@@ -3453,7 +3453,8 @@ SUBROUTINE BD_GA2(t,n,u,utimes,p,x,xd,z,OtherState,m,ErrStat,ErrMsg)
       CALL BD_DistrLoadCopy( p, u_interp, m )
 
          ! Incorporate boundary conditions
-      CALL BD_BoundaryGA2(x,p,u_interp,OtherState)
+      CALL BD_BoundaryGA2(x,p,u_interp,OtherState, ErrStat2, ErrMsg2)
+          call SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
 
 
       CALL BD_InitAcc( u_interp, p, x, OtherState, m, ErrStat2, ErrMsg2)
