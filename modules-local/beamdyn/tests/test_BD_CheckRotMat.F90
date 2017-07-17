@@ -2,7 +2,7 @@
 !> and testing 'n' angles in the range \f$[-\pi, \pi]\f$ for each unit vector.
 !> The rotation matrices are perturbed by the factor 'pert', and the subroutine is run to determine
 !> whether this generates a fatal error.
-! mjs--NOTE: it appears that 'pert' must be at most 1e-13 to (nearly) guarantee it generates an invalid
+! mjs--NOTE: it appears that 'pert' must be at most 1e-12 to (nearly) guarantee it generates an invalid
     ! rotation matrix to double precision, but strange things can always happen with random perturbations
     ! resulting in a valid perturbed rotation matrix.
 
@@ -25,7 +25,7 @@ subroutine test_BD_CheckRotMat()
 
     ! n is the parameter determining the size of the test
     integer,    parameter    :: n = 1e3
-    real(BDKi), parameter    :: tol1 = 1e-16, pert = 1e-13, tol2 = 10.0_BDKi * pert
+    real(BDKi), parameter    :: tol1 = 1e-16, pert = 1e-12, tol2 = 10.0_BDKi * pert
     ! mjs--FIXME: currently this subroutine is not seeing NWTC_Num, but if this is fixed, the built in
         ! value for pi could be used instead of this
     real(BDKi), parameter    :: pi1 = 4.0_BDKi * atan(1.0_BDKi)
