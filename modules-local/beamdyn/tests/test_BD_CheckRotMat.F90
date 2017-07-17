@@ -2,7 +2,7 @@
 !> and testing 'n' angles in the range \f$[-\pi, \pi]\f$ for each unit vector.
 !> The rotation matrices are perturbed by the factor 'pert', and the subroutine is run to determine
 !> whether this generates a fatal error.
-! mjs--NOTE: it appears that 'pert' must be at most 1e-12 to (nearly) guarantee it generates an invalid
+! mjs--NOTE: it appears that 'pert' must be at least 1e-12 to (nearly) guarantee it generates an invalid
     ! rotation matrix to double precision, but strange things can always happen with random perturbations
     ! resulting in a valid perturbed rotation matrix.
 
