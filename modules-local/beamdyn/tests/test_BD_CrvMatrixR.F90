@@ -1,4 +1,7 @@
-!> This unit test is for the subroutine 
+!> This unit test is for the subroutine BD_CrvMatrixR and tests it by generating 'n' random unit vectors
+!> and testing 'n' angles in the range \f$[-\pi, \pi]\f$ for each unit vector to determine whether the
+!> subroutine generates the appropriate rotation matrix from an explicity constructed WM vector,
+!> as compared to the explicity calculated rotation matrix.
 ! mjs-- NOTE: could presumably change 'n' and 'tol' to be inputs to the subroutine in the comprehensive
     ! unit testing framework
 @test

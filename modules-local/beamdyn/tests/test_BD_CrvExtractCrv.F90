@@ -1,7 +1,7 @@
 !> This unit test is for the subroutine BD_CrvExtractCrv and tests it by generating 'n' random unit vectors
 !> and testing 'n' angles in the range \f$[-\pi, \pi]\f$ for each unit vector to determine whether the
 !> subroutine generates the appropriate WM parameter vector from an explicity constructed rotation matrix,
-!> as compared the explicity calculated WM vector.
+!> as compared to the explicity calculated WM vector.
 ! mjs-- NOTE: could presumably change 'n' and 'tol' to be inputs to the subroutine in the comprehensive
     ! unit testing framework
 @test
