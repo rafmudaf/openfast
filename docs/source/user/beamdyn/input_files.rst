@@ -56,7 +56,7 @@ And the following :math:`3 \times 3` direction cosine matrix (``GlbDCM``) relate
 
 .. _frame:
 
-.. figure:: figs/Frame.jpg
+.. figure:: figs/frame.jpg
    :width: 80%
    :align: center
 
