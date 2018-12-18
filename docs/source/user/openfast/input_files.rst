@@ -213,6 +213,16 @@ CompAero: Compute aerodynamic loads [0 or 1]
 
 2: Use AeroDyn v15 for aerodynamic loads
 
+**better with a table?**
+
+==  =====================================
+ 0  Do not calculate aerodynamic loads
+ 1  Use AeroDyn v14 for aerodynamic loads
+ 2  Use AeroDyn v15 for aerodynamic loads
+==  =====================================
+
+**I think yes. Thoughts?**
+
 If CompElast is set to 1 and CompAero is set to 1, the blade discretization specified in AeroDyn
 v14 will be used for discretization of the blade structural model of ElastoDyn (in this case, input
 BldNodes in ElastoDyn is unused) and the tower discretization specified in ElastoDyn will be
