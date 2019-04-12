@@ -319,6 +319,23 @@ input file can be specified relative to the location of
 the FAST primary input file or specified with an absolute path.
 It is recommended that paths and/or filenames be wrapped in quotes.
 
+.. TODO: Whats the point of the middle section below? Is this whats included in the input files?
+
+============  =========================================================================  ========================================================================================================================================================================================================================
+Entry Name    Short description [Units]                                                  Explanation
+============  =========================================================================  ========================================================================================================================================================================================================================
+EDFile        Name of file containing ElastoDyn input parameters [-]                     This is the name of the ElastoDyn primary input file.
+BDBldFile(1)  Name of file containing BeamDyn input parameters for blade 1 [-]           This is the name of the BeamDyn primary input file for blade 1. It is not used if CompElast = 1.
+BDBldFile(2)  Name of file containing BeamDyn input parameters for blade 2 [-]           This is the name of the BeamDyn primary input file for blade 2. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1.
+BDBldFile(3)  Name of file containing BeamDyn input parameters for blade 3 [-]           This is the name of the BeamDyn primary input file for blade 3. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1 or for two-bladed rotors.
+InflowFile    Name of file containing inflow wind input parameters [-]                   This is the name of the InflowWind primary input file. It is used only if CompInflow = 1.
+AeroFile      Name of file containing aerodynamic input parameters [-]                   This is the name of the AeroDyn v14 (CompAero = 1) or AeroDyn v15 (CompAero = 2) primary input file. It is not used if CompAero = 0.
+ServoFile     Name of file containing control and electrical-drive input parameters [-]  This is the name of the ServoDyn primary input file. It is not used if CompServo = 0.
+HydroFile     Name of file containing hydrodynamic input parameters [-]                  This is the name of the HydroDyn primary input file. It is not used if CompHydro = 0.
+SubFile       Name of file containing sub-structural input parameters [-]                This is the name of the SubDyn primary input file. It is not used if CompSub = 0.
+MooringFile   Name of file containing mooring system input parameters [-]                This is the name of the MAP++ (CompMooring = 1), FEAMooring (CompMooring = 2), MoorDyn (CompMooring = 3), or OrcaFlexInterface (CompMooring = 4) primary input file. It is not used if CompMooring = 0.
+IceFile       Name of file containing ice input parameters [-]                           This is the name of the IceFloe (CompIce = 1) or IceDyn (CompIce = 2) primary input file. It is not used if CompIce = 0.
+============  =========================================================================  ========================================================================================================================================================================================================================
 
 ============  =====================================================================  ========================================================================================================================================================================================================================
 EDFile        Name of file containing ElastoDyn input parameters                     This is the name of the ElastoDyn primary input file.
