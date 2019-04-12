@@ -183,9 +183,10 @@ should be used in the simulation.
 
 CompElast: Compute structural dynamics [1 or 2]
 -----------------------------------------------
-1: Use ElastoDyn for the structural dynamics of the rotor, drivetrain, nacelle, tower, and platform
-
-2: Use BeamDyn for the structural dynamics on the blades and ElastoDyn for the drivetrain, nacelle, tower, and platform
+==  ====================================================================================================================
+ 1  Use ElastoDyn for the structural dynamics of the rotor, drivetrain, nacelle, tower, and platform
+ 2  Use BeamDyn for the structural dynamics on the blades and ElastoDyn for the drivetrain, nacelle, tower, and platform
+==  ====================================================================================================================
 
 Please note that ElastoDyn is always used when running OpenFAST.
 If CompElast is set to 2, the blade-related inputs and outputs from the ElastoDyn module
@@ -197,31 +198,21 @@ blade mode DOFs are unused.
 
 CompInflow: Compute inflow wind velocities [0, 1, or 2]
 -------------------------------------------------------
-0: Use still air 
-
-1: Use InflowWind for inflow wind conditions
-
-2: Use external wind conditions from OpenFOAM/SOWFA
+==  ================================================
+ 0  Use still air 
+ 1  Use InflowWind for inflow wind conditions
+ 2  Use external wind conditions from OpenFOAM/SOWFA
+==  ================================================
 
 In the normal OpenFAST executable, setting CompInflow = 2 is not allowed.
 
 CompAero: Compute aerodynamic loads [0 or 1]
 --------------------------------------------
-0: Do not calculate aerodynamic loads
-
-1: Use AeroDyn v14 for aerodynamic loads
-
-2: Use AeroDyn v15 for aerodynamic loads
-
-**better with a table?**
-
 ==  =====================================
  0  Do not calculate aerodynamic loads
  1  Use AeroDyn v14 for aerodynamic loads
  2  Use AeroDyn v15 for aerodynamic loads
 ==  =====================================
-
-**I think yes. Thoughts?**
 
 If CompElast is set to 1 and CompAero is set to 1, the blade discretization specified in AeroDyn
 v14 will be used for discretization of the blade structural model of ElastoDyn (in this case, input
@@ -237,98 +228,74 @@ If CompElast is set to 2, CompAero must also be set to 2.
 
 CompServo: Compute control and electrical-drive dynamics [0 or 1]
 -----------------------------------------------------------------
-0: Do not calculate control and electrical-drive dynamics
-
-1: Use ServoDyn for control and electrical-drive dynamics
+==  ======================================================
+ 0  Do not calculate control and electrical-drive dynamics
+ 1  Use ServoDyn for control and electrical-drive dynamics
+==  ======================================================
 
 CompHydro: Compute hydrodynamic loads [0 or 1]
 ----------------------------------------------
-0: Do not calculate hydrodynamic loads
+==  ======================================================
+ 0  Do not calculate hydrodynamic loads
+ 1  Use HydroDyn for hydrodynamic loads
+==  ======================================================
 
-1: Use HydroDyn for hydrodynamic loads
-
-If CompHydro is not zero, FAST considers the model to be an offshore system. If CompSub is also non-zero, the offshore system is a fixed-bottom system.
+If CompHydro is not zero, FAST considers the model to be an offshore system.
+If CompSub is also non-zero, the offshore system is a fixed-bottom system.
 If CompSub is zero, the offshore system is considered a floating system.
 
 CompSub: Compute sub-structural dynamics [0 or 1]
 -------------------------------------------------
-0: Do not calculate sub-structural dynamics
-
-1: Use SubDyn for sub-structural dynamics
+==  ======================================================
+ 0  Do not calculate sub-structural dynamics
+ 1  Use SubDyn for sub-structural dynamics
+==  ======================================================
 
 CompMooring: Compute mooring system [0, 1, 2, 3, or 4]
 ------------------------------------------------------
-0: Do not model a mooring system
 
-1: Use MAP++ to model a mooring system
+==  ======================================================
+ 0  Do not model a mooring system
+ 1  Use MAP++ to model a mooring system
+ 2  Use FEAMooring to model a mooring system
+ 3  Use MoorDyn to model a mooring system
+ 4  Use OrcaFlexInterface to model a mooring system
+==  ======================================================
 
-2: Use FEAMooring to model a mooring system
-
-3: Use MoorDyn to model a mooring system
-
-4: Use OrcaFlexInterface to model a mooring system
-
-If CompMooring is set to 4, CompHydro must be set to 0 and FAST considers the model to be an offshore floating system.
+If CompMooring is set to 4, CompHydro must be set to 0 and FAST
+considers the model to be an offshore floating system.
 
 CompIce: Compute ice loads [0, 1, or 2]
 ---------------------------------------
-0: Do not model offshore surface ice
-
-1: Use IceFloe to model offshore surface ice
-
-2: Use IceDyn to model offshore surface ice
+==  ======================================================
+ 0  Do not model offshore surface ice
+ 1  Use IceFloe to model offshore surface ice
+ 2  Use IceDyn to model offshore surface ice
+==  ======================================================
 
 If CompIce is not zero, both CompHydro and CompSub must be set to 1.
 
 Input Files
 ~~~~~~~~~~~
+The input files specified in this section of the primary FAST
+input file can be specified relative to the location of
+the FAST primary input file or specified with an absolute path.
+It is recommended that paths and/or filenames be wrapped in quotes.
 
-The input files specified in this section of the primary FAST input file can be specified relative to the location of
-the FAST primary input file or specified with an absolute path. It is recommended that paths and/or filenames be wrapped in quotes.
 
-- EDFile: Name of file containing ElastoDyn input parameters [-]
-
-  - This is the name of the ElastoDyn primary input file.
-
-- BDBldFile(1): Name of file containing BeamDyn input parameters for blade 1 [-]
-
-  - This is the name of the BeamDyn primary input file for blade 1. It is not used if CompElast = 1.
-
-- BDBldFile(2): Name of file containing BeamDyn input parameters for blade 2 [-]
-
-  - This is the name of the BeamDyn primary input file for blade 2. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1.
-
-- BDBldFile(3): Name of file containing BeamDyn input parameters for blade 3 [-]
-
-  - This is the name of the BeamDyn primary input file for blade 3. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1 or for two-bladed rotors.
-
-- InflowFile: Name of file containing inflow wind input parameters [-]
-
-  - This is the name of the InflowWind primary input file. It is used only if CompInflow = 1.
-
-- AeroFile: Name of file containing aerodynamic input parameters [-]
-
-  - This is the name of the AeroDyn v14 (CompAero = 1) or AeroDyn v15 (CompAero = 2) primary input file. It is not used if CompAero = 0.
-
-- ServoFile: Name of file containing control and electrical-drive input parameters [-]
-
-  - This is the name of the ServoDyn primary input file. It is not used if CompServo = 0.
-
-- HydroFile: Name of file containing hydrodynamic input parameters [-]
-
-  - This is the name of the HydroDyn primary input file. It is not used if CompHydro = 0.
-
-- SubFile: Name of file containing sub-structural input parameters [-]
-
-  - This is the name of the SubDyn primary input file. It is not used if CompSub = 0.
-
-- MooringFile: Name of file containing mooring system input parameters [-]
-
-  - This is the name of the MAP++ (CompMooring = 1), FEAMooring (CompMooring = 2), MoorDyn (CompMooring = 3), or OrcaFlexInterface (CompMooring = 4) primary input file. It is not used if CompMooring = 0.
-
-- IceFile: Name of file containing ice input parameters [-]
-
-  - This is the name of the IceFloe (CompIce = 1) or IceDyn (CompIce = 2) primary input file. It is not used if CompIce = 0.
+============  =====================================================================  ========================================================================================================================================================================================================================
+EDFile        Name of file containing ElastoDyn input parameters                     This is the name of the ElastoDyn primary input file.
+BDBldFile(1)  Name of file containing BeamDyn input parameters for blade 1           This is the name of the BeamDyn primary input file for blade 1. It is not used if CompElast = 1.
+BDBldFile(2)  Name of file containing BeamDyn input parameters for blade 2           This is the name of the BeamDyn primary input file for blade 2. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1.
+BDBldFile(3)  Name of file containing BeamDyn input parameters for blade 3           This is the name of the BeamDyn primary input file for blade 3. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1 or for two-bladed rotors.
+InflowFile    Name of file containing inflow wind input parameters                   This is the name of the InflowWind primary input file. It is used only if CompInflow = 1.
+AeroFile      Name of file containing aerodynamic input parameters                   This is the name of the AeroDyn v14 (CompAero = 1) or AeroDyn v15 (CompAero = 2) primary input file. It is not used if CompAero = 0.
+ServoFile     Name of file containing control and electrical-drive input parameters  This is the name of the ServoDyn primary input file. It is not used if CompServo = 0.
+HydroFile     Name of file containing hydrodynamic input parameters                  This is the name of the HydroDyn primary input file. It is not used if CompHydro = 0.
+SubFile       Name of file containing sub-structural input parameters                This is the name of the SubDyn primary input file. It is not used if CompSub = 0.
+MooringFile   Name of file containing mooring system input parameters                This is the name of the MAP++ (CompMooring = 1), FEAMooring (CompMooring = 2), MoorDyn (CompMooring = 3), or OrcaFlexInterface (CompMooring = 4) primary input file. It is not used if CompMooring = 0.
+IceFile       Name of file containing ice input parameters                           This is the name of the IceFloe (CompIce = 1) or IceDyn (CompIce = 2) primary input file. It is not used if CompIce = 0.
+============  =====================================================================  ========================================================================================================================================================================================================================
 
 **Output**
 
