@@ -22,9 +22,9 @@ is an abbreviation for the module generating the file (see Table 2), and <ext> i
 
 File extensions currently are:
 
-======================  ============================================  =========== 
+======================  ============================================  ===========
  Output file extension  File type                                     File format
-======================  ============================================  =========== 
+======================  ============================================  ===========
  sum                    Summary file                                  text
  out                    Time-marching tabular output                  text
  outb                   Time-marching tabular output                  binary
@@ -32,7 +32,7 @@ File extensions currently are:
  chkp                   Checkpoint files for restart capability       binary
  vtp                    Polygonal data file for visualization         VTK XML (text)
  lin                    Linearization output                          text
-======================  ============================================  =========== 
+======================  ============================================  ===========
 
 When OpenFAST is called as a library from Simulink, the output files are named ``<RootName>.SFunc.<ext>``
 and ``<RootName>.SFunc.<ModName>.<ext>``.
@@ -48,7 +48,7 @@ Visualization File Naming Convention
 ------------------------------------
 When FAST generates visualization files, it generates many .vtp files. There is one file per mesh per
 output time step (as specified by input parameter VTK_fps). Each mesh output will also write an additional
-mesh showing the reference configuration at initialization (this mesh name will have the string “_Reference”
+mesh showing the reference configuration at initialization (this mesh name will have the string "_Reference"
 appended to it). The naming convention is ``<RootName>.<MeshName>.t<step#>.vtp``.
 
 If an OpenFAST simulation encounters an error when WrVTK > 0, additional files are output when the
@@ -59,7 +59,7 @@ Checkpoint File Naming Convention
 ---------------------------------
 If FAST generates checkpoint files, these checkpoint filenames are in the form ``<RootName>.<timeStep>.chkp``
 where <timeStep> is an integer indicating at which time step the results in the file were generated.
-If the simulation was running a Bladed-style DLL in ServoDyn, there will be a second checkpoint file named 
+If the simulation was running a Bladed-style DLL in ServoDyn, there will be a second checkpoint file named
 ``<RootName>.<timeStep>.dll.chkp``.
 
 Variables Specified in the OpenFAST Primary Input File
@@ -78,7 +78,7 @@ Setting this flag to **True** will result in the OpenFAST primary input file bei
 file named ``<RootName>.ech`` where <RootName> is the name of the OpenFAST primary input file,
 excluding its file extension. This feature is useful for debugging an input file.
 
-AbortLevel: Error level when simulation should abort [“WARNING”, “SEVERE”, or “FATAL”]
+AbortLevel: Error level when simulation should abort ["WARNING", "SEVERE", or "FATAL"]
 --------------------------------------------------------------------------------------
 This string tells OpenFAST what error level should cause an abort. Typically we set this to
 abort on fatal errors, but there may be instances when a user wishes to abort on severe errors or warnings.
@@ -93,8 +93,8 @@ Fatal errors are those from which the program cannot recover. For example:
 Some examples of severe errors include the following:
 
 - A format specifier for real numbers is too narrow to print, so output files will almost certainly contain ``***`` instead of actual numbers.
-- When trying to read a numeric value, logical “True” or “False” values were found instead. Fortran interprets them as 0 or 1, but that may not be what the user intended.
-- A routine is using math based on the assumption that the angles are small, but the angles the routine found were larger than what it considers “small.”
+- When trying to read a numeric value, logical "True" or "False" values were found instead. Fortran interprets them as 0 or 1, but that may not be what the user intended.
+- A routine is using math based on the assumption that the angles are small, but the angles the routine found were larger than what it considers "small."
 
 Warnings are typically generated when the simulation can continue—perhaps by the program adjusting inputs—but the results may not be what the user expected. Things that may generate warnings include
 
@@ -131,7 +131,7 @@ use SubDyn, guidance for choosing the time step is found in the SubDyn ReadMe fi
 InterpOrder: Interpolation/Extrapolation order for input/output time history [1 or 2]
 -------------------------------------------------------------------------------------
 This is the order of the interpolation or extrapolation used for module inputs in the OpenFAST
-glue code. Valid entries are “1” for linear interpolation/extrapolation or “2” for quadratic
+glue code. Valid entries are "1" for linear interpolation/extrapolation or "2" for quadratic
 interpolation/extrapolation. Previous module inputs are extrapolated at the beginning of each
 step in the time-advancement loop to provide a guess for the actual module inputs at future
 times for those modules that rely on an implicit time-integrator. Module inputs are typically
@@ -158,7 +158,7 @@ DT_UJac: Time between calls to get Jacobians [s]
 We use a Jacobian matrix to solve the module input-output relationship between accelerations
 and loads in the ElastoDyn-BeamDyn, ElastoDyn-HydroDyn-SubDyn, and ElastoDyn- OrcaFlexInterface
 couplings. This Jacobian is computed with finite differences and can be time consuming.
-However, it rarely needs to be calculated frequently. 
+However, it rarely needs to be calculated frequently.
 
 DT_UJac determines how often the Jacobian needs to be updated. For most models, DT_UJac
 can be set to a value larger than TMax. DT_UJac is not currently used for models that
@@ -199,7 +199,7 @@ blade mode DOFs are unused.
 CompInflow: Compute inflow wind velocities [0, 1, or 2]
 -------------------------------------------------------
 ==  ================================================
- 0  Use still air 
+ 0  Use still air
  1  Use InflowWind for inflow wind conditions
  2  Use external wind conditions from OpenFOAM/SOWFA
 ==  ================================================
@@ -221,7 +221,7 @@ used for discretization of the tower aerodynamic model of AeroDyn v14.
 
 If CompAero is set to 2, the aerodynamic blade and tower discretizations of AeroDyn v15 are
 independent of structural discretizations in the ElastoDyn or BeamDyn modules. If CompElast
-is set to 1 and CompAero is set to 2, input PitchAxis in the ElastoDyn blade input file is 
+is set to 1 and CompAero is set to 2, input PitchAxis in the ElastoDyn blade input file is
 unused because the specification of aerodynamic center in AeroDyn v15 replaces the need for PitchAxis.
 
 If CompElast is set to 2, CompAero must also be set to 2.
