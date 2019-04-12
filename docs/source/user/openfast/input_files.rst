@@ -337,44 +337,48 @@ MooringFile   Name of file containing mooring system input parameters [-]       
 IceFile       Name of file containing ice input parameters [-]                           This is the name of the IceFloe (CompIce = 1) or IceDyn (CompIce = 2) primary input file. It is not used if CompIce = 0.
 ============  =========================================================================  ========================================================================================================================================================================================================================
 
-============  =====================================================================  ========================================================================================================================================================================================================================
-EDFile        Name of file containing ElastoDyn input parameters                     This is the name of the ElastoDyn primary input file.
-BDBldFile(1)  Name of file containing BeamDyn input parameters for blade 1           This is the name of the BeamDyn primary input file for blade 1. It is not used if CompElast = 1.
-BDBldFile(2)  Name of file containing BeamDyn input parameters for blade 2           This is the name of the BeamDyn primary input file for blade 2. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1.
-BDBldFile(3)  Name of file containing BeamDyn input parameters for blade 3           This is the name of the BeamDyn primary input file for blade 3. Different BeamDyn input files can be used between blades to model rotor structural imbalances. It is not used if CompElast = 1 or for two-bladed rotors.
-InflowFile    Name of file containing inflow wind input parameters                   This is the name of the InflowWind primary input file. It is used only if CompInflow = 1.
-AeroFile      Name of file containing aerodynamic input parameters                   This is the name of the AeroDyn v14 (CompAero = 1) or AeroDyn v15 (CompAero = 2) primary input file. It is not used if CompAero = 0.
-ServoFile     Name of file containing control and electrical-drive input parameters  This is the name of the ServoDyn primary input file. It is not used if CompServo = 0.
-HydroFile     Name of file containing hydrodynamic input parameters                  This is the name of the HydroDyn primary input file. It is not used if CompHydro = 0.
-SubFile       Name of file containing sub-structural input parameters                This is the name of the SubDyn primary input file. It is not used if CompSub = 0.
-MooringFile   Name of file containing mooring system input parameters                This is the name of the MAP++ (CompMooring = 1), FEAMooring (CompMooring = 2), MoorDyn (CompMooring = 3), or OrcaFlexInterface (CompMooring = 4) primary input file. It is not used if CompMooring = 0.
-IceFile       Name of file containing ice input parameters                           This is the name of the IceFloe (CompIce = 1) or IceDyn (CompIce = 2) primary input file. It is not used if CompIce = 0.
-============  =====================================================================  ========================================================================================================================================================================================================================
+Output
+~~~~~~
 
-**Output**
+This section of the primary FAST input file deals with what can be output from
+a FAST simulation, except for linearization and visualization output, which are
+included in the subsequent sections.
 
-This section of the primary FAST input file deals with what can be output from a FAST simulation, except for linearization and visualization output, which are included in the subsequent sections.
-SumPrint: Print summary data to “<RootName>.sum” [T/F]
-When set to “True”, FAST will generate a file named “<RootName>.sum”. This summary file contains the version number of all modules being used, the time steps for each module, and information about the channels being written to the time-marching output file(s). If SumPrint is “False”, no summary file will be generated.
-SttsTime: Amount of time between screen status messages [s]
-During a FAST simulation, the program prints a message like this: 
-SttsTime sets how frequently this message is updated. For example, if SttsTime is 2 seconds, you will see this message updated every 2 seconds of simulated time. 
-ChkptTime: Amount of time between creating checkpoint files for potential restart [s]
-This input determines how frequently checkpoint files should be written. Checkpoint files are used for restart capability; we recommend that short simulations set ChkptTime to be larger than the simulation time, TMax. For more information on checkpoint files and restart capability in FAST, see sections “Checkpoint Files (Restart Capability)”and “Restart: Starting FAST from a checkpoint file” in this document. ChkptTime is ignored in the FAST-Simulink interface, and must be larger than TMax when using the FAST-OrcaFlex interface (CompMooring = 4).
-DT_Out: Time step for tabular output [s]
-This is the time step of the data in the tabular (time-marching) output files. DT_Out must be an integer multiple of DT. Alternatively, DT_Out can be entered as the string “default”, which will set DT_Out = DT.
-TStart: Time to begin tabular output [s]
-This is the time step that must be reached before FAST will begin writing data in the tabular (time-marching) output files. Note that the output files may not actually start at TStart seconds if TStart is not an integer multiple of DT_Out.
-OutFileFmt: Format for tabular output [1, 2, or 3]
-This indicates which type of tabular (time-marching) output files will be generated. If OutFileFmt is 1, only a text file will be written. If OutFileFmt is 2, only a binary file will be written. If OutFileFmt is 3, both text and binary files will be written.
-Text files write a line to the file each output time step. This can make the simulation run slower, but it can be useful for debugging, particularly if a simulation doesn’t run to completion or if you want to look at some results before the entire simulation finishes.
-Binary files are written in their entirety at the end of the simulation . If a lot of output channels are requested for a long simulation, this can take up a moderate amount of memory. However, they tend to run faster and the resulting files take up much less space. The binary files contain more precise output data than text files, which are limited by the chosen output format specifier—see OutFmt below. 
-We recommend you use text files for debugging and binary files for production work.
-A MATLAB script for reading FAST binary output files is included in the archive (see <FAST8>/Utilities/SimulationToolbox/Utilities/ReadFASTbinary.m). Python code to read FAST output files exists in WISDEM’s AeroelasticSE repository. The NREL post-processors Crunch and MCrunch can also read these binary files.
-TabDelim: Use tab delimiters in text tabular output file? [T/F]
-When OutFileFmt = 1 or 3, setting TabDelim to “True” will put tabs between columns in the text tabular (time-marching) output file. Otherwise, spaces will separate columns in the text tabular output file. If OutFileFmt = 2, TabDelim has no effect.
-OutFmt: Format used for text tabular output, excluding the time channel [-]
-When OutFileFmt = 1 or 3, FAST will use OutFmt to format the channels printed in the text tabular output file. OutFmt should result in a field that is 10 characters long (channel headers are 10 characters long, and NWTC post-processing software sometimes assume 10 characters). The time channel is printed using the “F10.4” format. We commonly specify OutFmt to be “ES10.3E2”. If OutFileFmt = 2, OutFmt has no effect.
+============  ==========================================================================  ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Entry Name    Short description [Units]                                                   Explanation
+============  ==========================================================================  ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+SumPrint      Print summary data to "<RootName>.sum" [T/F]                                When set to "True", FAST will generate a file named "<RootName>.sum". This summary file contains the version number of all modules being used, the time steps for each module, and information about the channels being written to the time-marching output file(s). If SumPrint is "False", no summary file will be generated.
+SttsTime      Amount of time between screen status messages [s]                           During a FAST simulation, the program prints a message like this: `SttsTime sets how frequently this message is updated. For example, if SttsTime is 2 seconds, you will see this message updated every 2 seconds of simulated time.`
+ChkptTime     Amount of time between creating checkpoint files for potential restart [s]  This input determines how frequently checkpoint files should be written. Checkpoint files are used for restart capability; we recommend that short simulations set ChkptTime to be larger than the simulation time, TMax. For more information on checkpoint files and restart capability in FAST, see sections "Checkpoint Files (Restart Capability)"and "Restart: Starting FAST from a checkpoint file" in this document. ChkptTime is ignored in the FAST-Simulink interface, and must be larger than TMax when using the FAST-OrcaFlex interface (CompMooring = 4).
+DT_Out        Time step for tabular output [s]                                            This is the time step of the data in the tabular (time-marching) output files. DT_Out must be an integer multiple of DT. Alternatively, DT_Out can be entered as the string "default", which will set DT_Out = DT.
+TStart        Time to begin tabular output [s]                                            This is the time step that must be reached before FAST will begin writing data in the tabular (time-marching) output files. Note that the output files may not actually start at TStart seconds if TStart is not an integer multiple of DT_Out.
+OutFileFmt    Format for tabular output [1, 2, or 3]                                      See below (*)
+TabDelim      Use tab delimiters in text tabular output file? [T/F]                       When OutFileFmt = 1 or 3, setting TabDelim to "True" will put tabs between columns in the text tabular (time-marching) output file. Otherwise, spaces will separate columns in the text tabular output file. If OutFileFmt = 2, TabDelim has no effect.
+OutFmt        Format used for text tabular output, excluding the time channel [-]         When OutFileFmt = 1 or 3, FAST will use OutFmt to format the channels printed in the text tabular output file. OutFmt should result in a field that is 10 characters long (channel headers are 10 characters long, and NWTC post-processing software sometimes assume 10 characters). The time channel is printed using the "F10.4" format. We commonly specify OutFmt to be "ES10.3E2". If OutFileFmt = 2, OutFmt has no effect.
+============  ==========================================================================  ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+.. TODO: update below
+
+(*) This indicates which type of tabular (time-marching) output files will be
+generated. If OutFileFmt is 1, only a text file will be written. If OutFileFmt
+is 2, only a binary file will be written. If OutFileFmt is 3, both text and
+binary files will be written. Text files write a line to the file each output
+time step. This can make the simulation run slower, but it can be useful for
+debugging, particularly if a simulation doesn’t run to completion or if you
+want to look at some results before the entire simulation finishes.
+Binary files are written in their entirety at the end of the simulation . If
+a lot of output channels are requested for a long simulation, this can take
+up a moderate amount of memory. However, they tend to run faster and the
+resulting files take up much less space. The binary files contain more precise
+output data than text files, which are limited by the chosen output format
+specifier—see OutFmt below. We recommend you use text files for debugging and
+binary files for production work. A MATLAB script for reading FAST binary
+output files is included in the archive
+(see <FAST8>/Utilities/SimulationToolbox/Utilities/ReadFASTbinary.m). Python
+code to read FAST output files exists in WISDEM’s AeroelasticSE repository.
+The NREL post-processors Crunch and MCrunch can also read these binary files.
+
+
 Linearization
 This section of the primary FAST input file deals with options for linearization.
 In general, all module-level states, inputs, and outputs of the enabled FAST modules will be treated in the linearization. The last four inputs in this section—LinInputs, LinOutputs, LinOutJac, and LinOutMod—do not affect the result of the linearization, they determine only what information is written to the linearization output file(s).
