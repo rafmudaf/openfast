@@ -418,111 +418,78 @@ ElastoDyn   BlPitchComC     Collective blade-pitch-angle command extended input
 ==========  ==============  ===================================================
 
 Visualization
-This section of the primary FAST input file deals with options for visualization output from a FAST simulation. Visualization data is written in Visualization ToolKit (VTK) format, which can be read and viewed in standard open-source visualization packages such as ParaView or VisIt.
-WrVTK: VTK visualization data output [0, 1, or 2]
-When WrVTK = 0, visualization output data will not be generated, and the remaining input parameters in this section are not used. When WrVTK = 1, FAST will generate visualization data only at the initialization step for visualizing the reference and initial configurations. When WrVTK = 2 FAST will generate visualization data for animating time series; data will be written at the initialization step (including the reference configuration) and at a fixed rate for the rest of the simulation, as specified by VTK_fps. This option will generate many output files.
-VTK_type: Type of VTK visualization data [1, 2, or 3]
-VTK_type is used to indicate whether visualization will be based on surface or stick-figure geometry. This input parameter is not used when WrVTK = 0.
-When VTK_type is 1, FAST will generate surface data; Table 4 describes the surfaces generated with this option. To generate surface visualization, the simulation must use AeroDyn v15 (CompAero must be 2), and AeroDyn’s airfoil tables must contain normalized x- and y-coordinate data (see the airfoil files for the 5-MW model in the FAST CertTest directory for an example). 
+~~~~~~~~~~~~~
+This section of the primary FAST input file deals with options for
+visualization output from a FAST simulation. Visualization data is written in
+Visualization ToolKit (VTK) format, which can be read and viewed in standard
+open-source visualization packages such as ParaView or VisIt.
+
+==========  ===========================================  =============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Entry Name  Short description [Units]                    Explanation
+==========  ===========================================  =============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+WrVTK       VTK visualization data output [0, 1, or 2]   When WrVTK = 0, visualization output data will not be generated, and the remaining input parameters in this section are not used. When WrVTK = 1, FAST will generate visualization data only at the initialization step for visualizing the reference and initial configurations. When WrVTK = 2 FAST will generate visualization data for animating time series; data will be written at the initialization step (including the reference configuration) and at a fixed rate for the rest of the simulation, as specified by VTK_fps. This option will generate many output files.
+VTK_type    Type of VTK visualization data [1, 2, or 3]  See below (*) for more info. VTK_type is used to indicate whether visualization will be based on surface or stick-figure geometry.
+VTK_fields  Write mesh fields to VTK data files? [T/F]   Except for the reference configuration, the visualization output always includes the translational displacement simulated by FAST, i.e., the turbine is always shown in its deflected state. The VTK_fields input parameter controls whether the VTK files will also be augmented to include data arrays, which can be used to additionally visualize orientations, velocities, accelerations, forces, and/or moments (because the translational displacement fields are used to position the nodes for visualization, they are not included as separate fields). When VTK_fields is "True", the mesh fields shown in Table 5 are output as data arrays in the VTK files; this data is not included in the VTK files when VTK_fields is "False". The reference configuration meshes always contain the reference orientation fields, even when VTK_fields is "False".  When FAST is generating surface visualization data (VTK_type = 1), field data will be generated on the basic meshes instead of surfaces (this will generate all of the files that are generated when VTK_type = 2 as well as the files normally generated with VTK_type = 1). VTK_fields is not used when WrVTK = 0.
+VTK_fps     Frame rate for VTK output [fps]              When WrVTK = 2, the rate at which the VTK files are output is determined by VTK_fps. This input specifies the desired number of frames that should be generated per second of simulation time. FAST will use the integer multiple of DT closest to 1/VTK_fps to determine if VTK files should be output at the end of a simulation step; the actual frame rate used resulting from this rounding is written to the screen and the FAST summary file. This input parameter is only used when WrVTK = 2.
+==========  ===========================================  =============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+(*) VTK_Type: This input parameter is not used when WrVTK = 0. When VTK_type is 1, FAST will generate surface data; Table 4 describes the surfaces generated with this option. To generate surface visualization, the simulation must use AeroDyn v15 (CompAero must be 2), and AeroDyn’s airfoil tables must contain normalized x- and y-coordinate data (see the airfoil files for the 5-MW model in the FAST CertTest directory for an example).
 When VTK_type is 2, FAST will generate stick-figure data using line and point meshes (not surfaces) for a limited subset of FAST’s meshes. The meshes used with this option are listed in Table 5.
 When VTK_type is 3, FAST will generate stick-figure data using line and point meshes (not surfaces) for all of the input and output meshes in the FAST simulation being run. Table 5 lists all of the meshes that can be output in VTK format with this option. Modules that are not used will not generate VTK files.
+
 Table 4: Surface Visualization Features
-Surface    Data
-Blades    The AeroDyn v15 blade Line2 meshes will be used for position and orientation of each node. The airfoil-coordinate data specified in the AeroDyn airfoil data input file(s) is used to give shape to the blades. Each airfoil must contain the same number of coordinates so that FAST can create polygons between points on each adjacent airfoil.
-Hub    The hub is visualized as a sphere centered at the node defined on ElastoDyn’s hub mesh. The radius of the sphere is determined by ElastoDyn’s HubRad input parameter.
-Nacelle    The nacelle is visualized as a box that sits on top of the tower. The shape of this box is scaled by the distance between the points defined by ElastoDyn’s nacelle and hub meshes (minus the hub radius).
-Tower    The tower is defined by the ElastoDyn tower Line2 mesh and visualized as a truncated conical surface. The top of the tower is assumed to have a diameter of  3.87/87.6  TowerLength; the tower base has a diameter of 6/87.6  TowerLength, where  TowerLength equals (TowerHt-TowerBsHt). These ratios are based on values from the NREL 5-MW turbine.
-Morison    For offshore turbines that use HydroDyn’s strip-theory solution (Morison submodule), surface visualizations are based on the Morison distributed (Line2) mesh. The diameters of these members come from the HydroDyn input file. Note that HydroDyn currently uses the identity matrix for the orientations of this mesh, so elements that are not completely vertical will not be visualized correctly (horizontal elements look like planes instead of cylinders). 
-Ground/Seabed    The land-based turbines will produce a VTK file that represents the ground. For offshore turbines, a VTK file representing the seabed is generated. Only one of these surfaces is produced for any given simulation. These surfaces are squares whose size is scaled by the rotor diameter.
+=============  ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Surface        Data
+=============  ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Blades         The AeroDyn v15 blade Line2 meshes will be used for position and orientation of each node. The airfoil-coordinate data specified in the AeroDyn airfoil data input file(s) is used to give shape to the blades. Each airfoil must contain the same number of coordinates so that FAST can create polygons between points on each adjacent airfoil.
+Hub            The hub is visualized as a sphere centered at the node defined on ElastoDyn’s hub mesh. The radius of the sphere is determined by ElastoDyn’s HubRad input parameter.
+Nacelle        The nacelle is visualized as a box that sits on top of the tower. The shape of this box is scaled by the distance between the points defined by ElastoDyn’s nacelle and hub meshes (minus the hub radius).
+Tower          The tower is defined by the ElastoDyn tower Line2 mesh and visualized as a truncated conical surface. The top of the tower is assumed to have a diameter of  3.87/87.6  TowerLength; the tower base has a diameter of 6/87.6  TowerLength, where  TowerLength equals (TowerHt-TowerBsHt). These ratios are based on values from the NREL 5-MW turbine.
+Morison        For offshore turbines that use HydroDyn’s strip-theory solution (Morison submodule), surface visualizations are based on the Morison distributed (Line2) mesh. The diameters of these members come from the HydroDyn input file. Note that HydroDyn currently uses the identity matrix for the orientations of this mesh, so elements that are not completely vertical will not be visualized correctly (horizontal elements look like planes instead of cylinders).
+Ground/Seabed  The land-based turbines will produce a VTK file that represents the ground. For offshore turbines, a VTK file representing the seabed is generated. Only one of these surfaces is produced for any given simulation. These surfaces are squares whose size is scaled by the rotor diameter.
 Still Water    For models that use HydroDyn, a surface representing the still water level is generated. This surface is a square the same size as the seabed surface.
-Wave    Incident wave elevations are generated for models that use the HydroDyn module. The wave elevations are generated on a square grid the same size as the seabed surface containing 25 × 25 points in the X- and Y- directions. The local incident wave elevations (including second-order terms, but not including radiation or diffraction effects, when enabled) at each grid point are connected using triangular elements to form a surface.
+Wave           Incident wave elevations are generated for models that use the HydroDyn module. The wave elevations are generated on a square grid the same size as the seabed surface containing 25 × 25 points in the X- and Y- directions. The local incident wave elevations (including second-order terms, but not including radiation or diffraction effects, when enabled) at each grid point are connected using triangular elements to form a surface.
+=============  ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+.. TODO: refactor this table to match the pdf
 
 Table 5: Stick-Figure Visualization Features.
-Fields marked as “In” are input to the module on the given mesh; fields marked as “out” are output from the module.
-Mesh Name    Type    Output when VTK_type is 1 or 2?    Fields
-            Force    Moment    Orientation    Translational Velocity    Rotational Velocity    Translational Acceleration    Rotational Acceleration
-ElastoDyn                                     
-ED_BladeLn2Mesh_motion    Line2                 Out    Out    Out    Out    Out
-ED_BladePtLoads    Point        In    In                    
-ED_BladeRootMotion    Point                Out    Out    Out    Out    Out
-ED_Hub    Point        In    In    Out    Out    Out    Out    Out
-ED_Nacelle    Point        In    In    Out    Out    Out    Out    Out
-ED_TowerLn2Mesh_motion    Line2                Out    Out    Out    Out    Out
-ED_TowerPtLoads    Point        In    In                    
-ED_PlatformPtMesh    Point        In    In    Out    Out    Out    Out    Out
-BeamDyn                                     
-BD_BldMotion    Line2    §§
-        Out    Out    Out    Out    Out
-BD_HubMotion    Point                In    In         In*** 
+Fields marked as "In" are input to the module on the given mesh; fields marked as "out" are output from the module.
+===========================  ======  =================================  ======== ===================================================================================================================================================================================================================================================================================================================================================================================================
+Mesh Name                     Type    Output when VTK_type is 1 or 2?    Force    Moment    Orientation    Translational Velocity    Rotational Velocity    Translational Acceleration    Rotational Acceleration
+===========================  ======  =================================  ======== ==================================================================================================================================================================================================================================================================================================================================================================================================================
+ED_BladeLn2Mesh_motion        Line2                                                         Out      Out    Out    Out    Out
+ED_BladePtLoads               Point                                       In       In
+ED_BladeRootMotion            Point                                                          Out      Out    Out    Out    Out
+ED_Hub                        Point                                      In       In        Out      Out    Out    Out    Out
+ED_Nacelle                    Point                                      In       In        Out      Out    Out    Out    Out
+ED_TowerLn2Mesh_motion        Line2                                                         Out      Out    Out    Out    Out
+ED_TowerPtLoads               Point                                       In       In
+ED_PlatformPtMesh             Point                                       In       In        Out      Out    Out    Out    Out
+BD_BldMotion                  Line2        §§                                               Out      Out    Out    Out    Out
+BD_HubMotion                  Point                                                          In       In            In*** 
+BD_DistrLoad                  Line2                                       In       In        Out      Out    Out    Out    Out
+BD_ReactionForce_RootMotion   Point                                      Out    Out    In    In    In    In    In
+SrvD_NTMD                     Point                                      Out    Out    In    In    In    In    In
+SrvD_TTMD                     Point                                      Out    Out    In    In    In    In    In
+AD_Blade                      Line2        §§                           Out    Out    In    In        In***
+AD_BladeRootMotion            Point                                      In    In*** In***
+AD_HubMotion                  Point                                      In    In*** In    In***
+AD_Tower                      Line2                                      Out    Out    In    In        In***
+HD_AllHdroOrigin              Point                                     Out    Out    In    In    In    In    In
+HD_Mesh                       Point                                      Out    Out    In    In    In    In    In
+HD_MorisonLumped              Point                                      Out‡‡‡  Out‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡
+HD_MorisonDistrib             Line2                                     Out‡‡‡ Out‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡
+SD_LMesh_y2Mesh               Point                                      In    In    Out    Out    Out    Out    Out
+SD_y1Mesh_TPMesh              Point                                      Out    Out    In    In    In    In    In
+MAP_PtFairlead                Point                                      Out            In*** In***
+MD_PtFairlead                 Point                                      Out            In*** In***
+FEAM_PtFairlead               Point                                      Out            In*** In***
+Orca_PtfmMesh                 Point                                      Out    Out    In    In    In    In    In
+IceF_iceMesh                  Point                                      Out    Out        In        In***
+IceD_PointMesh                Point                                      Out            In        In***
 
-BD_DistrLoad    Line2        In    In    Out    Out    Out    Out    Out
-BD_ReactionForce_RootMotion    Point        Out    Out    In    In    In    In    In
-ServoDyn (TMD)                                    
-SrvD_NTMD    Point        Out    Out    In    In    In    In    In
-SrvD_TTMD    Point        Out    Out    In    In    In    In    In
-AeroDyn v15                                    
-AD_Blade    Line2    §§
-Out    Out    In    In        In***
 
-AD_BladeRootMotion    Point                In    In***
-    In***
-
-AD_HubMotion    Point                In    In***
-In    In***
-
-AD_Tower    Line2        Out    Out    In    In        In***
-
-HydroDyn                                     
-HD_AllHdroOrigin     Point        Out    Out    In    In    In    In    In
-HD_Mesh     Point        Out    Out    In    In    In    In    In
-HD_MorisonLumped    Point        Out‡‡‡
-Out‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-
-HD_MorisonDistrib    Line2        Out‡‡‡
-Out‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-In‡‡‡
-
-SubDyn                                     
-SD_LMesh_y2Mesh    Point        In    In    Out    Out    Out    Out    Out
-SD_y1Mesh_TPMesh    Point        Out    Out    In    In    In    In    In
-MAP++                                     
-MAP_PtFairlead    Point        Out            In***
-    In***
-
-MoorDyn§§§
-                                
-MD_PtFairlead    Point        Out            In***
-    In***
-
-FEAMooring§§§
-                                
-FEAM_PtFairlead    Point        Out            In***
-    In***
-
-OrcaFlex Interface§§§
-                                
-Orca_PtfmMesh    Point        Out    Out    In    In    In    In    In
-IceFloe                                    
-IceF_iceMesh    Point        Out    Out        In        In***
-
-IceDyn                                    
-IceD_PointMesh    Point        Out            In        In***
-
-VTK_fields: Write mesh fields to VTK data files? [T/F]
-Except for the reference configuration, the visualization output always includes the translational displacement simulated by FAST, i.e., the turbine is always shown in its deflected state. The VTK_fields input parameter controls whether the VTK files will also be augmented to include data arrays, which can be used to additionally visualize orientations, velocities, accelerations, forces, and/or moments (because the translational displacement fields are used to position the nodes for visualization, they are not included as separate fields). When VTK_fields is “True”, the mesh fields shown in Table 5 are output as data arrays in the VTK files; this data is not included in the VTK files when VTK_fields is “False”. The reference configuration meshes always contain the reference orientation fields, even when VTK_fields is “False”. 
-When FAST is generating surface visualization data (VTK_type = 1), field data will be generated on the basic meshes instead of surfaces (this will generate all of the files that are generated when VTK_type = 2 as well as the files normally generated with VTK_type = 1).
-VTK_fields is not used when WrVTK = 0.
-VTK_fps: Frame rate for VTK output [fps]
-When WrVTK = 2, the rate at which the VTK files are output is determined by VTK_fps. This input specifies the desired number of frames that should be generated per second of simulation time. FAST will use the integer multiple of DT closest to 1/VTK_fps to determine if VTK files should be output at the end of a simulation step; the actual frame rate used resulting from this rounding is written to the screen and the FAST summary file. This input parameter is only used when WrVTK = 2.
 Linearization Files
 FAST v8.16 introduced full-system linearization functionality for land-based wind turbines, including core (but not all) features of the InflowWind, AeroDyn v15, ServoDyn, and ElastoDyn modules and their coupling. The linearization output file(s) contain values at the time of the linearization for (1) the OP state, input, and outputs; (2) the linear state-space matrice(s); and optionally (3) the Jacobian matrices representing the Jacobians of module-level state and output equations with respect to their states and inputs, and the Jacobians of the full-system input-output transformation functions with respect to all inputs and outputs. Currently the linearization files are always output as text files; future versions may include binary versions. The FAST MATLAB toolbox included in the FAST archive contains a file called “ReadFASTLinear.m”, which can be used to read the linearization output (.lin) files generated by FAST into MATLAB. Additionally, a file named “GetMats_f8.m” has been added to the MATLAB post-processor MBC, which calls “ReadFASTLinear.m” and sets the variables needed for subsequent analysis with MBC.
 For people familiar with the linearization functionality of FAST v7, the following differences should be noted for the FAST v8 linearization functionality:
