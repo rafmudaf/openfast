@@ -438,6 +438,7 @@ When VTK_type is 2, FAST will generate stick-figure data using line and point me
 When VTK_type is 3, FAST will generate stick-figure data using line and point meshes (not surfaces) for all of the input and output meshes in the FAST simulation being run. Table 5 lists all of the meshes that can be output in VTK format with this option. Modules that are not used will not generate VTK files.
 
 Table 4: Surface Visualization Features
+
 =============  ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 Surface        Data
 =============  ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================
@@ -455,73 +456,118 @@ Wave           Incident wave elevations are generated for models that use the Hy
 
 Table 5: Stick-Figure Visualization Features.
 Fields marked as "In" are input to the module on the given mesh; fields marked as "out" are output from the module.
-===========================  ======  =================================  ======== ===================================================================================================================================================================================================================================================================================================================================================================================================
-Mesh Name                     Type    Output when VTK_type is 1 or 2?    Force    Moment    Orientation    Translational Velocity    Rotational Velocity    Translational Acceleration    Rotational Acceleration
-===========================  ======  =================================  ======== ==================================================================================================================================================================================================================================================================================================================================================================================================================
-ED_BladeLn2Mesh_motion        Line2                                                         Out      Out    Out    Out    Out
-ED_BladePtLoads               Point                                       In       In
-ED_BladeRootMotion            Point                                                          Out      Out    Out    Out    Out
-ED_Hub                        Point                                      In       In        Out      Out    Out    Out    Out
-ED_Nacelle                    Point                                      In       In        Out      Out    Out    Out    Out
-ED_TowerLn2Mesh_motion        Line2                                                         Out      Out    Out    Out    Out
-ED_TowerPtLoads               Point                                       In       In
-ED_PlatformPtMesh             Point                                       In       In        Out      Out    Out    Out    Out
-BD_BldMotion                  Line2        §§                                               Out      Out    Out    Out    Out
-BD_HubMotion                  Point                                                          In       In            In*** 
-BD_DistrLoad                  Line2                                       In       In        Out      Out    Out    Out    Out
-BD_ReactionForce_RootMotion   Point                                      Out    Out    In    In    In    In    In
-SrvD_NTMD                     Point                                      Out    Out    In    In    In    In    In
-SrvD_TTMD                     Point                                      Out    Out    In    In    In    In    In
-AD_Blade                      Line2        §§                           Out    Out    In    In        In***
-AD_BladeRootMotion            Point                                      In    In*** In***
-AD_HubMotion                  Point                                      In    In*** In    In***
-AD_Tower                      Line2                                      Out    Out    In    In        In***
-HD_AllHdroOrigin              Point                                     Out    Out    In    In    In    In    In
-HD_Mesh                       Point                                      Out    Out    In    In    In    In    In
-HD_MorisonLumped              Point                                      Out‡‡‡  Out‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡
-HD_MorisonDistrib             Line2                                     Out‡‡‡ Out‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡ In‡‡‡
-SD_LMesh_y2Mesh               Point                                      In    In    Out    Out    Out    Out    Out
-SD_y1Mesh_TPMesh              Point                                      Out    Out    In    In    In    In    In
-MAP_PtFairlead                Point                                      Out            In*** In***
-MD_PtFairlead                 Point                                      Out            In*** In***
-FEAM_PtFairlead               Point                                      Out            In*** In***
-Orca_PtfmMesh                 Point                                      Out    Out    In    In    In    In    In
-IceF_iceMesh                  Point                                      Out    Out        In        In***
-IceD_PointMesh                Point                                      Out            In        In***
 
+===========================  ======  =================================  ======== ======== ============== ========================= ====================== ============================= ==========================
+Mesh Name                     Type    Output when VTK_type is 1 or 2?    Force    Moment    Orientation    Translational Velocity    Rotational Velocity    Translational Acceleration    Rotational Acceleration
+===========================  ======  =================================  ======== ======== ============== ========================= ====================== ============================= ==========================
+ED_BladeLn2Mesh_motion        Line2                                                         Out          Out                        Out                    Out                           Out
+ED_BladePtLoads               Point                                       In       In
+ED_BladeRootMotion            Point                                                          Out           Out                       Out                    Out                           Out
+ED_Hub                        Point                                      In       In        Out           Out                       Out                    Out                           Out
+ED_Nacelle                    Point                                      In       In        Out           Out                       Out                    Out                           Out
+ED_TowerLn2Mesh_motion        Line2                                                         Out           Out                       Out                    Out                           Out
+ED_TowerPtLoads               Point                                       In       In
+ED_PlatformPtMesh             Point                                       In       In        Out           Out                       Out                    Out                           Out
+BD_BldMotion                  Line2        §§                                               Out           Out                       Out                    Out                           Out
+BD_HubMotion                  Point                                                          In            In                                               In*** 
+BD_DistrLoad                  Line2                                       In       In        Out           Out                       Out                    Out                           Out
+BD_ReactionForce_RootMotion   Point                                      Out       Out        In           In                        In                     In                            In
+SrvD_NTMD                     Point                                      Out       Out        In           In                        In                     In                            In
+SrvD_TTMD                     Point                                      Out       Out        In           In                        In                     In                            In
+AD_Blade                      Line2        §§                           Out       Out        In           In                                               In***
+AD_BladeRootMotion            Point                                      In       In***      In***
+AD_HubMotion                  Point                                      In       In***      In           In***
+AD_Tower                      Line2                                      Out       Out       In            In                        In***
+HD_AllHdroOrigin              Point                                     Out       Out       In            In                        In                        In                             In
+HD_Mesh                       Point                                      Out       Out       In            In                        In                        In                             In
+HD_MorisonLumped              Point                                      Out‡‡‡  Out‡‡‡     In‡‡‡         In‡‡‡                      In‡‡‡                   In‡‡‡                          In‡‡‡
+HD_MorisonDistrib             Line2                                     Out‡‡‡  Out‡‡‡     In‡‡‡         In‡‡‡                      In‡‡‡                   In‡‡‡                          In‡‡‡
+SD_LMesh_y2Mesh               Point                                      In        In       Out           Out                        Out                      Out                             Out
+SD_y1Mesh_TPMesh              Point                                      Out       Out       In           In                         In                      In                             In
+MAP_PtFairlead                Point                                      Out                In***         In***
+MD_PtFairlead                 Point                                      Out                In***         In***
+FEAM_PtFairlead               Point                                      Out                In***         In***
+Orca_PtfmMesh                 Point                                      Out        Out     In            In                          In                      In                              In
+IceF_iceMesh                  Point                                      Out        Out        In         In***
+IceD_PointMesh                Point                                      Out        In        In***
+===========================  ======  =================================  ======== ======== ============== ========================= ====================== ============================= ==========================
 
 Linearization Files
-FAST v8.16 introduced full-system linearization functionality for land-based wind turbines, including core (but not all) features of the InflowWind, AeroDyn v15, ServoDyn, and ElastoDyn modules and their coupling. The linearization output file(s) contain values at the time of the linearization for (1) the OP state, input, and outputs; (2) the linear state-space matrice(s); and optionally (3) the Jacobian matrices representing the Jacobians of module-level state and output equations with respect to their states and inputs, and the Jacobians of the full-system input-output transformation functions with respect to all inputs and outputs. Currently the linearization files are always output as text files; future versions may include binary versions. The FAST MATLAB toolbox included in the FAST archive contains a file called “ReadFASTLinear.m”, which can be used to read the linearization output (.lin) files generated by FAST into MATLAB. Additionally, a file named “GetMats_f8.m” has been added to the MATLAB post-processor MBC, which calls “ReadFASTLinear.m” and sets the variables needed for subsequent analysis with MBC.
-For people familiar with the linearization functionality of FAST v7, the following differences should be noted for the FAST v8 linearization functionality:
-    Linearization analyses can now be invoked when running FAST using the Simulink interface, although inputs to the FAST S-Function from Simulink cannot be used in the linearization process.
-    The OP(s) to linearize about are determined by the user, not by a separate OP determination algorithm (the convergence check and optional trim calculation are not available).
-    The conditions on when linearization is permissible have changed. In InflowWind, linearization is possible with both steady (WindType = 1) and uniform (WindType = 2) wind file types. In ServoDyn, while GenTiStr and GenTiStp must still both be TRUE, there are no longer restrictions on TimGenOn and TimGenOf. Also in ServoDyn, there are no longer restrictions on the override pitch or yaw maneuevers and these can now be enabled when linearizing. Also in ServoDyn, high-speed-shaft brake control must be disabled (HSSBrMode = 0) and the nacelle- and tower-based TMDs must be disabled (CompNTMD = FALSE and CompTTMD = FALSE). In ElastoDyn, it is now possible to linearize with no DOFs (for a completely rigid turbine).
-    Linearization of the aerodynamics is now possible with a frozen-wake assumption in AeroDyn v15.
-    Each linearization output file only pertains to a given time; periodic solutions (periodic with the rotor azimuth angle) must be split into separate files—one for each azimuth angle.
-    While the details are hidden from the casual user, the underlying linearization process is very different. In FAST v7, linearization was completely numerical and controlled by the structural model. In FAST v8, linearization involves (1) linearizing the underlying nonlinear equations of each module about the OP (where some linearizations are analytical, some are numerical), (2) linearizing the module-to-module input-output coupling relationships in the FAST glue code about the OP (analytical), and (3) combining all linearized matrices into the full-system linear state-space model and exporting those matrices and the OP to a file (analytical). This modularized approach to linearization permits details of the linearization to be made visible e.g. the OP of each module-level state, input, and output and the module-level Jacobians may now be written to the linearization output file(s).
-    Only first-order system matrices are available (second-order system matrices, including the mass matrix, are not).
-    Common control inputs and wind disturbances are available, but these are grouped in terms of the input matrix (B) and transmission matrix (D) (not separate disturbance matrices Bd and Dd) and cannot be selected individually. Nacelle-yaw angle and rate have been replaced with yaw moment. The wind disturbances of vertical wind speed, horizontal wind shear, linear vertical shear, and gust speed are no longer available.
-    While the new linearization functionality has been well tested, the results are not always in agreement with those of FAST v7. Differences have been seen e.g. in the aerodynamic damping terms relating aerodynamic loads with structural velocities. At this time, it is unclear whether these differences are expected based on the differences in theory between FAST v7 and v8, or whether there are problems in one or both versions. As with any analysis, the results should be assessed for accuracy.
-    When invoking MBC3 for post-processing of the linearization output file(s), file “GetMats_f8.m” replaces “GetMats.m”.
+~~~~~~~~~~~~~~~~~~~
+FAST v8.16 introduced full-system linearization functionality for land-based
+wind turbines, including core (but not all) features of the InflowWind,
+AeroDyn v15, ServoDyn, and ElastoDyn modules and their coupling. The
+linearization output file(s) contain values at the time of the linearization
+for (1) the OP state, input, and outputs; (2) the linear state-space
+matrice(s); and optionally (3) the Jacobian matrices representing the Jacobians
+of module-level state and output equations with respect to their states and
+inputs, and the Jacobians of the full-system input-output transformation
+functions with respect to all inputs and outputs. Currently the linearization
+files are always output as text files; future versions may include binary
+versions. The FAST MATLAB toolbox included in the FAST archive contains a file
+called "ReadFASTLinear.m", which can be used to read the linearization output
+(.lin) files generated by FAST into MATLAB. Additionally, a file named
+"GetMats_f8.m" has been added to the MATLAB post-processor MBC, which calls
+"ReadFASTLinear.m" and sets the variables needed for subsequent analysis with
+MBC.
+
+For people familiar with the linearization functionality of FAST v7, the
+following differences should be noted for the FAST v8 linearization
+functionality:
+
+  - Linearization analyses can now be invoked when running FAST using the Simulink interface, although inputs to the FAST S-Function from Simulink cannot be used in the linearization process.
+  - The OP(s) to linearize about are determined by the user, not by a separate OP determination algorithm (the convergence check and optional trim calculation are not available).
+  - The conditions on when linearization is permissible have changed. In InflowWind, linearization is possible with both steady (WindType = 1) and uniform (WindType = 2) wind file types. In ServoDyn, while GenTiStr and GenTiStp must still both be TRUE, there are no longer restrictions on TimGenOn and TimGenOf. Also in ServoDyn, there are no longer restrictions on the override pitch or yaw maneuevers and these can now be enabled when linearizing. Also in ServoDyn, high-speed-shaft brake control must be disabled (HSSBrMode = 0) and the nacelle- and tower-based TMDs must be disabled (CompNTMD = FALSE and CompTTMD = FALSE). In ElastoDyn, it is now possible to linearize with no DOFs (for a completely rigid turbine).
+  - Linearization of the aerodynamics is now possible with a frozen-wake assumption in AeroDyn v15.
+  - Each linearization output file only pertains to a given time; periodic solutions (periodic with the rotor azimuth angle) must be split into separate files—one for each azimuth angle.
+  - While the details are hidden from the casual user, the underlying linearization process is very different. In FAST v7, linearization was completely numerical and controlled by the structural model. In FAST v8, linearization involves (1) linearizing the underlying nonlinear equations of each module about the OP (where some linearizations are analytical, some are numerical), (2) linearizing the module-to-module input-output coupling relationships in the FAST glue code about the OP (analytical), and (3) combining all linearized matrices into the full-system linear state-space model and exporting those matrices and the OP to a file (analytical). This modularized approach to linearization permits details of the linearization to be made visible e.g. the OP of each module-level state, input, and output and the module-level Jacobians may now be written to the linearization output file(s).
+  - Only first-order system matrices are available (second-order system matrices, including the mass matrix, are not).
+  - Common control inputs and wind disturbances are available, but these are grouped in terms of the input matrix (B) and transmission matrix (D) (not separate disturbance matrices Bd and Dd) and cannot be selected individually. Nacelle-yaw angle and rate have been replaced with yaw moment. The wind disturbances of vertical wind speed, horizontal wind shear, linear vertical shear, and gust speed are no longer available.
+  - While the new linearization functionality has been well tested, the results are not always in agreement with those of FAST v7. Differences have been seen e.g. in the aerodynamic damping terms relating aerodynamic loads with structural velocities. At this time, it is unclear whether these differences are expected based on the differences in theory between FAST v7 and v8, or whether there are problems in one or both versions. As with any analysis, the results should be assessed for accuracy.
+  - When invoking MBC3 for post-processing of the linearization output file(s), file "GetMats_f8.m" replaces "GetMats.m".
+
 Visualization Toolkit Files (Visualization Capability)
-FAST v8.15 introduced visualization capability based on either surface or stick-figure geometry for model reference and initial configurations and time-series animation through the generation of VTK output files. Visualization Toolkit (VTK) is an open-source, freely available software system for 3D computer graphics, image processing, and visualization. The VTK files generated by FAST can be read with standard open-source visualization packages such as ParaView or VisIt. 
-An example of FAST’s surface visualization capability is shown in Figure 5. Examples of stick-figure visualization are shown in Figure 6 and Figure 7. With the current release, it is not yet possible to visualize the mooring lines.
-FAST will generate a lot of files when WrVTK > 0. This can take a long time, especially when generating surface data with fields.
-If a FAST simulation encounters an error when WrVTK > 0, for debugging purposes, all of the meshes and field data will be output at the final step before the program ends (this is equivalent to having WrVTK = 2, VTK_Type = 3, and VTK_fields = TRUE when the program ends).
- 
+FAST v8.15 introduced visualization capability based on either surface or
+stick-figure geometry for model reference and initial configurations and
+time-series animation through the generation of VTK output files. Visualization
+Toolkit (VTK) is an open-source, freely available software system for 3D
+computer graphics, image processing, and visualization. The VTK files generated
+by FAST can be read with standard open-source visualization packages such as
+ParaView or VisIt.
+
+An example of FAST’s surface visualization capability is shown in Figure 5.
+Examples of stick-figure visualization are shown in Figure 6 and Figure 7.
+With the current release, it is not yet possible to visualize the mooring
+lines.
+
+FAST will generate a lot of files when WrVTK > 0. This can take a long time,
+especially when generating surface data with fields. If a FAST simulation
+encounters an error when WrVTK > 0, for debugging purposes, all of the meshes
+and field data will be output at the final step before the program ends (this
+is equivalent to having WrVTK = 2, VTK_Type = 3, and VTK_fields = TRUE when
+the program ends).
+
 Figure 5: FAST surface visualization generated from Certification Test #25 as displayed in ParaView
- 
+
 Figure 6: FAST basic mesh stick-figure visualization generated from Certification Test #25 as displayed in ParaView. Glyphs were added to visualize the hub and nacelle point meshes.
- 
+
 Figure 7: FAST stick-figure visualization of all meshes generated from Certification Test #25 as displayed in ParaView. Nodes on ElastoDyn’s blade 2 mesh are displayed in orange; Nodes on AeroDyn v15's blade 2 mesh are blue.
+
 Checkpoint Files (Restart Capability)
-For long FAST simulations that may not run to completion due to hardware failure or system availability, FAST has the ability to generate checkpoint files. These files can be used to restart the FAST simulation from the place the checkpoint file was written. See section, “Restart: Starting FAST from a checkpoint file” for a description on how to restart FAST from the checkpoint.
-Checkpoint capability has not been added to the FAST-Simulink or FAST-OrcaFlex interfaces.
+For long FAST simulations that may not run to completion due to hardware
+failure or system availability, FAST has the ability to generate checkpoint
+files. These files can be used to restart the FAST simulation from the place
+the checkpoint file was written. See section, "Restart: Starting FAST from a
+checkpoint file" for a description on how to restart FAST from the checkpoint.
+Checkpoint capability has not been added to the FAST-Simulink or FAST-OrcaFlex
+interfaces.
+
 If you generate a checkpoint file, keep in mind the following caveats:
-    Any Bladed-style DLL used for control must be modified for checkpoint/restart capability. We have made these modifications to the DLLs provided in the FAST archive:
-    When record 1 of the “DATA” (avrSwap) array is –8, the DLL should create a checkpoint file. The file must be named according to the file name passed in argument “INFILE” for this call. This file must contain all static data in the DLL that is necessary to start the DLL in the middle of the simulation.
-    When record 1 of the “DATA” (avrSwap) array is –9, the DLL should read the checkpoint file whose named is specified in the argument “INFILE”. The data from this file should be used to set the values of any static variables contained in the DLL so that the simulation can continue from that point.
-    Source files to generate the Bladed-style DLL modified for this change are in the <FAST8>/CertTest/5MW_Baseline/ServoData/Source folder.
-    Any files that were open when the checkpoint file was created will not be open on restart. We recommend you use only binary output files when starting from checkpoint files.
-    The user-defined control routines are not available for checkpoint restart (i.e., CertTests 11-13 won’t work).
-    Before FAST creates a checkpoint file, it doubles the amount of memory in use in the simulation because all of the data is packed into three arrays that are then written to a file. Thus, it is likely that 32-bit simulations will not be able to create checkpoint files. 
+
+  - Any Bladed-style DLL used for control must be modified for checkpoint/restart capability. We have made these modifications to the DLLs provided in the FAST archive:
+  - When record 1 of the "DATA" (avrSwap) array is –8, the DLL should create a checkpoint file. The file must be named according to the file name passed in argument "INFILE" for this call. This file must contain all static data in the DLL that is necessary to start the DLL in the middle of the simulation.
+  - When record 1 of the "DATA" (avrSwap) array is –9, the DLL should read the checkpoint file whose named is specified in the argument "INFILE". The data from this file should be used to set the values of any static variables contained in the DLL so that the simulation can continue from that point.
+  - Source files to generate the Bladed-style DLL modified for this change are in the <FAST8>/CertTest/5MW_Baseline/ServoData/Source folder.
+  - Any files that were open when the checkpoint file was created will not be open on restart. We recommend you use only binary output files when starting from checkpoint files.
+  - The user-defined control routines are not available for checkpoint restart (i.e., CertTests 11-13 won’t work).
+  - Before FAST creates a checkpoint file, it doubles the amount of memory in use in the simulation because all of the data is packed into three arrays that are then written to a file. Thus, it is likely that 32-bit simulations will not be able to create checkpoint files.
