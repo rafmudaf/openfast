@@ -357,8 +357,6 @@ TabDelim      Use tab delimiters in text tabular output file? [T/F]             
 OutFmt        Format used for text tabular output, excluding the time channel [-]         When OutFileFmt = 1 or 3, FAST will use OutFmt to format the channels printed in the text tabular output file. OutFmt should result in a field that is 10 characters long (channel headers are 10 characters long, and NWTC post-processing software sometimes assume 10 characters). The time channel is printed using the "F10.4" format. We commonly specify OutFmt to be "ES10.3E2". If OutFileFmt = 2, OutFmt has no effect.
 ============  ==========================================================================  ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
-.. TODO: update below
-
 (*) This indicates which type of tabular (time-marching) output files will be
 generated. If OutFileFmt is 1, only a text file will be written. If OutFileFmt
 is 2, only a binary file will be written. If OutFileFmt is 3, both text and
@@ -373,9 +371,10 @@ resulting files take up much less space. The binary files contain more precise
 output data than text files, which are limited by the chosen output format
 specifier—see OutFmt below. We recommend you use text files for debugging and
 binary files for production work. A MATLAB script for reading FAST binary
-output files is included in the archive
-(see <FAST8>/Utilities/SimulationToolbox/Utilities/ReadFASTbinary.m). Python
-code to read FAST output files exists in WISDEM’s AeroelasticSE repository.
+output files is included in the OpenFAST
+`Matlab Toolbox repository <https://github.com/OpenFAST/matlab-toolbox/blob/master/Utilities/ReadFASTbinary.m>`_.
+Python code to read FAST output files is distributed with OpenFAST in the
+regression test framework's `fast_io module <https://github.com/OpenFAST/openfast/blob/master/reg_tests/lib/fast_io.py>`_.
 The NREL post-processors Crunch and MCrunch can also read these binary files.
 
 Linearization
