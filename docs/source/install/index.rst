@@ -409,3 +409,4 @@ test or may be deprecated in the future.
    install_spack.rst
 
 .. TODO: Check the windows paths: math library command, installation location
+.. TODO:  Please see Marshall Buhl’s paper `Installing NWTC CAE Tools on PCs Running Windows® <https://nwtc.nrel.gov/system/files/Setup_NWTC_Windows.pdf>`__
