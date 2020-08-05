@@ -1,0 +1,33 @@
+  
+name: Development Pipeline
+
+on: push
+
+jobs:
+  build-and-test:
+    name: OpenFAST tests on Ubuntu
+    runs-on: ubuntu-latest
+    container:
+      image: rafmudaf/openfast-ubuntu:dev
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+      with:
+        submodules: recursive
+    # - name: Get latest CMake
+    #   uses: lukka/get-cmake@v3.17.3
+    - name: Build OpenFAST executable
+      uses: lukka/run-cmake@v2.5
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeBuildType: RelWithDebInfo
+        cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
+        cmakeAppendedArgs: -DBUILD_TESTING=ON
+        buildDirectory: "${{ github.workspace }}/build"
+        buildWithCMakeArgs: "--target install"
+    - name: 'Run NWTC tests'
+      uses: ./.github/actions/tests-module-nwtclibrary
+    - name: 'Run AeroDyn tests'
+      uses: ./.github/actions/tests-module-aerodyn
+    - name: 'Run BeamDyn tests'
+      uses: ./.github/actions/tests-module-beamdyn
