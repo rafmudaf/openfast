@@ -3315,16 +3315,20 @@ END SUBROUTINE CheckR16Var
 !=======================================================================
 !> This subroutine prints the contents of the FileInfo data structure to the screen
 !! This may be useful for diagnostic purposes.  this is written to unit U
-   subroutine Print_FileInfo( U, FileInfo )
+   subroutine Print_FileInfo_Struct( U, FileInfo )
       integer(IntKi),      intent(in   ) :: U         !< Unit number to print to
       type(FileInfoType),  intent(in   ) :: FileInfo  !< derived type containing everything read from file
       integer(IntKi)                     :: i         !< generic counter
       character(20)                      :: TmpStr20
       character(45)                      :: TmpStr45
-      write(U,*)  '-------------- Print_FileInfo ------------'
+      write(U,*)  '-------------- Print_FileInfo_Struct ------------'
       write(U,*)  '  info stored in the FileInfo data type'
-      write(U,*)  '        %NumLines : ',FileInfo%NumLines
-      write(U,*)  '        %NumFiles : ',FileInfo%NumFiles
+      write(U,*)  '        %NumLines           (integer): ',FileInfo%NumLines
+      write(U,*)  '        %NumFiles           (integer): ',FileInfo%NumFiles
+      write(U,*)  '        %FileList  (array of strings): ',size(FileInfo%FileList)
+      write(U,*)  '        %FileIndx  (array of integer): ',size(FileInfo%FileIndx)
+      write(U,*)  '        %FileLine  (array of integer): ',size(FileInfo%FileLine)
+      write(U,*)  '        %Lines     (array of strings): ',size(FileInfo%Lines   )
       if (allocated(FileInfo%FileList)) then
          write(U,*)  '  list of files read:'
          write(U,*)  '     FileIdx     FileName'
@@ -3341,7 +3345,7 @@ END SUBROUTINE CheckR16Var
             write(U,*) TmpStr45, trim(FileInfo%Lines(i))
          enddo
       endif
-   end subroutine Print_FileInfo
+   end subroutine Print_FileInfo_Struct
 !=======================================================================
 !> This subroutine parses the specified line of text for two words.  One should be a
 !! the name of a variable and the other the value of the variable.
