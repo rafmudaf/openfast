@@ -3313,6 +3313,36 @@ END SUBROUTINE CheckR16Var
    RETURN
    END SUBROUTINE OpenUOutfile
 !=======================================================================
+!> This subroutine prints the contents of the FileInfo data structure to the screen
+!! This may be useful for diagnostic purposes.  this is written to unit U
+   subroutine Print_FileInfo( U, FileInfo )
+      integer(IntKi),      intent(in   ) :: U         !< Unit number to print to
+      type(FileInfoType),  intent(in   ) :: FileInfo  !< derived type containing everything read from file
+      integer(IntKi)                     :: i         !< generic counter
+      character(20)                      :: TmpStr20
+      character(45)                      :: TmpStr45
+      write(U,*)  '-------------- Print_FileInfo ------------'
+      write(U,*)  '  info stored in the FileInfo data type'
+      write(U,*)  '        %NumLines : ',FileInfo%NumLines
+      write(U,*)  '        %NumFiles : ',FileInfo%NumFiles
+      if (allocated(FileInfo%FileList)) then
+         write(U,*)  '  list of files read:'
+         write(U,*)  '     FileIdx     FileName'
+         do i=1,FileInfo%NumFiles
+            write(TmpStr20,'(7x,I3,10x)')  i
+            write(U,*) TmpStr20//trim(FileInfo%FileList(i))
+         enddo
+      endif
+      if (allocated(FileInfo%FileLine) .and. allocated(FileInfo%FileIndx) .and. allocated(FileInfo%Lines)) then
+         write(U,*) '  Non-comment lines stored in memory from files:'
+         write(U,*) '         i       FileIndx       FileLine     Lines(i)'
+         do i=1,FileInfo%NumLines
+            write(TmpStr45, '(5x,I5,10x,I5,10x,I5,5x)') i, FileInfo%FileIndx(i), FileInfo%FileLine(i)
+            write(U,*) TmpStr45, trim(FileInfo%Lines(i))
+         enddo
+      endif
+   end subroutine Print_FileInfo
+!=======================================================================
 !> This subroutine parses the specified line of text for two words.  One should be a
 !! the name of a variable and the other the value of the variable.
 !! Generate an error message if the value is the wrong type or if only one "word" is found.
