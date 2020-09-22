@@ -346,53 +346,36 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for coherent turbulence [used only for WindType = 3 or 4]_ section
+   !-------------------------------------------------------------------------------------------------
+
+   ! CurLine = CurLine + 1  ! Skip section break
+   ! CALL ParseVar( InFileInfo, CurLine, "CTTS_CoherentTurbFlag", InputFileData%CTTS_CoherentTurb, TmpErrStat, TmpErrMsg )
+   ! CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   ! IF (ErrStat >= AbortErrLev) THEN
+   !    CALL CleanUp()
+   !    RETURN
+   ! ENDIF
+
+   ! CALL ParseVar( InFileInfo, CurLine, "CTTS_FileName", InputFileData%CTTS_FileName, TmpErrStat, TmpErrMsg )
+   ! CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   ! IF (ErrStat >= AbortErrLev) THEN
+   !    CALL CleanUp()
+   !    RETURN
+   ! ENDIF
+   ! IF ( PathIsRelative( InputFileData%CTTS_FileName ) ) InputFileData%CTTS_FileName = TRIM(PriPath)//TRIM(InputFileData%CTTS_FileName)
+
+   ! CALL ParseVar( InFileInfo, CurLine, "CTTS_Path", InputFileData%CTTS_Path, TmpErrStat, TmpErrMsg )
+   ! CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   ! IF (ErrStat >= AbortErrLev) THEN
+   !    CALL CleanUp()
+   !    RETURN
+   ! ENDIF
+   ! IF ( PathIsRelative( InputFileData%CTTS_Path ) ) InputFileData%CTTS_Path = TRIM(PriPath)//TRIM(InputFileData%CTTS_Path)
+
 END SUBROUTINE InflowWind_ParseInputFileInfo
 
-
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for coherent turbulence [used only for WindType = 3 or 4]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read CTTS_Flag
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%CTTS_CoherentTurb, 'CTTS_CoherentTurbFlag', &
-!                'Flag to coherent turbulence', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
-!       ! Read CTWind%WindFileName
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%CTTS_FileName, 'CTTS_FileName', &
-!                'Name of coherent turbulence file', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-!    IF ( PathIsRelative( InputFileData%CTTS_FileName ) ) InputFileData%CTTS_FileName = TRIM(PriPath)//TRIM(InputFileData%CTTS_FileName)
-
-!       ! Read CTWind%PathName
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%CTTS_Path, 'CTTS_Path', &
-!                'Path to coherent turbulence binary files', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-!    IF ( PathIsRelative( InputFileData%CTTS_Path ) ) InputFileData%CTTS_Path = TRIM(PriPath)//TRIM(InputFileData%CTTS_Path)
-
-! #else
-!    InputFileData%CTTS_CoherentTurb = .FALSE.
-! #endif
 
 !    !-------------------------------------------------------------------------------------------------
 !    !> Read the _Parameters for HAWC-formatted binary files [used only for WindType = 5]_ section
