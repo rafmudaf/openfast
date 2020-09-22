@@ -139,6 +139,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
 
       TYPE(IfW_4Dext_InitOutputType)                        :: FDext_InitOutData    !< initialization info
 
+      TYPE(FileInfoType)                                    :: InFileInfo    !< The derived type for holding the full input file for parsing -- we may pass this in the future
 !!!     TYPE(CTBladed_Backgr)                                        :: BackGrndValues
 
 
@@ -186,7 +187,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
          ! Parse all the InflowWind related input files and populate the *_InitDataType derived types
 
       IF ( InitInp%UseInputFile ) THEN
-         CALL InflowWind_ReadInput( InitInp%InputFileName, EchoFileName, InputFileData, TmpErrStat, TmpErrMsg )
+         CALL InflowWind_ReadInput( InitInp%InputFileName, InFileInfo, TmpErrStat, TmpErrMsg )
          CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
          IF ( ErrStat >= AbortErrLev ) THEN
             CALL Cleanup()
@@ -200,19 +201,32 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
         InputFileData%LidRadialVel = InitInp%lidar%LidRadialVel
                         
       ELSE
-                  
-         CALL InflowWind_CopyInputFile( InitInp%PassedFileData, InputFileData, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
-            CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)          
+         ! <--- To be replaced with input path without file IO --->
+
+         ! CALL InflowWind_CopyInputFile( InitInp%PassedFileData, InputFileData, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
+         !    CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)          
          
       ENDIF
 
+      CALL InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, ErrMsg )
          ! let's tell InflowWind if an external module (e.g., FAST.Farm) is going to set the velocity grids.
+      
       IF ( InitInp%Use4Dext) then
          InputFileData%WindType = FDext_WindNumber      
          InputFileData%PropagationDir = 0.0_ReKi ! wind is in XYZ coordinates (already rotated if necessary), so don't rotate it again
       END IF
       
-      
+      ! For testing:
+      ! Driver code will catch this and exit. Doesn't work in all modules.
+
+      PRINT *, "--- WindType: ", InputFileData%WindType
+      PRINT *, "--- PropagationDir: ", InputFileData%PropagationDir
+      PRINT *, "--- NWindVel: ", InputFileData%NWindVel
+
+      ErrStat = ErrID_Fatal
+      ErrMsg = "Ending early for testing."
+      RETURN
+
          ! initialize sensor data:   
       CALL Lidar_Init( InitInp, InputGuess, p, ContStates, DiscStates, ConstrStateGuess, OtherStates,   &
                        y, m, TimeInterval, InitOutData, TmpErrStat, TmpErrMsg )
