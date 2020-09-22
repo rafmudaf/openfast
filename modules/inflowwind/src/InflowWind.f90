@@ -219,6 +219,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       ! For testing:
       ! Driver code will catch this and exit. Doesn't work in all modules.
 
+      ! General Section
       PRINT *, "--- WindType: ", InputFileData%WindType
       PRINT *, "--- PropagationDir: ", InputFileData%PropagationDir
       PRINT *, "--- NWindVel: ", InputFileData%NWindVel
@@ -227,9 +228,15 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- WindVyiList: ", InputFileData%WindVyiList
       PRINT *, "--- WindVziList: ", InputFileData%WindVziList
 
+      ! WindType 1
       PRINT *, "--- HWindSpeed: ", InputFileData%Steady_HWindSpeed
       PRINT *, "--- RefHt: ", InputFileData%Steady_RefHt
       PRINT *, "--- Plexp: ", InputFileData%Steady_PLexp
+
+      ! WindType 2
+      PRINT *, "--- Filename: ", TRIM(InputFileData%Uniform_FileName)
+      PRINT *, "--- RefHt: ", InputFileData%Uniform_RefHt
+      PRINT *, "--- RefLength: ", InputFileData%Uniform_RefLength
 
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."

@@ -295,48 +295,36 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for Uniform wind file [used only for WindType = 2]_ section
+   !-------------------------------------------------------------------------------------------------
+
+   CurLine = 16
+   CALL ParseVar( InFileInfo, CurLine, "UniformFileName", InputFileData%Uniform_FileName, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+   ! IF ( PathIsRelative( InputFileData%Uniform_FileName ) ) InputFileData%Uniform_FileName = TRIM(PriPath)//TRIM(InputFileData%Uniform_FileName)
+
+   CurLine = 17
+   CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%Uniform_RefHt, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+
+   CurLine = 18
+   CALL ParseVar( InFileInfo, CurLine, "RefLength", InputFileData%Uniform_RefLength, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+
 END SUBROUTINE InflowWind_ParseInputFileInfo
-
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for Uniform wind file [used only for WindType = 2]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read UniformWindFile
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Uniform_FileName, 'WindFileName', &
-!                   'Filename of time series data for uniform wind field', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-!    IF ( PathIsRelative( InputFileData%Uniform_FileName ) ) InputFileData%Uniform_FileName = TRIM(PriPath)//TRIM(InputFileData%Uniform_FileName)
-
-!       ! Read RefHt
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Uniform_RefHt, 'RefHt', &
-!                   'Reference height for uniform wind file', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
-!       ! Read RefLength
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Uniform_RefLength, 'RefLength', &
-!                   'Reference length for uniform wind file', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
 
 !    !-------------------------------------------------------------------------------------------------
 !    !> Read the _Parameters for Binary TurbSim Full-Field files [used only for WindType = 3]_ section
