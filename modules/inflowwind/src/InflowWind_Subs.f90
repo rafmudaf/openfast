@@ -170,13 +170,11 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       ! Temoporary messages
    INTEGER(IntKi)                                     :: TmpErrStat
    CHARACTER(ErrMsgLen)                               :: TmpErrMsg
-   ! CHARACTER(1024)                                    :: PriPath              !< Path name of the primary file
 
       ! Initialization
    ErrStat                 = ErrID_None
    ErrMsg                  = ""
    InputFileData%EchoFlag  = .FALSE.         ! initialize for error handling (cleanup() routine)
-   ! CALL GetPath( InputFileName, PriPath )    ! Input files will be relative to the path where the primary input file is located.
 
       ! Allocate the array for the OutList
    CALL AllocAry( InputFileData%OutList, MaxOutPts, "InflowWind Input File's OutList", TmpErrStat, TmpErrMsg )
@@ -198,7 +196,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 5
    CALL ParseVar( InFileInfo, CurLine, "WindType", InputFileData%WindType, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -206,7 +203,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 6
    CALL ParseVar( InFileInfo, CurLine, "PropagationDir", InputFileData%PropagationDir, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -214,7 +210,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 7
    CALL ParseVar( InFileInfo, CurLine, "NWindVel", InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -243,7 +238,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       ENDIF
    ENDIF
 
-   CurLine = 8
    CALL ParseAry( InFileInfo, CurLine, 'WindVxiList', InputFileData%WindVxiList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -251,7 +245,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 9
    CALL ParseAry( InFileInfo, CurLine, 'WindVyiList', InputFileData%WindVyiList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -259,7 +252,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 10
    CALL ParseAry( InFileInfo, CurLine, 'WindVziList', InputFileData%WindVziList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -271,7 +263,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    !> Read the _Parameters for Steady Wind Conditions [used only for WindType = 1]_ section
    !-------------------------------------------------------------------------------------------------
 
-   CurLine = 12
+   CurLine = CurLine + 1  ! Skip section break
    CALL ParseVar( InFileInfo, CurLine, "HWindSpeed", InputFileData%Steady_HWindSpeed, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -279,7 +271,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 13
    CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%Steady_RefHt, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -287,7 +278,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 14
    CALL ParseVar( InFileInfo, CurLine, "PLexp", InputFileData%Steady_PLexp, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -299,7 +289,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    !> Read the _Parameters for Uniform wind file [used only for WindType = 2]_ section
    !-------------------------------------------------------------------------------------------------
 
-   CurLine = 16
+   CurLine = CurLine + 1  ! Skip section break
    CALL ParseVar( InFileInfo, CurLine, "UniformFileName", InputFileData%Uniform_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -308,7 +298,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    ENDIF
    ! IF ( PathIsRelative( InputFileData%Uniform_FileName ) ) InputFileData%Uniform_FileName = TRIM(PriPath)//TRIM(InputFileData%Uniform_FileName)
 
-   CurLine = 17
    CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%Uniform_RefHt, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -316,7 +305,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 18
    CALL ParseVar( InFileInfo, CurLine, "RefLength", InputFileData%Uniform_RefLength, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -328,7 +316,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    !> Read the _Parameters for Binary TurbSim Full-Field files [used only for WindType = 3]_ section
    !-------------------------------------------------------------------------------------------------
 
-   CurLine = 20
+   CurLine = CurLine + 1  ! Skip section break
    CALL ParseVar( InFileInfo, CurLine, "TurbSimFileName", InputFileData%TSFF_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -341,7 +329,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    !> Read the _Parameters for Binary Bladed-style Full-Field files [used only for WindType = 4]_ section
    !-------------------------------------------------------------------------------------------------
 
-   CurLine = 22
+   CurLine = CurLine + 1  ! Skip section break
    CALL ParseVar( InFileInfo, CurLine, "FilenameRoot", InputFileData%BladedFF_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -351,7 +339,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
 !    IF ( PathIsRelative( InputFileData%BladedFF_FileName ) ) InputFileData%BladedFF_FileName = TRIM(PriPath)//TRIM(InputFileData%BladedFF_FileName)
 !    InputFileData%BladedFF_FileName = TRIM(InputFileData%BladedFF_FileName)//'.wnd'
 
-   CurLine = 23
    CALL ParseVar( InFileInfo, CurLine, "TowerFile", InputFileData%BladedFF_TowerFile, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
