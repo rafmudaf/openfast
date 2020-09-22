@@ -223,6 +223,14 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- PropagationDir: ", InputFileData%PropagationDir
       PRINT *, "--- NWindVel: ", InputFileData%NWindVel
 
+      PRINT *, "--- WindVxiList: ", InputFileData%WindVxiList
+      PRINT *, "--- WindVyiList: ", InputFileData%WindVyiList
+      PRINT *, "--- WindVziList: ", InputFileData%WindVziList
+
+      PRINT *, "--- HWindSpeed: ", InputFileData%Steady_HWindSpeed
+      PRINT *, "--- RefHt: ", InputFileData%Steady_RefHt
+      PRINT *, "--- Plexp: ", InputFileData%Steady_PLexp
+
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."
       RETURN

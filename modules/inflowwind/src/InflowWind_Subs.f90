@@ -149,7 +149,10 @@ SUBROUTINE InflowWind_ReadInput( InputFile, InFileInfo, ErrStat, ErrMsg )
 END SUBROUTINE InflowWind_ReadInput
 
 
+!====================================================================================================
+!>  This public subroutine parses the array of strings in InputFileData for the input parameters.
 SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, ErrMsg )
+!----------------------------------------------------------------------------------------------------
 
    IMPLICIT NONE
    CHARACTER(*),              PARAMETER               :: RoutineName="InflowWind_ParseInputFileInfo"
@@ -163,7 +166,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
 
       ! Local variables
    INTEGER(IntKi)                                     :: CurLine              !< Current entry in InFileInfo%Lines array
-   CHARACTER(35)                                      :: Frmt                 !< Output format for logical parameters. (matches NWTC Subroutine Library format)
 
       ! Temoporary messages
    INTEGER(IntKi)                                     :: TmpErrStat
@@ -171,7 +173,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    ! CHARACTER(1024)                                    :: PriPath              !< Path name of the primary file
 
       ! Initialization
-   Frmt                    = "( 2X, L11, 2X, A, T30, ' - ', A )"
    ErrStat                 = ErrID_None
    ErrMsg                  = ""
    InputFileData%EchoFlag  = .FALSE.         ! initialize for error handling (cleanup() routine)
@@ -221,14 +222,6 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 8
-   CALL ParseVar( InFileInfo, CurLine, "NWindVel", InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
-   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-   IF (ErrStat >= AbortErrLev) THEN
-      ! CALL CleanUp()
-      RETURN
-   ENDIF
-
       ! Before proceeding, make sure that NWindVel makes sense
    IF ( InputFileData%NWindVel < 0 .OR. InputFileData%NwindVel > 9 ) THEN
       CALL SetErrStat( ErrID_Fatal, 'NWindVel must be greater than or equal to zero and less than 10.', &
@@ -250,7 +243,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       ENDIF
    ENDIF
 
-   CurLine = 9
+   CurLine = 8
    CALL ParseAry( InFileInfo, CurLine, 'WindVxiList', InputFileData%WindVxiList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -258,7 +251,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 10
+   CurLine = 9
    CALL ParseAry( InFileInfo, CurLine, 'WindVyiList', InputFileData%WindVyiList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -266,7 +259,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-   CurLine = 11
+   CurLine = 10
    CALL ParseAry( InFileInfo, CurLine, 'WindVziList', InputFileData%WindVziList, InputFileData%NWindVel, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) THEN
@@ -274,49 +267,35 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for Steady Wind Conditions [used only for WindType = 1]_ section
+   !-------------------------------------------------------------------------------------------------
+
+   CurLine = 12
+   CALL ParseVar( InFileInfo, CurLine, "HWindSpeed", InputFileData%Steady_HWindSpeed, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+
+   CurLine = 13
+   CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%Steady_RefHt, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+
+   CurLine = 14
+   CALL ParseVar( InFileInfo, CurLine, "PLexp", InputFileData%Steady_PLexp, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+
 END SUBROUTINE InflowWind_ParseInputFileInfo
-
-
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for Steady Wind Conditions [used only for WindType = 1]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-
-!       ! Read HWindSpeed
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Steady_HWindSpeed, 'HWindSpeed', &
-!                   'Horizontal windspeed for steady wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
-!       ! Read RefHt
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Steady_RefHt, 'RefHt', &
-!                   'Reference height for horizontal wind speed for steady wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
-!       ! Read PLexp
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%Steady_PLexp, 'PLexp', &
-!                   'Power law exponent for steady wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
 
 !    !-------------------------------------------------------------------------------------------------
 !    !> Read the _Parameters for Uniform wind file [used only for WindType = 2]_ section
