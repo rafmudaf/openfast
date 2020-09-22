@@ -337,42 +337,30 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    ENDIF
 !    IF ( PathIsRelative( InputFileData%TSFF_FileName ) ) InputFileData%TSFF_FileName = TRIM(PriPath)//TRIM(InputFileData%TSFF_FileName)
 
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for Binary Bladed-style Full-Field files [used only for WindType = 4]_ section
+   !-------------------------------------------------------------------------------------------------
+
+   CurLine = 22
+   CALL ParseVar( InFileInfo, CurLine, "FilenameRoot", InputFileData%BladedFF_FileName, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
+!    IF ( PathIsRelative( InputFileData%BladedFF_FileName ) ) InputFileData%BladedFF_FileName = TRIM(PriPath)//TRIM(InputFileData%BladedFF_FileName)
+!    InputFileData%BladedFF_FileName = TRIM(InputFileData%BladedFF_FileName)//'.wnd'
+
+   CurLine = 23
+   CALL ParseVar( InFileInfo, CurLine, "TowerFile", InputFileData%BladedFF_TowerFile, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
 END SUBROUTINE InflowWind_ParseInputFileInfo
 
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for Binary Bladed-style Full-Field files [used only for WindType = 4]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read BladedStyle%WindFileName
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%BladedFF_FileName, 'FileName', &
-!                'Rootname of the full-field wind file to use (.wnd, .sum)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-!    IF ( PathIsRelative( InputFileData%BladedFF_FileName ) ) InputFileData%BladedFF_FileName = TRIM(PriPath)//TRIM(InputFileData%BladedFF_FileName)
-!    InputFileData%BladedFF_FileName = TRIM(InputFileData%BladedFF_FileName)//'.wnd'
-   
-!       ! Read TowerFileFlag
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%BladedFF_TowerFile, 'TowerFileFlag', &
-!                'Have tower file (.twr) [flag]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
-
-! #ifdef UNUSED_INPUTFILE_LINES
 
 !    !-------------------------------------------------------------------------------------------------
 !    !> Read the _Parameters for coherent turbulence [used only for WindType = 3 or 4]_ section
