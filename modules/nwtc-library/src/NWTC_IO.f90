@@ -6006,6 +6006,89 @@ END SUBROUTINE CheckR16Var
    RETURN
    END SUBROUTINE ReadOutputList
 !=======================================================================
+!> This routine reads up to MaxAryLen values from an input file and store them in CharAry(:).
+!! These values represent the names of output channels, and they are specified in the format
+!! required for OutList(:) in FAST input files.
+!! The end of this list is specified with the line beginning with the 3 characters "END".
+   SUBROUTINE ReadOutputListFromFileInfo ( FileInfo, LineNum, CharAry, AryLenRead, AryName, AryDescr, ErrStat, ErrMsg, UnEc )
+
+      ! Argument declarations:
+
+   TYPE (FileInfoType), INTENT(IN)   :: FileInfo                                   !< The derived type for holding the file information.
+   INTEGER(IntKi),      INTENT(INOUT):: LineNum                                    !< The number of the line to parse.
+   INTEGER,             INTENT(OUT)  :: AryLenRead                                 !< Length of the array that was actually read.
+   INTEGER,             INTENT(IN)   :: UnEc                                       !< I/O unit for echo file (if > 0).
+   INTEGER,             INTENT(OUT)  :: ErrStat                                    !< Error status
+   CHARACTER(*),        INTENT(OUT)  :: ErrMsg                                     !< Error message
+
+   CHARACTER(*),        INTENT(OUT)  :: CharAry(:)                                 !< Character array being read (calling routine dimensions it to max allowable size).
+
+   CHARACTER(*),        INTENT(IN)   :: AryDescr                                   !< Text string describing the variable.
+   CHARACTER(*),        INTENT(IN)   :: AryName                                    !< Text string containing the variable name.
+
+
+      ! Local declarations:
+
+   INTEGER                          :: MaxAryLen                                   ! Maximum length of the array being read
+   INTEGER                          :: NumWords                                    ! Number of words contained on a line
+
+
+   CHARACTER(1000)                  :: OutLine                                     ! Character string read from file, containing output list
+   CHARACTER(3)                     :: EndOfFile
+
+
+      ! Initialize some values
+
+   ErrStat = ErrID_None
+   ErrMsg  = ''
+   MaxAryLen  = SIZE(CharAry)
+   AryLenRead = 0
+
+   CharAry = ''
+
+
+      ! Read in all of the lines containing output parameters and store them in CharAry(:).
+      ! The end of this list is specified with the line beginning with END.
+
+   DO
+
+      if (UnEc > 0) WRITE(UnEc, '(A)')  FileInfo%Lines(LineNum)
+      OutLine = trim(FileInfo%Lines(LineNum))
+
+      EndOfFile = OutLine(1:3)            ! EndOfFile is the 1st 3 characters of OutLine
+      CALL Conv2UC( EndOfFile )           ! Convert EndOfFile to upper case
+      IF ( EndOfFile == 'END' ) THEN
+         LineNum = LineNum + 1
+         EXIT     ! End of OutList has been reached; therefore, exit this DO
+      ENDIF
+
+      NumWords = CountWords( OutLine )    ! The number of words in OutLine.
+
+      AryLenRead = AryLenRead + NumWords  ! The total number of output channels read in so far.
+
+         ! Check to see if the maximum # allowable in the array has been reached.
+
+      IF ( AryLenRead > MaxAryLen )  THEN
+
+         ErrStat = ErrID_Fatal
+         ErrMsg = 'ReadOutputList:The maximum number of output channels allowed is '//TRIM( Int2LStr(MaxAryLen) )//'.'
+         RETURN
+
+      ELSE
+
+         CALL GetWords ( OutLine, CharAry((AryLenRead - NumWords + 1):AryLenRead), NumWords )
+
+      END IF
+
+      LineNum = LineNum+1
+
+   END DO
+
+
+   RETURN
+   END SUBROUTINE ReadOutputListFromFileInfo
+
+!=======================================================================
 !> \copydoc nwtc_io::readcary
    SUBROUTINE ReadR4Ary ( UnIn, Fil, Ary, AryLen, AryName, AryDescr, ErrStat, ErrMsg, UnEc )
 
