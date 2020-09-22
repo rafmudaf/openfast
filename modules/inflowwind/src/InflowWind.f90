@@ -238,6 +238,9 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- RefHt: ", InputFileData%Uniform_RefHt
       PRINT *, "--- RefLength: ", InputFileData%Uniform_RefLength
 
+      ! WindType 3
+      PRINT *, "--- Filename: ", TRIM(InputFileData%TSFF_FileName)
+
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."
       RETURN

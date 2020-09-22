@@ -324,30 +324,21 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       RETURN
    ENDIF
 
-END SUBROUTINE InflowWind_ParseInputFileInfo
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for Binary TurbSim Full-Field files [used only for WindType = 3]_ section
+   !-------------------------------------------------------------------------------------------------
 
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for Binary TurbSim Full-Field files [used only for WindType = 3]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read TSFFWind info
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%TSFF_FileName, 'FileName', &
-!                'Name of the TurbSim full field wind file to use (.bts)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName)
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL CleanUp()
-!       RETURN
-!    ENDIF
+   CurLine = 20
+   CALL ParseVar( InFileInfo, CurLine, "TurbSimFileName", InputFileData%TSFF_FileName, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 !    IF ( PathIsRelative( InputFileData%TSFF_FileName ) ) InputFileData%TSFF_FileName = TRIM(PriPath)//TRIM(InputFileData%TSFF_FileName)
 
+
+END SUBROUTINE InflowWind_ParseInputFileInfo
 
 !    !-------------------------------------------------------------------------------------------------
 !    !> Read the _Parameters for Binary Bladed-style Full-Field files [used only for WindType = 4]_ section
