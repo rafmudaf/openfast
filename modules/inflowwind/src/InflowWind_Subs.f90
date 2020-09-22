@@ -374,271 +374,196 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    ! ENDIF
    ! IF ( PathIsRelative( InputFileData%CTTS_Path ) ) InputFileData%CTTS_Path = TRIM(PriPath)//TRIM(InputFileData%CTTS_Path)
 
-END SUBROUTINE InflowWind_ParseInputFileInfo
+   !-------------------------------------------------------------------------------------------------
+   !> Read the _Parameters for HAWC-formatted binary files [used only for WindType = 5]_ section
+   !-------------------------------------------------------------------------------------------------
 
-
-!    !-------------------------------------------------------------------------------------------------
-!    !> Read the _Parameters for HAWC-formatted binary files [used only for WindType = 5]_ section
-!    !-------------------------------------------------------------------------------------------------
-
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read HAWC_FileName_u
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_FileName_u, 'HAWC_FileName_u', &
-!                'Name of the file containing the u-component fluctuating wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CurLine = CurLine + 1  ! Skip section break
+   CALL ParseVar( InFileInfo, CurLine, "FileName_u", InputFileData%HAWC_FileName_u, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 !    IF ( PathIsRelative( InputFileData%HAWC_FileName_u ) ) InputFileData%HAWC_FileName_u = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_u)
 
-!       ! Read HAWC_FileName_v
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_FileName_v, 'HAWC_FileName_v', &
-!                'Name of the file containing the v-component fluctuating wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "FileName_v", InputFileData%HAWC_FileName_v, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 !    IF ( PathIsRelative( InputFileData%HAWC_FileName_v ) ) InputFileData%HAWC_FileName_v = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_v)
 
-!       ! Read HAWC_FileName_w
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_FileName_w, 'HAWC_FileName_w', &
-!                'Name of the file containing the w-component fluctuating wind', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "FileName_w", InputFileData%HAWC_FileName_w, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 !    IF ( PathIsRelative( InputFileData%HAWC_FileName_w ) ) InputFileData%HAWC_FileName_w = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_w)
 
-!       ! Read HAWC_nx
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_nx, 'HAWC_nx', &
-!                'Number of grids in the x direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "nx", InputFileData%HAWC_nx, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_ny
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_ny, 'HAWC_ny', &
-!                'Number of grids in the y direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "ny", InputFileData%HAWC_ny, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_nz
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_nz, 'HAWC_nz', &
-!                'Number of grids in the z direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "nz", InputFileData%HAWC_nz, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_dx
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_dx, 'HAWC_dx', &
-!                'Number of grids in the x direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "dx", InputFileData%HAWC_dx, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_dy
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_dy, 'HAWC_dy', &
-!                'Number of grids in the y direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "dy", InputFileData%HAWC_dy, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_dz
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_dz, 'HAWC_dz', &
-!                'Number of grids in the z direction (in the 3 files above)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "dz", InputFileData%HAWC_dz, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_RefHt
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_RefHt, 'HAWC_RefHt', &
-!                'Reference (hub) height of the grid', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%HAWC_RefHt, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
+   !----------------------------------------------------------------------------------------------
+   !> Read the _Scaling parameters for turbulence (HAWC-format files) [used only for WindType = 5]_ subsection
+   !----------------------------------------------------------------------------------------------
 
+   CurLine = CurLine + 1  ! Skip section break
+   CALL ParseVar( InFileInfo, CurLine, "ScaleMethod", InputFileData%HAWC_ScaleMethod, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       !----------------------------------------------------------------------------------------------
-!       !> Read the _Scaling parameters for turbulence (HAWC-format files) [used only for WindType = 5]_ subsection
-!       !----------------------------------------------------------------------------------------------
+   CALL ParseVar( InFileInfo, CurLine, "SFx", InputFileData%HAWC_SFx, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "SFy", InputFileData%HAWC_SFy, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_ScaleMethod
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_ScaleMethod, 'HAWC_ScaleMethod', &
-!                'Turbulence scaling method [0=none, 1=direct scaling, 2= calculate scaling '// &
-!                'factor based on a desired standard deviation]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "SFz", InputFileData%HAWC_SFz, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_SFx
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SFx, 'HAWC_SFx', &
-!                'Turbulence scaling factor for the x direction [ScaleMethod=1]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "SigmaFx", InputFileData%HAWC_SigmaFx, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_SFy
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SFy, 'HAWC_SFy', &
-!                'Turbulence scaling factor for the y direction [ScaleMethod=1]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "SigmaFy", InputFileData%HAWC_SigmaFy, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_SFz
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SFz, 'HAWC_SFz', &
-!                'Turbulence scaling factor for the z direction [ScaleMethod=1]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "SigmaFz", InputFileData%HAWC_SigmaFz, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Read HAWC_SigmaFx
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SigmaFx, 'HAWC_SigmaFx', &
-!                'Turbulence standard deviation to calculate scaling from in x direction [ScaleMethod=2]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   ! FIXME:  TStart has no comment
+   ! CALL ParseVar( InFileInfo, CurLine, "HAWC_TStart", InputFileData%HAWC_TStart, TmpErrStat, TmpErrMsg )
+   ! CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   ! IF (ErrStat >= AbortErrLev) THEN
+   !    ! CALL CleanUp()
+   !    RETURN
+   ! ENDIF
 
-!       ! Read HAWC_SigmaFy
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SigmaFy, 'HAWC_SigmaFy', &
-!                'Turbulence standard deviation to calculate scaling from in y direction [ScaleMethod=2]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   ! FIXME:  TEnd has no comment
+   ! CALL ParseVar( InFileInfo, CurLine, "HAWC_TEnd", InputFileData%HAWC_TEnd, TmpErrStat, TmpErrMsg )
+   ! CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   ! IF (ErrStat >= AbortErrLev) THEN
+   !    ! CALL CleanUp()
+   !    RETURN
+   ! ENDIF
 
-!       ! Read HAWC_SigmaFz
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_SigmaFz, 'HAWC_SigmaFz', &
-!                'Turbulence standard deviation to calculate scaling from in z direction [ScaleMethod=2]', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   !----------------------------------------------------------------------------------------------
+   !> Read the _Mean wind profile paramters (added to HAWC-format files) [used only for WindType = 5]_ subsection
+   !----------------------------------------------------------------------------------------------
 
-! #ifdef UNUSED_INPUTFILE_LINES
+   CurLine = CurLine + 1  ! Skip section break
+   CALL ParseVar( InFileInfo, CurLine, "URef", InputFileData%HAWC_URef, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-! !FIXME:  TStart has no comment
-!       ! Read HAWC_TStart
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_TStart, 'HAWC_TStart', &
-!                '', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
+   CALL ParseVar( InFileInfo, CurLine, "WindProfile", InputFileData%HAWC_ProfileType, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-! !FIXME:  TEnd has no comment
-!       ! Read HAWC_TEnd
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_TEnd, 'HAWC_TEnd', &
-!                '', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-   
-! #endif
+   CALL ParseVar( InFileInfo, CurLine, "PLExp", InputFileData%HAWC_PLExp, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       !----------------------------------------------------------------------------------------------
-!       !> Read the _Mean wind profile paramters (added to HAWC-format files) [used only for WindType = 5]_ subsection
-!       !----------------------------------------------------------------------------------------------
+   CALL ParseVar( InFileInfo, CurLine, "Z0", InputFileData%HAWC_Z0, TmpErrStat, TmpErrMsg )
+   CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
+   IF (ErrStat >= AbortErrLev) THEN
+      ! CALL CleanUp()
+      RETURN
+   ENDIF
 
-!       ! Section separator line
-!    CALL ReadCom( UnitInput, InputFileName, 'InflowWind input file separator line', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read HAWC_URef
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_URef, 'HAWC_URef', &
-!                'Mean u-component wind speed at the reference height', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read HAWC_ProfileType
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_ProfileType, 'HAWC_ProfileType', &
-!                'Wind profile type (0=constant;1=logarithmic;2=power law)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read HAWC_PLExp
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_PLExp, 'HAWC_PLExp', &
-!                'Power law exponent (used for PL wind profile type only)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
-!       ! Read HAWC_Z0
-!    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_Z0, 'HAWC_Z0', &
-!                'Surface roughness length (used for LOG wind profile type only)', TmpErrStat, TmpErrMsg, UnitEcho )
-!    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
-!    IF (ErrStat >= AbortErrLev) THEN
-!       CALL Cleanup()
-!       RETURN
-!    END IF
-
+   ! JN: Revise:
 !       ! Read HAWC_InitPosition   (Shift of wind box)  NOTE: This an optional input!!!!
 !    InputFileData%HAWC_InitPosition(2:3) = 0.0_ReKi    ! We are only using X, so only read in one.  The data can handle 3 coords
 !    CALL ReadVar( UnitInput, InputFileName, InputFileData%HAWC_InitPosition(1), 'HAWC_Position', &
 !                'Initial position of the HAWC wind file (shift along X usually)', TmpErrStat, TmpErrMsg, UnitEcho )
+
 !    if (TmpErrStat == ErrID_None) then
 !       !---------------------- OUTPUT --------------------------------------------------         
-!       CALL ReadCom( UnitInput, InputFileName, 'Section Header: Output', TmpErrStat, TmpErrMsg, UnitEcho )
+      ! CALL ReadCom( UnitInput, InputFileName, 'Section Header: Output', TmpErrStat, TmpErrMsg, UnitEcho )
 !       CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
 !       IF (ErrStat >= AbortErrLev) THEN
 !          CALL Cleanup()
@@ -659,6 +584,7 @@ END SUBROUTINE InflowWind_ParseInputFileInfo
 !       RETURN
 !    END IF
 
+END SUBROUTINE InflowWind_ParseInputFileInfo
 
 !    !---------------------- OUTLIST  --------------------------------------------
 !    CALL ReadCom( UnitInput, InputFileName, 'Section Header: OutList', TmpErrStat, TmpErrMsg, UnitEcho )

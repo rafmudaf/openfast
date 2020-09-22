@@ -245,6 +245,34 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- Filename: ", TRIM(InputFileData%BladedFF_FileName)
       PRINT *, "--- Tower File: ", InputFileData%BladedFF_TowerFile
 
+      ! WindType 5
+      PRINT *, "--- Filename_u: ", TRIM(InputFileData%HAWC_FileName_u)
+      PRINT *, "--- Filename_v: ", TRIM(InputFileData%HAWC_FileName_v)
+      PRINT *, "--- Filename_w: ", TRIM(InputFileData%HAWC_FileName_w)
+
+      PRINT *, "--- nx: ", InputFileData%HAWC_nx
+      PRINT *, "--- ny: ", InputFileData%HAWC_ny
+      PRINT *, "--- nz: ", InputFileData%HAWC_nz
+
+      PRINT *, "--- dx: ", InputFileData%HAWC_dx
+      PRINT *, "--- dy: ", InputFileData%HAWC_dy
+      PRINT *, "--- dz: ", InputFileData%HAWC_dz
+
+      PRINT *, "--- RefHt: ", InputFileData%HAWC_RefHt
+
+      PRINT *, "--- SFx: ", InputFileData%HAWC_SFx
+      PRINT *, "--- SFy: ", InputFileData%HAWC_SFy
+      PRINT *, "--- SFz: ", InputFileData%HAWC_SFz
+
+      PRINT *, "--- SigmaFx: ", InputFileData%HAWC_SigmaFx
+      PRINT *, "--- SigmaFy: ", InputFileData%HAWC_SigmaFy
+      PRINT *, "--- SigmaFz: ", InputFileData%HAWC_SigmaFz
+
+      PRINT *, "--- URef: ", InputFileData%HAWC_URef
+      PRINT *, "--- WindProfile: ", InputFileData%HAWC_ProfileType
+      PRINT *, "--- PLExp: ", InputFileData%HAWC_PLExp
+      PRINT *, "--- Z0: ", InputFileData%HAWC_Z0
+
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."
       RETURN
