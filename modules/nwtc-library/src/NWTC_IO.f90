@@ -153,6 +153,7 @@ MODULE NWTC_IO
       MODULE PROCEDURE ParseInAry                                             ! Parse an array of whole numbers.
       MODULE PROCEDURE ParseLoAry                                             ! Parse an array of LOGICAL values.
       MODULE PROCEDURE ParseSiAry                                             ! Parse an array of single-precision REAL values.
+      MODULE PROCEDURE ParseChAry
    END INTERFACE
 
       !> \copydoc nwtc_io::checkr4var
@@ -3346,6 +3347,65 @@ END SUBROUTINE CheckR16Var
          enddo
       endif
    end subroutine Print_FileInfo_Struct
+!=======================================================================
+!> This subroutine parses the specified line of text for AryLen CHARACTER values.
+!! Generate an error message if the value is the wrong type.
+!! Use ParseAry (nwtc_io::parseary) instead of directly calling a specific routine in the generic interface.   
+   SUBROUTINE ParseChAry ( FileInfo, LineNum, AryName, Ary, AryLen, ErrStat, ErrMsg, UnEc )
+
+         ! Arguments declarations.
+
+      INTEGER, INTENT(IN)                    :: AryLen                        !< The length of the array to parse.
+
+      CHARACTER(1024), INTENT(OUT)            :: Ary(AryLen)                  !< The array to receive the input values.
+
+      INTEGER(IntKi), INTENT(OUT)            :: ErrStat                       !< The error status.
+      INTEGER(IntKi), INTENT(INOUT)          :: LineNum                       !< The number of the line to parse.
+
+      INTEGER,        INTENT(IN), OPTIONAL   :: UnEc                          !< I/O unit for echo file. If present and > 0, write to UnEc.
+
+      CHARACTER(*),   INTENT(In)             :: AryName                       !< The array name we are trying to fill.
+      CHARACTER(*),   INTENT(OUT)            :: ErrMsg                        !< The error message, if ErrStat /= 0.
+
+      TYPE (FileInfoType), INTENT(IN)        :: FileInfo                      !< The derived type for holding the file information.
+
+
+         ! Local declarations.
+
+      INTEGER(IntKi)                         :: ErrStatLcl                    ! Error status local to this routine.
+      INTEGER(IntKi)                         :: i                             ! Error status local to this routine.
+
+      CHARACTER(*), PARAMETER                :: RoutineName = 'ParseChAry'
+
+      ErrStat = ErrID_None
+      ErrMsg  = ""
+   
+      IF (LineNum > size(FileInfo%Lines) ) THEN
+         CALL SetErrStat ( ErrID_Fatal, NewLine//' >> A fatal error occurred when parsing data.'//NewLine//  &
+                  ' >> The "'//TRIM( AryName )//'" array was not assigned because the file is too short.' &
+                  , ErrStat, ErrMsg, RoutineName )
+         RETURN
+      END IF
+   
+      READ (FileInfo%Lines(LineNum),*,IOSTAT=ErrStatLcl) Ary
+      IF ( ErrStatLcl /= 0 )  THEN
+         CALL SetErrStat ( ErrID_Fatal, 'A fatal error occurred when parsing data from "' &
+                  //TRIM( FileInfo%FileList(FileInfo%FileIndx(LineNum)) )//'".'//NewLine//  &
+                  ' >> The "'//TRIM( AryName )//'" array was not assigned valid REAL values on line #' &
+                  //TRIM( Num2LStr( FileInfo%FileLine(LineNum) ) )//'.'//NewLine//' >> The text being parsed was :'//NewLine &
+                  //'    "'//TRIM( FileInfo%Lines(LineNum) )//'"',ErrStat,ErrMsg,RoutineName )
+         RETURN
+      ENDIF
+
+      IF ( PRESENT(UnEc) )  THEN
+         IF ( UnEc > 0 )  WRITE (UnEc,'(A)')  TRIM( FileInfo%Lines(LineNum) )
+      END IF
+
+      LineNum = LineNum + 1
+
+      RETURN
+
+   END SUBROUTINE ParseChAry
 !=======================================================================
 !> This subroutine parses the specified line of text for two words.  One should be a
 !! the name of a variable and the other the value of the variable.
