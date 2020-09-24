@@ -4428,6 +4428,29 @@ END SUBROUTINE CheckR16Var
    RETURN
    END SUBROUTINE PremEOF
 !=======================================================================
+   SUBROUTINE InitFileInfo( StringArray, FileInfo )
+
+      CHARACTER(1024), DIMENSION(:), INTENT(IN) :: StringArray
+      TYPE(FileInfoType), INTENT(OUT) :: FileInfo
+      INTEGER :: i, n_lines
+
+      n_lines = size(StringArray)
+
+      FileInfo%NumLines = n_lines
+      FileInfo%NumFiles = 1
+
+      ALLOCATE( FileInfo%Lines(n_lines) )
+      ALLOCATE( FileInfo%FileLine(n_lines) )
+      ALLOCATE( FileInfo%FileIndx(n_lines) )
+      ALLOCATE( FileInfo%FileList(n_lines) )
+
+      FileInfo%Lines = StringArray
+      FileInfo%FileLine = (/ (i, i = 1, FileInfo%NumLines) /)
+      FileInfo%FileIndx = (/ (1, i = 1, FileInfo%NumLines) /)
+      FileInfo%FileList = (/ "passed file info" /)
+
+   END SUBROUTINE
+!=======================================================================
 !> This routine calls ScanComFile (nwtc_io::scancomfile) and ReadComFile (nwtc_io::readcomfile) 
 !! to move non-comments in a set of nested files starting with TopFile into the FileInfo (nwtc_io::fileinfo) structure.
    SUBROUTINE ProcessComFile ( TopFileName, FileInfo, ErrStat, ErrMsg )
