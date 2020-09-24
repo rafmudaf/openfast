@@ -1700,7 +1700,7 @@ CONTAINS
 
       IF ( TRIM( FndUCVarName ) == TRIM( ExpUCVarName ) )  THEN
          NameIndx = 1
-         IF ( LEN_TRIM( Words(2) ) == 0 )  THEN
+         IF ( LEN_TRIM( Words(2) ) == 0 .and. LEN_TRIM(ExpVarName) > 1)  THEN
             CALL ExitThisRoutine ( ErrID_Fatal, NewLine//' >> A fatal error occurred when parsing data from "'//TRIM( FileName ) &
                       //'".'//NewLine//' >> The variable "'//TRIM( Words(1) )//'" was not assigned a value on line #' &
                       //TRIM( Num2LStr( FileLineNum ) )//'.' )
@@ -1709,7 +1709,7 @@ CONTAINS
       ELSE
          FndUCVarName = Words(2)
          CALL Conv2UC ( FndUCVarName )
-         IF ( TRIM( FndUCVarName ) == TRIM( ExpUCVarName ) )  THEN
+         IF ( TRIM( FndUCVarName ) == TRIM( ExpUCVarName ) .or. LEN_TRIM(ExpVarName) == 0)  THEN
             NameIndx = 2
          ELSE
             CALL ExitThisRoutine ( ErrID_Fatal, NewLine//' >> A fatal error occurred when parsing data from "'//TRIM( FileName ) &
@@ -3392,9 +3392,8 @@ END SUBROUTINE CheckR16Var
          RETURN
       END IF
       
-      
       CALL GetWords ( FileInfo%Lines(LineNum), Words, 2 )                     ! Read the first two words in Line.
-      IF ( Words(2) == '' )  THEN
+      IF ( Words(2) == '' .AND. LEN_TRIM(ExpVarName)>0 )  THEN
          CALL SetErrStat ( ErrID_Fatal, 'A fatal error occurred when parsing data from "' &
                    //TRIM( FileInfo%FileList(FileInfo%FileIndx(LineNum)) )//'".'//NewLine//  &
                    ' >> The variable "'//TRIM( ExpVarName )//'" was not assigned valid string value on line #' &
