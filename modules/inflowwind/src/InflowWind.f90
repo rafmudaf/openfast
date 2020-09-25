@@ -208,7 +208,13 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
          
       ENDIF
 
-      CALL InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, ErrMsg )
+      CALL InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, TmpErrStat, TmpErrMsg )
+      CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
+      IF ( ErrStat >= AbortErrLev ) THEN
+         CALL Cleanup()
+         CALL InflowWind_DestroyInputFile( InputFileData, TmpErrStat, TmpErrMsg )
+         RETURN
+      ENDIF
          ! let's tell InflowWind if an external module (e.g., FAST.Farm) is going to set the velocity grids.
       
       IF ( InitInp%Use4Dext) then
@@ -273,6 +279,10 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- PLExp: ", InputFileData%HAWC_PLExp
       PRINT *, "--- Z0: ", InputFileData%HAWC_Z0
       PRINT *, "--- HAWC_InitPosition: ", InputFileData%HAWC_InitPosition
+
+      PRINT *, "--- SumPrint: ", InputFileData%SumPrint
+      PRINT *, "--- NumOuts: ", InputFileData%NumOuts
+      PRINT *, "--- OutList: ", InputFileData%OutList
 
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."
