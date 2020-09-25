@@ -6039,7 +6039,7 @@ END SUBROUTINE CheckR16Var
    TYPE (FileInfoType), INTENT(IN)   :: FileInfo                                   !< The derived type for holding the file information.
    INTEGER(IntKi),      INTENT(INOUT):: LineNum                                    !< The number of the line to parse.
    INTEGER,             INTENT(OUT)  :: AryLenRead                                 !< Length of the array that was actually read.
-   INTEGER,             INTENT(IN)   :: UnEc                                       !< I/O unit for echo file (if > 0).
+   INTEGER,             INTENT(IN),OPTIONAL   :: UnEc                                       !< I/O unit for echo file (if > 0).
    INTEGER,             INTENT(OUT)  :: ErrStat                                    !< Error status
    CHARACTER(*),        INTENT(OUT)  :: ErrMsg                                     !< Error message
 
@@ -6071,12 +6071,12 @@ END SUBROUTINE CheckR16Var
 
       ! Read in all of the lines containing output parameters and store them in CharAry(:).
       ! The end of this list is specified with the line beginning with END.
-
    DO
 
-      if (UnEc > 0) WRITE(UnEc, '(A)')  FileInfo%Lines(LineNum)
+      IF ( PRESENT(UnEc) )  THEN
+         if (UnEc > 0) WRITE(UnEc, '(A)')  FileInfo%Lines(LineNum)
+      ENDIF
       OutLine = trim(FileInfo%Lines(LineNum))
-
       EndOfFile = OutLine(1:3)            ! EndOfFile is the 1st 3 characters of OutLine
       CALL Conv2UC( EndOfFile )           ! Convert EndOfFile to upper case
       IF ( EndOfFile == 'END' ) THEN
