@@ -6054,6 +6054,7 @@ END SUBROUTINE CheckR16Var
    INTEGER                          :: MaxAryLen                                   ! Maximum length of the array being read
    INTEGER                          :: NumWords                                    ! Number of words contained on a line
 
+   INTEGER                          :: QuoteCh                                     ! Character position.
 
    CHARACTER(1000)                  :: OutLine                                     ! Character string read from file, containing output list
    CHARACTER(3)                     :: EndOfFile
@@ -6076,13 +6077,20 @@ END SUBROUTINE CheckR16Var
       IF ( PRESENT(UnEc) )  THEN
          if (UnEc > 0) WRITE(UnEc, '(A)')  FileInfo%Lines(LineNum)
       ENDIF
-      OutLine = trim(FileInfo%Lines(LineNum))
+      OutLine = adjustl(trim(FileInfo%Lines(LineNum)))   ! remove leading whitespace
       EndOfFile = OutLine(1:3)            ! EndOfFile is the 1st 3 characters of OutLine
       CALL Conv2UC( EndOfFile )           ! Convert EndOfFile to upper case
       IF ( EndOfFile == 'END' ) THEN
          LineNum = LineNum + 1
          EXIT     ! End of OutList has been reached; therefore, exit this DO
       ENDIF
+
+      ! Check if we have a quoted string at the begining.  Ignore anything outside the quotes if so (this is the ReadVar behaviour for quoted strings).
+      if (SCAN(OutLine(1:1), '''"' ) == 1_IntKi ) then
+         QuoteCh = SCAN( OutLine(2:), '''"' )            ! last quote
+         if (QuoteCh < 1)  QuoteCh = LEN_TRIM(OutLine)   ! in case no end quote
+         OutLine(QuoteCh+2:) = ' '    ! blank out everything after last quote
+      endif
 
       NumWords = CountWords( OutLine )    ! The number of words in OutLine.
 
