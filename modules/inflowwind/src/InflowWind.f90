@@ -272,6 +272,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       PRINT *, "--- WindProfile: ", InputFileData%HAWC_ProfileType
       PRINT *, "--- PLExp: ", InputFileData%HAWC_PLExp
       PRINT *, "--- Z0: ", InputFileData%HAWC_Z0
+      PRINT *, "--- HAWC_InitPosition: ", InputFileData%HAWC_InitPosition
 
       ErrStat = ErrID_Fatal
       ErrMsg = "Ending early for testing."
