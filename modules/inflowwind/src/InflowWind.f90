@@ -146,7 +146,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
          ! Temporary variables for error handling
       INTEGER(IntKi)                                        :: TmpErrStat
       CHARACTER(ErrMsgLen)                                  :: TmpErrMsg         !< temporary error message
-
+      CHARACTER(1024)                                       :: PriPath
 
          ! Local Variables
       INTEGER(IntKi)                                        :: I, j              !< Generic counter
@@ -183,32 +183,38 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
       EchoFileName  = TRIM(p%RootFileName)//".ech"
       SumFileName   = TRIM(p%RootFileName)//".sum"
 
+         ! these values (and others hard-coded in lidar_init) should be set in the input file, too
+      InputFileData%SensorType = InitInp%lidar%SensorType
+      InputFileData%NumPulseGate = InitInp%lidar%NumPulseGate
+      InputFileData%RotorApexOffsetPos = InitInp%lidar%RotorApexOffsetPos
+      InputFileData%LidRadialVel = InitInp%lidar%LidRadialVel
 
          ! Parse all the InflowWind related input files and populate the *_InitDataType derived types
+      CALL GetPath( InitInp%InputFileName, PriPath )
 
       IF ( InitInp%UseInputFile ) THEN
-         CALL InflowWind_ReadInput( InitInp%InputFileName, InFileInfo, TmpErrStat, TmpErrMsg )
+         CALL ProcessComFile( InitInp%InputFileName, InFileInfo, TmpErrStat, TmpErrMsg )
+         ! For diagnostic purposes, the following can be used to display the contents
+         ! of the InFileInfo data structure.
+         ! call Print_FileInfo_Struct( CU, InFileInfo ) ! CU is the screen -- different number on different systems.
+
          CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
          IF ( ErrStat >= AbortErrLev ) THEN
             CALL Cleanup()
             RETURN
          ENDIF
-         
-         ! these values (and others hard-coded in lidar_init) should be set in the input file, too
-        InputFileData%SensorType = InitInp%lidar%SensorType
-        InputFileData%NumPulseGate = InitInp%lidar%NumPulseGate
-        InputFileData%RotorApexOffsetPos = InitInp%lidar%RotorApexOffsetPos
-        InputFileData%LidRadialVel = InitInp%lidar%LidRadialVel
                         
       ELSE
-         ! <--- To be replaced with input path without file IO --->
-
-         ! CALL InflowWind_CopyInputFile( InitInp%PassedFileData, InputFileData, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
-         !    CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)          
+         CALL InflowWind_CopyInputFile( InitInp%PassedFileData, InputFileData, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
+         CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
+         IF ( ErrStat >= AbortErrLev ) THEN
+            CALL Cleanup()
+            RETURN
+         ENDIF          
          
       ENDIF
 
-      CALL InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, TmpErrStat, TmpErrMsg )
+      CALL InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, PriPath, TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
          CALL Cleanup()

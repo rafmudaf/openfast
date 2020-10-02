@@ -120,38 +120,9 @@ MODULE InflowWind_Subs
 
 CONTAINS
 
-
-!====================================================================================================
-!>  This public subroutine reads the input required for InflowWind from the file whose name is an
-!!     input parameter.
-SUBROUTINE InflowWind_ReadInput( InputFile, InFileInfo, ErrStat, ErrMsg )
-!----------------------------------------------------------------------------------------------------
-
-      IMPLICIT                                           NONE
-
-      CHARACTER(*),              PARAMETER            :: RoutineName="InflowWind_ReadInput"
-
-
-      ! Passed variables
-   CHARACTER(*),                       INTENT(IN   )  :: InputFile            !< name of the input file
-   TYPE(FileInfoType),                 INTENT(INOUT)  :: InFileInfo           !< The derived type for holding the file information
-   INTEGER(IntKi),                     INTENT(  OUT)  :: ErrStat              !< Returned error status from this subroutine
-   CHARACTER(*),                       INTENT(  OUT)  :: ErrMsg               !< Returned error message from this subroutine ! JN: ErrMsgLen?
-
-      ! Read the entire input file, minus any comment lines, into the InFileInfo
-   ! data structure in memory for further processing.
-   call ProcessComFile( InputFile, InFileInfo, ErrStat, ErrMsg )
-
-   ! For diagnostic purposes, the following can be used to display the contents
-   ! of the InFileInfo data structure.
-   ! call Print_FileInfo_Struct( CU, InFileInfo ) ! CU is the screen -- different number on different systems.
-
-END SUBROUTINE InflowWind_ReadInput
-
-
 !====================================================================================================
 !>  This public subroutine parses the array of strings in InputFileData for the input parameters.
-SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, ErrMsg )
+SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, PriPath, ErrStat, ErrMsg )
 !----------------------------------------------------------------------------------------------------
 
    IMPLICIT NONE
@@ -160,6 +131,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
       ! Passed variables
    TYPE(InflowWind_InputFile),         INTENT(INOUT)  :: InputFileData        !< Data of the InflowWind Input File
    TYPE(FileInfoType),                 INTENT(IN   )  :: InFileInfo           !< The derived type for holding the file information
+   CHARACTER(*),                       INTENT(IN   )  :: PriPath              !< Path to InflowWind input files
 
    INTEGER(IntKi),                     INTENT(  OUT)  :: ErrStat              !< Returned error status from this subroutine
    CHARACTER(*),                       INTENT(  OUT)  :: ErrMsg               !< Returned error message from this subroutine
@@ -256,7 +228,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    CALL ParseVar( InFileInfo, CurLine, "UniformFileName", InputFileData%Uniform_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-   ! IF ( PathIsRelative( InputFileData%Uniform_FileName ) ) InputFileData%Uniform_FileName = TRIM(PriPath)//TRIM(InputFileData%Uniform_FileName)
+   IF ( PathIsRelative( InputFileData%Uniform_FileName ) ) InputFileData%Uniform_FileName = TRIM(PriPath)//TRIM(InputFileData%Uniform_FileName)
 
    CALL ParseVar( InFileInfo, CurLine, "RefHt", InputFileData%Uniform_RefHt, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
@@ -274,7 +246,7 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    CALL ParseVar( InFileInfo, CurLine, "TurbSimFileName", InputFileData%TSFF_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-!    IF ( PathIsRelative( InputFileData%TSFF_FileName ) ) InputFileData%TSFF_FileName = TRIM(PriPath)//TRIM(InputFileData%TSFF_FileName)
+   IF ( PathIsRelative( InputFileData%TSFF_FileName ) ) InputFileData%TSFF_FileName = TRIM(PriPath)//TRIM(InputFileData%TSFF_FileName)
 
    !-------------------------------------------------------------------------------------------------
    !> Read the _Parameters for Binary Bladed-style Full-Field files [used only for WindType = 4]_ section
@@ -284,8 +256,8 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    CALL ParseVar( InFileInfo, CurLine, "FilenameRoot", InputFileData%BladedFF_FileName, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-!    IF ( PathIsRelative( InputFileData%BladedFF_FileName ) ) InputFileData%BladedFF_FileName = TRIM(PriPath)//TRIM(InputFileData%BladedFF_FileName)
-!    InputFileData%BladedFF_FileName = TRIM(InputFileData%BladedFF_FileName)//'.wnd'
+   IF ( PathIsRelative( InputFileData%BladedFF_FileName ) ) InputFileData%BladedFF_FileName = TRIM(PriPath)//TRIM(InputFileData%BladedFF_FileName)
+   InputFileData%BladedFF_FileName = TRIM(InputFileData%BladedFF_FileName)//'.wnd'
 
    CALL ParseVar( InFileInfo, CurLine, "TowerFile", InputFileData%BladedFF_TowerFile, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
@@ -318,17 +290,17 @@ SUBROUTINE InflowWind_ParseInputFileInfo( InputFileData, InFileInfo, ErrStat, Er
    CALL ParseVar( InFileInfo, CurLine, "FileName_u", InputFileData%HAWC_FileName_u, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-!    IF ( PathIsRelative( InputFileData%HAWC_FileName_u ) ) InputFileData%HAWC_FileName_u = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_u)
+   IF ( PathIsRelative( InputFileData%HAWC_FileName_u ) ) InputFileData%HAWC_FileName_u = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_u)
 
    CALL ParseVar( InFileInfo, CurLine, "FileName_v", InputFileData%HAWC_FileName_v, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-!    IF ( PathIsRelative( InputFileData%HAWC_FileName_v ) ) InputFileData%HAWC_FileName_v = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_v)
+   IF ( PathIsRelative( InputFileData%HAWC_FileName_v ) ) InputFileData%HAWC_FileName_v = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_v)
 
    CALL ParseVar( InFileInfo, CurLine, "FileName_w", InputFileData%HAWC_FileName_w, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
    IF (ErrStat >= AbortErrLev) RETURN
-!    IF ( PathIsRelative( InputFileData%HAWC_FileName_w ) ) InputFileData%HAWC_FileName_w = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_w)
+   IF ( PathIsRelative( InputFileData%HAWC_FileName_w ) ) InputFileData%HAWC_FileName_w = TRIM(PriPath)//TRIM(InputFileData%HAWC_FileName_w)
 
    CALL ParseVar( InFileInfo, CurLine, "nx", InputFileData%HAWC_nx, TmpErrStat, TmpErrMsg )
    CALL SetErrStat( TmpErrStat, TmpErrMsg, ErrStat, ErrMsg, RoutineName )
