@@ -31,7 +31,6 @@ contains
         CALL InflowWind_ParseInputFileInfo(InputFileData , InFileInfo, PriPath, TmpErrStat, TmpErrMsg)
 
         @assertEqual(TmpErrStat, 0)
-        PRINT *, "*** HAWC TESTS ***"
 
         @assertEqual(InputFileData%HAWC_FileName_u, trim(expected_fnu))
         @assertEqual(InputFileData%HAWC_FileName_v, trim(expected_fnv))
