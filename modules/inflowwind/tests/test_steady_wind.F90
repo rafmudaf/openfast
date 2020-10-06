@@ -10,7 +10,7 @@ module test_steady_wind
 contains
 
     @test
-    subroutine test_steady_wind_single_height_parser()
+    subroutine test_steady_wind_input_single_height()
 
         TYPE(FileInfoType)              :: InFileInfo
         TYPE(InflowWind_InputFile)      :: InputFileData
@@ -28,11 +28,11 @@ contains
         @assertEqual(InputFileData%NWindVel, 1)
         @assertEqual(InputFileData%WindVziList(1), 90)
 
-    end subroutine test_steady_wind_single_height_parser
+    end subroutine
 
 
     @test
-    subroutine test_steady_wind_mult_heights_parser()
+    subroutine test_steady_wind_input_mult_heights()
 
         TYPE(FileInfoType)              :: InFileInfo
         TYPE(InflowWind_InputFile)      :: InputFileData 
@@ -58,6 +58,6 @@ contains
         @assertEqual(InputFileData%WindVziList(1), 80)
         @assertEqual(InputFileData%WindVziList(2), 100)
 
-    end subroutine test_steady_wind_mult_heights_parser
+    end subroutine
 
 end module
