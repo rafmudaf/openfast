@@ -9,46 +9,55 @@ module test_steady_wind
 
 contains
 
-@test
-subroutine test_steady_wind_single_height()
+    @test
+    subroutine test_steady_wind_single_height_parser()
 
-    TYPE(FileInfoType)              :: InFileInfo
-    TYPE(InflowWind_InputFile)      :: InputFileData
-    CHARACTER(1024)                 :: PriPath 
-    INTEGER(IntKi)                  :: TmpErrStat
-    CHARACTER(ErrMsgLen)            :: TmpErrMsg
+        TYPE(FileInfoType)              :: InFileInfo
+        TYPE(InflowWind_InputFile)      :: InputFileData
+        CHARACTER(1024)                 :: PriPath 
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
 
-    PriPath = ""
+        PriPath = ""
 
-    CALL InitFileInfo(steady_one_height, InFileInfo)
-    CALL InflowWind_ParseInputFileInfo(InputFileData , InFileInfo, PriPath, TmpErrStat, TmpErrMsg)
+        InFileInfo = getInputFileData()
+        CALL InflowWind_ParseInputFileInfo(InputFileData , InFileInfo, PriPath, TmpErrStat, TmpErrMsg)
 
-    @assertEqual(InputFileData%WindType, 1)
-    @assertEqual(InputFileData%NWindVel, 1)
-    @assertEqual(InputFileData%WindVziList(1), 90)
+        @assertEqual(TmpErrStat, 0)
+        @assertEqual(InputFileData%WindType, 1)
+        @assertEqual(InputFileData%NWindVel, 1)
+        @assertEqual(InputFileData%WindVziList(1), 90)
 
-end subroutine test_steady_wind_single_height
+    end subroutine test_steady_wind_single_height_parser
 
 
-@test
-subroutine test_steady_wind_mult_heights()
+    @test
+    subroutine test_steady_wind_mult_heights_parser()
 
-    TYPE(FileInfoType)              :: InFileInfo
-    TYPE(InflowWind_InputFile)      :: InputFileData 
-    CHARACTER(1024)                 :: PriPath
-    INTEGER(IntKi)                  :: TmpErrStat
-    CHARACTER(ErrMsgLen)            :: TmpErrMsg
+        TYPE(FileInfoType)              :: InFileInfo
+        TYPE(InflowWind_InputFile)      :: InputFileData 
+        CHARACTER(1024)                 :: PriPath
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
 
-    PriPath = ""
+        PriPath = ""
 
-    CALL InitFileInfo(steady_multiple_heights, InFileInfo)
-    CALL InflowWind_ParseInputFileInfo(InputFileData , InFileInfo, PriPath, TmpErrStat, TmpErrMsg)
+        InFileInfo = getInputFileData()
+        InFileInfo%Lines(7:10) = (/ &
+            '          2   NWindVel       - Number of points to output the wind velocity    (0 to 9)                                                                        ', &
+            '        0,0   WindVxiList    - List of coordinates in the inertial X direction (m)                                                                             ', &
+            '        0,0   WindVyiList    - List of coordinates in the inertial Y direction (m)                                                                             ', &
+            '     80,100   WindVziList    - List of coordinates in the inertial Z direction (m)                                                                             ' &
+        /)
 
-    @assertEqual(InputFileData%WindType, 1)
-    @assertEqual(InputFileData%NWindVel, 2)
-    @assertEqual(InputFileData%WindVziList(1), 80)
-    @assertEqual(InputFileData%WindVziList(2), 100)
+        CALL InflowWind_ParseInputFileInfo(InputFileData , InFileInfo, PriPath, TmpErrStat, TmpErrMsg)
 
-end subroutine test_steady_wind_mult_heights
+        @assertEqual(TmpErrStat, 0)
+        @assertEqual(InputFileData%WindType, 1)
+        @assertEqual(InputFileData%NWindVel, 2)
+        @assertEqual(InputFileData%WindVziList(1), 80)
+        @assertEqual(InputFileData%WindVziList(2), 100)
+
+    end subroutine test_steady_wind_mult_heights_parser
 
 end module
