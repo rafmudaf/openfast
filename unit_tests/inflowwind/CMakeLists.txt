@@ -32,6 +32,7 @@ include_directories(
 set(testlist
     test_tools
     test_steady_wind
+    test_uniform_wind
 )
 foreach(test ${testlist})
     set(test_dependency pfunit ${source_modulesdirectory}/${module_directory}/tests/${test}.F90)
