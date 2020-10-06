@@ -35,6 +35,7 @@ set(testlist
     test_uniform_wind
     test_turbsim_wind
     test_bladed_wind
+    test_hawc_wind
 )
 foreach(test ${testlist})
     set(test_dependency pfunit ${source_modulesdirectory}/${module_directory}/tests/${test}.F90)
