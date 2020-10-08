@@ -2,7 +2,7 @@ name: 'OpenFAST glue code tests'
 description: 'Run tests focused on the OpenFAST glue code'
 author: 'Rafael Mudafort https://github.com/rafmudaf'
 runs:
-  using: "composite"
+  using: 'composite'
   steps: 
     - run: |
         ctest -VV -L linear -E Ideal
