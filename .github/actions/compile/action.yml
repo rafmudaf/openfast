@@ -1,0 +1,23 @@
+name: 'Compile OpenFAST'
+description: 'Compile part or all of OpenFAST'
+author: 'Rafael Mudafort https://github.com/rafmudaf'
+
+# inputs:
+#   build-type:
+#     description: 'Set the CMake build type: Release (-O3); RelWithDebInfo (-O2 -g); Debug (-g)'
+#     default: 'Release'
+#   build-targets:
+#     description: 'Which targets to compile'
+#     default: 'install'
+
+runs:
+  using: 'composite'
+  steps:
+
+  # - name: 'Run NWTC tests'
+  #   uses: ./.github/actions/tests-module-nwtclibrary
+  # - name: 'Run AeroDyn tests'
+  #   uses: ./.github/actions/tests-module-aerodyn    
+  # - name: 'Run BeamDyn tests'
+  #   if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
+  #   uses: ./.github/actions/tests-module-beamdyn
