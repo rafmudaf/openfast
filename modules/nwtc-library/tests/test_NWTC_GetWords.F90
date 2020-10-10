@@ -95,4 +95,22 @@ contains
 
     end subroutine
 
+    @test
+    subroutine test_mixed_seperator()
+
+        character(64)           :: case
+        character(64)           :: Words   (5)
+
+        case = "word otherword,wordwithnumber1;wordwithsymbol&'lastword"
+        CALL GetWords(case, Words, 5)
+
+        @assertEqual(size(Words), 5)
+        @assertEqual(Words(1), "word")
+        @assertEqual(Words(2), "otherword")
+        @assertEqual(Words(3), "wordwithnumber1")
+        @assertEqual(Words(4), "wordwithsymbol&")
+        @assertEqual(Words(5), "lastword")
+
+    end subroutine
+
 end module
