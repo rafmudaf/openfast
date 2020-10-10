@@ -20,22 +20,21 @@ contains
 
     end function
 
-    ! function getTestInputCharacters()
+    function getTestInputCharacters()
 
-    !     TYPE(FileInfoType)                  :: getTestInputCharacters
-    !     CHARACTER(1024), DIMENSION(6)       :: data = (/ &
-    !         ! Characters
-    !         '"Wind/08ms.wnd"        UniformFileName       - Filename of time series d', &
-    !         'Wind/08ms.wnd          UniformFileName       - Filename of time series d', &
-    !         '"test with spaces"     UniformFileName       - Filename of time set     ', &
-    !         '"test with ; chars"    UniformFileName       - Filename of time set     ', &
-    !         '"test with , chars"    UniformFileName       - Filename of time set     ', &
-    !         'test with , chars    UniformFileName       - Filename of time set       ' &
-    !     /)
+        TYPE(FileInfoType)                  :: getTestInputCharacters
+        CHARACTER(1024), DIMENSION(5)       :: data = (/ &
+            ! Characters
+            '"Wind/08ms.wnd"        UniformFileName       - Filename of time series d', &
+            'Wind/08ms.wnd          UniformFileName       - Filename of time series d', &
+            '"test with spaces"     UniformFileName       - Filename of time set     ', &
+            '"test with ; chars"    UniformFileName       - Filename of time set     ', &
+            '"test with , chars"    UniformFileName       - Filename of time set     ' &
+        /)
 
-    !     CALL InitFileInfo(data, getTestInputCharacters)
+        CALL InitFileInfo(data, getTestInputCharacters)
 
-    ! end function
+    end function
 
     ! function getTestInputIntegers()
 
