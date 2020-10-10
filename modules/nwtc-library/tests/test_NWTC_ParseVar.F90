@@ -158,4 +158,44 @@ contains
 
     end subroutine
 
+    @test
+    subroutine test_ParseDbVar()
+
+        type(FileInfoType)              :: InFileInfo
+        INTEGER(IntKi)                  :: LineNo
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
+
+        REAL(DbKi)                      :: res1, res2, res3, res4, res5
+
+        InFileInfo = getTestInputFloats()
+
+        ! PASSING CASES
+        ! LineNo = 1
+        ! CALL ParseDbVar(InFileInfo, LineNo, "HWindSpeed", res1, TmpErrStat, TmpErrMsg)
+        ! @assertEqual(0, TmpErrStat)
+        ! @assertEqual(8.0, res1)
+
+        ! LineNo = 2
+        ! CALL ParseDbVar(InFileInfo, LineNo, "HWindSpeed", res2, TmpErrStat, TmpErrMsg)
+        ! @assertEqual(0, TmpErrStat)
+        ! @assertEqual(-8.0, res2)
+
+        ! LineNo = 3
+        ! CALL ParseDbVar(InFileInfo, LineNo, "HWindSpeed", res3, TmpErrStat, TmpErrMsg)
+        ! @assertEqual(0, TmpErrStat)
+        ! @assertEqual(8.0, res3)
+
+        ! LineNo = 4
+        ! CALL ParseDbVar(InFileInfo, LineNo, "HWindSpeed", res4, TmpErrStat, TmpErrMsg)
+        ! @assertEqual(0, TmpErrStat)
+        ! @assertEqual(0.0, res4)
+
+        ! LineNo = 5
+        ! CALL ParseDbVar(InFileInfo, LineNo, "HWindSpeed", res5, TmpErrStat, TmpErrMsg)
+        ! @assertEqual(0, TmpErrStat)
+        ! @assertEqual(0.0, res5)
+
+    end subroutine
+
 end module
