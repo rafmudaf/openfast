@@ -54,21 +54,21 @@ contains
 
     end function
 
-    ! function getTestInputFloats()
+    function getTestInputFloats()
 
-    !     TYPE(FileInfoType)                  :: getTestInputFloats
-    !     CHARACTER(1024), DIMENSION(5)       :: data = (/ &
-    !     ! Float Types
-    !         '        8.0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
-    !         '       -8.0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
-    !         '          8   HWindSpeed     - Horizontal windspeed (m/s)               ', &
-    !         '          0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
-    !         '        0.0   HWindSpeed     - Horizontal windspeed (m/s)               ' &
-    !     /)
+        TYPE(FileInfoType)                  :: getTestInputFloats
+        CHARACTER(1024), DIMENSION(5)       :: data = (/ &
+        ! Float Types
+            '        8.0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
+            '       -8.0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
+            '          8   HWindSpeed     - Horizontal windspeed (m/s)               ', &
+            '          0   HWindSpeed     - Horizontal windspeed (m/s)               ', &
+            '        0.0   HWindSpeed     - Horizontal windspeed (m/s)               ' &
+        /)
 
-    !     CALL InitFileInfo(data, getTestInputFloats)
+        CALL InitFileInfo(data, getTestInputFloats)
 
-    ! end function
+    end function
 
     ! function getTestInputArrays()
 
