@@ -33,6 +33,7 @@ include_directories(
 set(testlist
     test_NWTC_IO_CheckArgs
     test_NWTC_RandomNumber
+    test_NWTC_GetWords
 )
 foreach(test ${testlist})
     set(test_dependency pfunit ${source_modulesdirectory}/${module_directory}/tests/${test}.F90)
