@@ -36,23 +36,23 @@ contains
 
     end function
 
-    ! function getTestInputIntegers()
+    function getTestInputIntegers()
 
-    !     TYPE(FileInfoType)                  :: getTestInputIntegers
-    !     CHARACTER(1024), DIMENSION(7)       :: data = (/ &
-    !         ! Integers
-    !         '          1   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         ' 1000000000   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         '         -1   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         '-1000000000   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         '        1.0   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         '       -1.0   WindType      - switch for wind file type (1=steady; 2=  ', &
-    !         '        1.2   WindType      - switch for wind file type (1=steady; 2=  ' &
-    !     /)
+        TYPE(FileInfoType)                  :: getTestInputIntegers
+        CHARACTER(1024), DIMENSION(7)       :: data = (/ &
+            ! Integers
+            '          1   WindType      - switch for wind file type (1=steady; 2=  ', &
+            ' 1000000000   WindType      - switch for wind file type (1=steady; 2=  ', &
+            '         -1   WindType      - switch for wind file type (1=steady; 2=  ', &
+            '-1000000000   WindType      - switch for wind file type (1=steady; 2=  ', &
+            '        1.0   WindType      - switch for wind file type (1=steady; 2=  ', &
+            '       -1.0   WindType      - switch for wind file type (1=steady; 2=  ', &
+            '        1.2   WindType      - switch for wind file type (1=steady; 2=  ' &
+        /)
 
-    !     CALL InitFileInfo(data, getTestInputIntegers)
+        CALL InitFileInfo(data, getTestInputIntegers)
 
-    ! end function
+    end function
 
     ! function getTestInputFloats()
 

@@ -62,12 +62,58 @@ contains
 
         LineNo = 4
         CALL ParseChVar(InFileInfo, LineNo, "UniformFileName", res4, TmpErrStat, TmpErrMsg)
-        print *, TmpErrMsg
         @assertEqual(4, TmpErrStat)
 
         LineNo = 5
         CALL ParseChVar(InFileInfo, LineNo, "UniformFileName", res5, TmpErrStat, TmpErrMsg)
-        print *, TmpErrMsg
+        @assertEqual(4, TmpErrStat)
+
+    end subroutine
+
+    @test
+    subroutine test_ParseInVar()
+
+        type(FileInfoType)              :: InFileInfo
+        INTEGER(IntKi)                  :: LineNo
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
+
+        INTEGER(IntKi)                  :: res1, res2, res3, res4, res5, res6, res7
+
+        InFileInfo = getTestInputIntegers()
+
+        ! PASSING CASES
+        LineNo = 1
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res1, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(1, res1)
+
+        LineNo = 2
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(1000000000, res2)
+
+        LineNo = 3
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res3, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(-1, res3)
+
+        LineNo = 4
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res4, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(-1000000000, res4)
+
+        ! FAILING CASES
+        LineNo = 5
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res5, TmpErrStat, TmpErrMsg)
+        @assertEqual(4, TmpErrStat)
+
+        LineNo = 6
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res6, TmpErrStat, TmpErrMsg)
+        @assertEqual(4, TmpErrStat)
+
+        LineNo = 7
+        CALL ParseInVar(InFileInfo, LineNo, "Windtype", res7, TmpErrStat, TmpErrMsg)
         @assertEqual(4, TmpErrStat)
 
     end subroutine
