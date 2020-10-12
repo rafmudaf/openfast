@@ -128,12 +128,9 @@ contains
 
     end subroutine
 
-    ! FAILING CASES
-
     @test
     subroutine test_input_words_greater_than_found()
 
-        ! TODO: SHOULDN'T THIS CASE FAIL?
         character(64)           :: case
         character(64)           :: Words   (6)
 
@@ -153,7 +150,6 @@ contains
     @test
     subroutine test_blank_input_line()
 
-        ! TODO: SHOULDN'T THIS CASE FAIL?
         character(64)           :: case
         character(64)           :: Words   (4)
 
