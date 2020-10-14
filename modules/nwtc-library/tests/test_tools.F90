@@ -70,16 +70,20 @@ contains
 
     end function
 
-    ! function getTestInputArrays()
+    function getTestInputInArrays()
 
-    !     TYPE(FileInfoType)                  :: getTestInputArrays
-    !     CHARACTER(1024), DIMENSION(5)       :: data = (/ &
-    !         ! Arrays
-    !         '         90   WindVziList    - List of coordinates in the inertial Z d  ' & 
-    !     /)
+        TYPE(FileInfoType)                  :: getTestInputInArrays
+        CHARACTER(1024), DIMENSION(5)       :: data = (/ &
+            ! Integer Arrays
+            '         90   WindVziList    - List of coordinates in the inertial Z    ', &
+            '      80,90   WindVziList    - List of coordinates in the inertial Z    ', & 
+            '     80, 90   WindVziList    - List of coordinates in the inertial Z    ', & 
+            '1,2,3,4,5,6   WindVziList    - List of coordinates in the inertial Z    ', &
+            '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20   WindVziList        ' & 
+        /)
 
-    !     CALL InitFileInfo(data, getTestInputArrays)
+        CALL InitFileInfo(data, getTestInputInArrays)
 
-    ! end function
+    end function
 
 end module
