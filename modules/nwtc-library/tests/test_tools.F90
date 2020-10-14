@@ -86,6 +86,22 @@ contains
 
     end function
 
+    function getTestInputFloatArrays()
+
+        TYPE(FileInfoType)                  :: getTestInputFloatArrays
+        CHARACTER(1024), DIMENSION(5)       :: data = (/ &
+            ! Integer Arrays
+            '       90.0   WindVziList    - List of coordinates in the inertial Z    ', &
+            '  80.0,90.0   WindVziList    - List of coordinates in the inertial Z    ', & 
+            '   80., 90.   WindVziList    - List of coordinates in the inertial Z    ', & 
+            '   80.3, 90   WindVziList    - List of coordinates in the inertial Z    ', & 
+            '1.1,2.2,3.3, 4.4,5.5,6.6,7.7,8.8   WindVziList    - List of coordinates ' &
+        /)
+
+        CALL InitFileInfo(data, getTestInputFloatArrays)
+
+    end function
+
     function getTestInputLoArrays()
 
         TYPE(FileInfoType)                  :: getTestInputLoArrays

@@ -56,6 +56,54 @@ contains
     end subroutine
 
     @test
+    subroutine test_ParseSiAry()
+
+        type(FileInfoType)              :: InFileInfo
+        INTEGER(IntKi)                  :: LineNo
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
+
+        REAL(ReKi)                      :: Exp1 (1)
+        REAL(ReKi)                      :: Exp2 (2)
+        REAL(ReKi)                      :: Exp3 (2)
+        REAL(ReKi)                      :: Exp4 (2)
+        REAL(ReKi)                      :: Exp5 (8)
+
+        InFileInfo = getTestInputFloatArrays()
+
+        ! PASSING CASES
+        LineNo = 1
+        CALL ParseSiAry(InFileInfo, LineNo, "WindVziList", Exp1, 1, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(90.0, Exp1(1))
+
+        LineNo = 2
+        CALL ParseSiAry(InFileInfo, LineNo, "WindVziList", Exp2, 2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(80.0, Exp2(1))
+        @assertEqual(90.0, Exp2(2))
+
+        LineNo = 3
+        CALL ParseSiAry(InFileInfo, LineNo, "WindVziList", Exp3, 2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(80.0, Exp3(1))
+        @assertEqual(90.0, Exp3(2))
+
+        LineNo = 4
+        CALL ParseSiAry(InFileInfo, LineNo, "WindVziList", Exp4, 2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(80.3, Exp4(1))
+        @assertEqual(90.0, Exp4(2))
+
+        LineNo = 5
+        CALL ParseSiAry(InFileInfo, LineNo, "WindVziList", Exp5, 8, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(1.1, Exp5(1))
+        @assertEqual(8.8, Exp5(8))
+
+    end subroutine
+
+    @test
     subroutine test_ParseLoAry()
 
         type(FileInfoType)              :: InFileInfo
