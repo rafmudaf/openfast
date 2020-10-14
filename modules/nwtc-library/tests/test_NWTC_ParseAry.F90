@@ -55,4 +55,38 @@ contains
 
     end subroutine
 
+    @test
+    subroutine test_ParseLoAry()
+
+        type(FileInfoType)              :: InFileInfo
+        INTEGER(IntKi)                  :: LineNo
+        INTEGER(IntKi)                  :: TmpErrStat
+        CHARACTER(ErrMsgLen)            :: TmpErrMsg
+
+        LOGICAL                         :: Exp1 (1)
+        LOGICAL                         :: Exp2 (2)
+        LOGICAL                         :: Exp3 (2)
+
+        InFileInfo = getTestInputLoArrays()
+
+        ! PASSING CASES
+        LineNo = 1
+        CALL ParseLoAry(InFileInfo, LineNo, "WindVziList", Exp1, 1, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(.TRUE., Exp1(1))
+
+        LineNo = 2
+        CALL ParseLoAry(InFileInfo, LineNo, "WindVziList", Exp2, 2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(.TRUE., Exp2(1))
+        @assertEqual(.FALSE., Exp2(2))
+
+        LineNo = 3
+        CALL ParseLoAry(InFileInfo, LineNo, "WindVziList", Exp3, 2, TmpErrStat, TmpErrMsg)
+        @assertEqual(0, TmpErrStat)
+        @assertEqual(.TRUE., Exp3(1))
+        @assertEqual(.FALSE., Exp3(2))
+
+    end subroutine
+
 end module

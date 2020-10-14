@@ -86,4 +86,18 @@ contains
 
     end function
 
+    function getTestInputLoArrays()
+
+        TYPE(FileInfoType)                  :: getTestInputLoArrays
+        CHARACTER(1024), DIMENSION(3)       :: data = (/ &
+            ! Integer Arrays
+            '       true   WindVziList    - List of coordinates in the inertial Z    ', &
+            ' true,false   WindVziList    - List of coordinates in the inertial Z    ', & 
+            'true, false   WindVziList    - List of coordinates in the inertial Z    ' &
+        /)
+
+        CALL InitFileInfo(data, getTestInputLoArrays)
+
+    end function
+
 end module
