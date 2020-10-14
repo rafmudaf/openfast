@@ -92,6 +92,13 @@ contains
         CALL ChkParseData(Words, "Target", FileName, LineNo, NameIndx, TmpErrStat, TmpErrMsg)
         @assertEqual(4, TmpErrStat)
 
+        ! Not enough words
+        Words(1) = "Target"
+        Words(2) = ""
+        Words(3) = ""
+        CALL ChkParseData(Words, "Target", FileName, LineNo, NameIndx, TmpErrStat, TmpErrMsg)
+        @assertEqual(4, TmpErrStat)
+
     end subroutine
 
 end module
