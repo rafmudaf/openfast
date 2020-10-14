@@ -5,7 +5,6 @@ module test_NWTC_GetWords
 
     implicit none
 
-
 contains
 
     ! PASSING CASES

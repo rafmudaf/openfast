@@ -36,6 +36,7 @@ set(testlist
     test_NWTC_RandomNumber
     test_NWTC_GetWords
     test_NWTC_ParseVar
+    test_NWTC_ChkParseData
 )
 foreach(test ${testlist})
     set(test_dependency pfunit ${source_modulesdirectory}/${module_directory}/tests/${test}.F90)
