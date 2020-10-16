@@ -5,7 +5,7 @@ on:
   push:
 
   pull_request:
-    types: [labeled] #, assigned]
+    types: [opened, labeled] #, assigned]
 
 # runs-on: ${{ matrix.os }}
 # strategy:
@@ -14,22 +14,19 @@ on:
 # runs-on: docker://rafmudaf/openfast-ubuntu:alpha
 
 jobs:
-  push-pipeline:
-    # if: github.event_name == 'push'
+  build-and-test:
     runs-on: ubuntu-latest
+    # container:
+    #   image: rafmudaf/openfast-ubuntu:dev
     steps:
       - name: Checkout
         uses: actions/checkout@main
         with:
           submodules: recursive
-      # - name: 'Configure CMake'
-        # uses: ./.github/actions/configure-cmake
-        # with:
-        #   buildType: 'Debug'
-        #   buildTarget: 'nwtclibs'
       # - name: Get latest CMake
       #   uses: lukka/get-cmake@v3.17.3
-      - name: Build OpenFAST executable
+      - name: Configure CMake & Compile Common Modules
+        # if: github.event_name == 'commit' || contains( github.event.pull_request.labels.*.name, 'Action Test All')
         uses: lukka/run-cmake@v2.5
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
@@ -37,13 +34,27 @@ jobs:
           cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
           cmakeAppendedArgs: -DBUILD_TESTING=ON
           buildDirectory: "${{ github.workspace }}/build"
-          buildWithCMakeArgs: "--target nwtc_library_utest"
-      - if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
-        name: 'NWTC Library tests'
-        uses: ./.github/actions/tests-module-nwtclibrary
+          buildWithCMakeArgs: "--target nwtclibs"
+      - name: Compile Drivers
+        uses: ./.github/actions/compile
+        with:
+          build-target: '*_driver'
+      - name: Compile Unit Tests
+        uses: ./.github/actions/compile
+        with:
+          build-target: '*_utest'
+          # run: make aerodyn_driver
+          # run: ls . && ls ${{ github.workspace }}
+          # working-directory: "${{ github.workspace }}/build"
+          # shell: bash
+          
+          # - name: 'NWTC Library tests'
+          #   if: github.event_name == 'commit' || contains( github.event.pull_request.labels.*.name, 'Action Test All')
+          #   uses: ./.github/actions/tests-module-nwtclibrary
 
-  # pull-request-pipeline:
+          # pull-request-pipeline:
   #   if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
   #   steps:
   #   - name: 'Run test suite'
   #     uses: ./.github/actions/compile-and-test
+  #     - if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
