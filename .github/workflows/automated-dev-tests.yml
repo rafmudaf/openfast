@@ -35,19 +35,16 @@ jobs:
           cmakeAppendedArgs: -DBUILD_TESTING=ON
           buildDirectory: "${{ github.workspace }}/build"
           buildWithCMakeArgs: "--target nwtclibs"
-      - name: Compile Drivers
-        uses: ./.github/actions/compile
-        with:
-          build-target: '*_driver'
       - name: Compile Unit Tests
         uses: ./.github/actions/compile
         with:
-          build-target: '*_utest'
-          # run: make aerodyn_driver
-          # run: ls . && ls ${{ github.workspace }}
-          # working-directory: "${{ github.workspace }}/build"
-          # shell: bash
-          
+          build-target: 'unit_tests'
+      - name: Compile Drivers
+        uses: ./.github/actions/compile
+        with:
+          build-target: 'beadyn_driver hydrodyn_driver'
+
+    
           # - name: 'NWTC Library tests'
           #   if: github.event_name == 'commit' || contains( github.event.pull_request.labels.*.name, 'Action Test All')
           #   uses: ./.github/actions/tests-module-nwtclibrary
