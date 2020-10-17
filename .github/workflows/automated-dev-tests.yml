@@ -34,7 +34,8 @@ jobs:
           cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
           cmakeAppendedArgs: -DBUILD_TESTING=ON
           buildDirectory: "${{ github.workspace }}/build"
-          buildWithCMakeArgs: "--target nwtclibs"
+          buildWithCMake: false
+          # buildWithCMakeArgs: "--parallel 4 --target nwtclibs"  #
       - name: Compile Unit Tests
         uses: ./.github/actions/compile
         with:
@@ -42,7 +43,7 @@ jobs:
       - name: Compile Drivers
         uses: ./.github/actions/compile
         with:
-          build-target: 'beadyn_driver hydrodyn_driver'
+          build-target: 'beamdyn_driver hydrodyn_driver'
 
     
           # - name: 'NWTC Library tests'
