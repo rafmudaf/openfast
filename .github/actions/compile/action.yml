@@ -13,7 +13,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: make ${{ inputs.build-target }}
+    - run: make -j4 ${{ inputs.build-target }}
       working-directory: "${{ github.workspace }}/build"
       shell: bash
 
