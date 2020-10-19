@@ -15,6 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Build and push to Docker Hub
+        if: contains( github.event.pull_request.labels.*.name, 'Update Docker')
         uses: docker/build-push-action@v1
         with:
         #   context: .
