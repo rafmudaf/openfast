@@ -49,7 +49,7 @@ jobs:
         if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
         uses: ./.github/actions/compile
         with:
-          build-target: 'install'
+          build-target: 'regression_tests'
 
       - name: 'NWTC Library tests'
         uses: ./.github/actions/tests-module-nwtclibrary
