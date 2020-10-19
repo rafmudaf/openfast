@@ -14,6 +14,11 @@ on:
 
 jobs:
   build-and-test:
+
+    # Do not run if:
+    # - Branch name contains "docs/"
+    if: "!contains( github.ref, 'docs/')"
+
     runs-on: ubuntu-latest
     container:
       image: rafmudaf/openfast-ubuntu:dev

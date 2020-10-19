@@ -4,12 +4,17 @@ name: 'Docker Pipeline'
 on:
   release:
     types: [published]
+
   pull_request:
     types: [labeled]
 
 jobs:
   build-and-push:
-    name: Build image and push image to Docker Hub
+
+    # Do not run if:
+    # - Branch name contains "docs/"
+    if: "!contains( github.ref, 'docs/')"
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
