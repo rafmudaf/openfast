@@ -18,5 +18,5 @@ runs:
 
 # Subset of OpenFAST regression tests; do not run
 # - 9, 16 because they're very sensitive
-# - 19, 20 because theyre too long
+# - 19, 20 because they're too long
 # - 17, 22, 23 because we dont know why they fail :(
