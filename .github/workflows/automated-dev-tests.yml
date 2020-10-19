@@ -60,6 +60,7 @@ jobs:
       - name: 'Run OpenFAST tests'
         if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
         uses: ./.github/actions/tests-gluecode-openfast
+
       - name: 'Post test files, if failing'
         uses: actions/upload-artifact@v2
         if: failure()
