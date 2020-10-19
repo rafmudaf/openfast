@@ -44,15 +44,12 @@ jobs:
         uses: ./.github/actions/compile
         with:
           build-target: 'beamdyn_driver hydrodyn_driver'
-
-    
-          # - name: 'NWTC Library tests'
-          #   if: github.event_name == 'commit' || contains( github.event.pull_request.labels.*.name, 'Action Test All')
-          #   uses: ./.github/actions/tests-module-nwtclibrary
-
-          # pull-request-pipeline:
-  #   if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
-  #   steps:
-  #   - name: 'Run test suite'
-  #     uses: ./.github/actions/compile-and-test
-  #     - if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
+      - name: 'NWTC Library tests'
+        uses: ./.github/actions/tests-module-nwtclibrary
+      - name: 'Run AeroDyn tests'
+        uses: ./.github/actions/tests-module-aerodyn
+      - name: 'Run BeamDyn tests'
+        uses: ./.github/actions/tests-module-beamdyn
+      - name: 'Run OpenFAST tests'
+        if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
+        uses: ./.github/actions/tests-gluecode-openfast
