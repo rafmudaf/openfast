@@ -16,11 +16,3 @@ runs:
     - run: make -j4 ${{ inputs.build-target }}
       working-directory: "${{ github.workspace }}/build"
       shell: bash
-
-  # - name: 'Run NWTC tests'
-  #   uses: ./.github/actions/tests-module-nwtclibrary
-  # - name: 'Run AeroDyn tests'
-  #   uses: ./.github/actions/tests-module-aerodyn    
-  # - name: 'Run BeamDyn tests'
-  #   if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
-  #   uses: ./.github/actions/tests-module-beamdyn
