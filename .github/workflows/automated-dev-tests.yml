@@ -32,7 +32,7 @@ jobs:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeBuildType: RelWithDebInfo
           cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
-          cmakeAppendedArgs: -DBUILD_TESTING=ON
+          cmakeAppendedArgs: -DBUILD_TESTING=ON -DCTEST_PLOT_ERRORS=ON
           buildDirectory: "${{ github.workspace }}/build"
           buildWithCMake: false
           # buildWithCMakeArgs: "--parallel 4 --target nwtclibs"  #
@@ -60,3 +60,17 @@ jobs:
       - name: 'Run OpenFAST tests'
         if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
         uses: ./.github/actions/tests-gluecode-openfast
+      - name: 'Post test files, if failing'
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: test-results
+          path: |
+            build/reg_tests/modules
+            build/reg_tests/glue-codes/openfast
+            !build/reg_tests/glue-codes/openfast/5MW_Baseline
+            !build/reg_tests/glue-codes/openfast/AOC
+            !build/reg_tests/glue-codes/openfast/AWT27
+            !build/reg_tests/glue-codes/openfast/SWRT
+            !build/reg_tests/glue-codes/openfast/UAE_VI
+            !build/reg_tests/glue-codes/openfast/WP_Baseline
