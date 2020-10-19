@@ -11,13 +11,12 @@ on:
 # strategy:
 #   matrix:
 #     os: [macOS-10.14, ubuntu-18.04]
-# runs-on: docker://rafmudaf/openfast-ubuntu:alpha
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    # container:
-    #   image: rafmudaf/openfast-ubuntu:dev
+    container:
+      image: rafmudaf/openfast-ubuntu:dev
     steps:
       - name: Checkout
         uses: actions/checkout@main
