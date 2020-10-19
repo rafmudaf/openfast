@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@main
         with:
           submodules: recursive
+
       # - name: Get latest CMake
       #   uses: lukka/get-cmake@v3.17.3
       - name: Configure CMake & Compile Common Modules
@@ -35,6 +36,7 @@ jobs:
           buildDirectory: "${{ github.workspace }}/build"
           buildWithCMake: false
           # buildWithCMakeArgs: "--parallel 4 --target nwtclibs"  #
+
       - name: Compile Unit Tests
         uses: ./.github/actions/compile
         with:
@@ -43,6 +45,12 @@ jobs:
         uses: ./.github/actions/compile
         with:
           build-target: 'beamdyn_driver hydrodyn_driver'
+      - name: Compile OpenFAST
+        if: contains( github.event.pull_request.labels.*.name, 'Action Test All')
+        uses: ./.github/actions/compile
+        with:
+          build-target: 'install'
+
       - name: 'NWTC Library tests'
         uses: ./.github/actions/tests-module-nwtclibrary
       - name: 'Run AeroDyn tests'
