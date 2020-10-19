@@ -34,7 +34,7 @@ RUN apt update -qq && \
     apt install -y git && \
     apt install -y nano
 
-RUN pip3 install numpy
+RUN pip3 install numpy Bokeh==1.4
 
 # Configure the environment
 ENV FC=/usr/bin/gfortran

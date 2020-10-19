@@ -1,0 +1,26 @@
+
+name: 'Docker Pipeline'
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    types: [labeled]
+
+jobs:
+  build-and-push:
+    name: Build image and push image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v1
+        with:
+        #   context: .
+          dockerfile: ./share/docker/openfast_ubuntu/Dockerfile
+          repository: rafmudaf
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        #   push: true
+          tags: dev

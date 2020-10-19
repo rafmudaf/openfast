@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM rafmudaf/openfast-ubuntu:v2.3.0
+FROM rafmudaf/openfast-ubuntu:dev
 
 # Move into the openfast directory and update
 WORKDIR /openfast
