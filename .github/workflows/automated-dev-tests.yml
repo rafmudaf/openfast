@@ -17,7 +17,7 @@ jobs:
 
     # Do not run if:
     # - Branch name contains "docs/"
-    if: "!contains( github.ref, 'docs/')"
+    if: "!contains(github.ref, 'docs/')"
 
     runs-on: ubuntu-latest
     container:
@@ -30,17 +30,22 @@ jobs:
 
       # - name: Get latest CMake
       #   uses: lukka/get-cmake@v3.17.3
+      # - name: Configure CMake
+      #   # if: github.event_name == 'commit' || contains(github.event.pull_request.labels.*.name, 'Action - Test All')
+      #   uses: lukka/run-cmake@v2.5
+      #   with:
+      #     cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+      #     cmakeBuildType: RelWithDebInfo
+      #     cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
+      #     cmakeAppendedArgs: -DBUILD_TESTING=ON -DCTEST_PLOT_ERRORS=ON
+      #     buildDirectory: "${{ github.workspace }}/build"
+      #     buildWithCMake: false
+      #     # buildWithCMakeArgs: "--parallel 4 --target nwtclibs"  #
       - name: Configure CMake
-        # if: github.event_name == 'commit' || contains(github.event.pull_request.labels.*.name, 'Action - Test All')
-        uses: lukka/run-cmake@v2.5
+        uses: ./.github/actions/cmake-config
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeBuildType: RelWithDebInfo
-          cmakeGenerator: UnixMakefiles # default is Ninja - Ninja 1.10 doesnt support Fortran
-          cmakeAppendedArgs: -DBUILD_TESTING=ON -DCTEST_PLOT_ERRORS=ON
-          buildDirectory: "${{ github.workspace }}/build"
-          buildWithCMake: false
-          # buildWithCMakeArgs: "--parallel 4 --target nwtclibs"  #
+          build-type: RelWithDebInfo
+          additional-flags: -DBUILD_TESTING=ON -DCTEST_PLOT_ERRORS=ON
 
       - name: Compile Unit Tests
         uses: ./.github/actions/compile
@@ -56,7 +61,7 @@ jobs:
         with:
           build-target: 'regression_tests'
 
-      - name: 'NWTC Library tests'
+      - name: 'Run NWTC Library tests'
         uses: ./.github/actions/tests-module-nwtclibrary
       - name: 'Run AeroDyn tests'
         uses: ./.github/actions/tests-module-aerodyn
