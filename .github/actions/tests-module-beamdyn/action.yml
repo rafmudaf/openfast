@@ -7,5 +7,5 @@ runs:
     - run: |
         ctest -VV -j7 -R bd_
         ctest -VV -R beamdyn_utest
-      working-directory: "${{ github.workspace }}/build"
+      working-directory: "/openfast/build"
       shell: bash

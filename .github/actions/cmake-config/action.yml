@@ -14,5 +14,5 @@ runs:
   using: 'composite'
   steps:
     - run: cmake .. -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} ${{ inputs.additional-flags }} 
-      working-directory: "${{ github.workspace }}/build"
+      working-directory: "/openfast/build"
       shell: bash

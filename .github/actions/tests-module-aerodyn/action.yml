@@ -5,5 +5,5 @@ runs:
   using: "composite"
   steps: 
     - run: ctest -VV -R fvw_utest
-      working-directory: "${{ github.workspace }}/build"
+      working-directory: "/openfast/build"
       shell: bash
