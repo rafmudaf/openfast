@@ -205,7 +205,7 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
          ENDIF
                         
       ELSE
-         CALL InflowWind_CopyInputFile( InitInp%PassedFileData, InputFileData, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
+         CALL NWTC_Library_CopyFileInfoType( InitInp%PassedFileData, InFileInfo, MESH_NEWCOPY, TmpErrStat, TmpErrMsg )
          CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
          IF ( ErrStat >= AbortErrLev ) THEN
             CALL Cleanup()
@@ -227,72 +227,6 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
          InputFileData%WindType = FDext_WindNumber      
          InputFileData%PropagationDir = 0.0_ReKi ! wind is in XYZ coordinates (already rotated if necessary), so don't rotate it again
       END IF
-      
-      ! For testing:
-      ! Driver code will catch this and exit. Doesn't work in all modules.
-
-      ! General Section
-      PRINT *, "--- WindType: ", InputFileData%WindType
-      PRINT *, "--- PropagationDir: ", InputFileData%PropagationDir
-      PRINT *, "--- NWindVel: ", InputFileData%NWindVel
-
-      PRINT *, "--- WindVxiList: ", InputFileData%WindVxiList
-      PRINT *, "--- WindVyiList: ", InputFileData%WindVyiList
-      PRINT *, "--- WindVziList: ", InputFileData%WindVziList
-
-      ! WindType 1
-      PRINT *, "--- HWindSpeed: ", InputFileData%Steady_HWindSpeed
-      PRINT *, "--- RefHt: ", InputFileData%Steady_RefHt
-      PRINT *, "--- Plexp: ", InputFileData%Steady_PLexp
-
-      ! WindType 2
-      PRINT *, "--- Filename: ", TRIM(InputFileData%Uniform_FileName)
-      PRINT *, "--- RefHt: ", InputFileData%Uniform_RefHt
-      PRINT *, "--- RefLength: ", InputFileData%Uniform_RefLength
-
-      ! WindType 3
-      PRINT *, "--- Filename: ", TRIM(InputFileData%TSFF_FileName)
-
-      ! WindType 4
-      PRINT *, "--- Filename: ", TRIM(InputFileData%BladedFF_FileName)
-      PRINT *, "--- Tower File: ", InputFileData%BladedFF_TowerFile
-
-      ! WindType 5
-      PRINT *, "--- Filename_u: ", TRIM(InputFileData%HAWC_FileName_u)
-      PRINT *, "--- Filename_v: ", TRIM(InputFileData%HAWC_FileName_v)
-      PRINT *, "--- Filename_w: ", TRIM(InputFileData%HAWC_FileName_w)
-
-      PRINT *, "--- nx: ", InputFileData%HAWC_nx
-      PRINT *, "--- ny: ", InputFileData%HAWC_ny
-      PRINT *, "--- nz: ", InputFileData%HAWC_nz
-
-      PRINT *, "--- dx: ", InputFileData%HAWC_dx
-      PRINT *, "--- dy: ", InputFileData%HAWC_dy
-      PRINT *, "--- dz: ", InputFileData%HAWC_dz
-
-      PRINT *, "--- RefHt: ", InputFileData%HAWC_RefHt
-
-      PRINT *, "--- SFx: ", InputFileData%HAWC_SFx
-      PRINT *, "--- SFy: ", InputFileData%HAWC_SFy
-      PRINT *, "--- SFz: ", InputFileData%HAWC_SFz
-
-      PRINT *, "--- SigmaFx: ", InputFileData%HAWC_SigmaFx
-      PRINT *, "--- SigmaFy: ", InputFileData%HAWC_SigmaFy
-      PRINT *, "--- SigmaFz: ", InputFileData%HAWC_SigmaFz
-
-      PRINT *, "--- URef: ", InputFileData%HAWC_URef
-      PRINT *, "--- WindProfile: ", InputFileData%HAWC_ProfileType
-      PRINT *, "--- PLExp: ", InputFileData%HAWC_PLExp
-      PRINT *, "--- Z0: ", InputFileData%HAWC_Z0
-      PRINT *, "--- HAWC_InitPosition: ", InputFileData%HAWC_InitPosition
-
-      PRINT *, "--- SumPrint: ", InputFileData%SumPrint
-      PRINT *, "--- NumOuts: ", InputFileData%NumOuts
-      PRINT *, "--- OutList: ", InputFileData%OutList
-
-      ErrStat = ErrID_Fatal
-      ErrMsg = "Ending early for testing."
-      RETURN
 
          ! initialize sensor data:   
       CALL Lidar_Init( InitInp, InputGuess, p, ContStates, DiscStates, ConstrStateGuess, OtherStates,   &
@@ -467,6 +401,9 @@ SUBROUTINE InflowWind_Init( InitInp,   InputGuess,    p, ContStates, DiscStates,
             Uniform_InitData%RefLength                =  InputFileData%Uniform_RefLength 
             Uniform_InitData%WindFileName             =  InputFileData%Uniform_FileName
             Uniform_InitData%SumFileUnit              =  SumFileUnit
+
+            Uniform_InitData%UseInputFile             =  InitInp%WindType2UseInputFile
+            Uniform_InitData%PassedFileData           =  InitInp%WindType2Data
 
                ! Initialize the UniformWind module
             CALL IfW_UniformWind_Init(Uniform_InitData, p%UniformWind, &
