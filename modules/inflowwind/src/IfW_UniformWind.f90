@@ -93,7 +93,7 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
       ! Passed Variables
    TYPE(IfW_UniformWind_InitInputType),         INTENT(IN   )  :: InitData          !< Input data for initialization
    TYPE(IfW_UniformWind_ParameterType),         INTENT(  OUT)  :: ParamData         !< Parameters
-   TYPE(IfW_UniformWind_MiscVarType),           INTENT(  OUT)  :: MiscVars          !< Misc variables for optimization (not copied in glue code)
+   TYPE(IfW_UniformWind_MiscVarType),           INTENT(INOUT)  :: MiscVars          !< Misc variables for optimization (not copied in glue code)
    TYPE(IfW_UniformWind_InitOutputType),        INTENT(  OUT)  :: InitOutData       !< Initial output
 
    REAL(DbKi),                                  INTENT(IN   )  :: Interval          !< We don't change this.
@@ -135,10 +135,10 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
       ! Check that it's not already initialized
       !-------------------------------------------------------------------------------------------------
 
-   ! IF ( MiscVars%TimeIndex /= 0 ) THEN
-   !    CALL SetErrStat(ErrID_Warn,' UniformWind has already been initialized.',ErrStat,ErrMsg,RoutineName)
-   !    RETURN
-   ! END IF
+   IF ( MiscVars%TimeIndex /= 0 ) THEN
+      CALL SetErrStat(ErrID_Warn,' UniformWind has already been initialized.',ErrStat,ErrMsg,RoutineName)
+      RETURN
+   END IF
 
       !-------------------------------------------------------------------------------------------------
       ! Copy things from the InitData to the ParamData

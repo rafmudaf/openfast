@@ -54,7 +54,7 @@ IMPLICIT NONE
 ! =======================
 ! =========  IfW_UniformWind_MiscVarType  =======
   TYPE, PUBLIC :: IfW_UniformWind_MiscVarType
-    INTEGER(IntKi)  :: TimeIndex      !< An Index into the TData array [-]
+    INTEGER(IntKi)  :: TimeIndex = 0      !< An Index into the TData array [-]
   END TYPE IfW_UniformWind_MiscVarType
 ! =======================
 ! =========  IfW_UniformWind_ParameterType  =======
