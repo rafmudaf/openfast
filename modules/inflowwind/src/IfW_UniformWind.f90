@@ -131,23 +131,14 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
    ErrStat     = ErrID_None
    ErrMsg      = ""
 
-
       !-------------------------------------------------------------------------------------------------
       ! Check that it's not already initialized
       !-------------------------------------------------------------------------------------------------
 
-   IF ( MiscVars%TimeIndex /= 0 ) THEN
-      CALL SetErrStat(ErrID_Warn,' UniformWind has already been initialized.',ErrStat,ErrMsg,RoutineName)
-      RETURN
-   END IF
-
-
-      ! Get a unit number to use
-
-   CALL GetNewUnit(UnitWind, TmpErrStat, TmpErrMsg)
-   CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
-   IF (ErrStat >= AbortErrLev) RETURN
-
+   ! IF ( MiscVars%TimeIndex /= 0 ) THEN
+   !    CALL SetErrStat(ErrID_Warn,' UniformWind has already been initialized.',ErrStat,ErrMsg,RoutineName)
+   !    RETURN
+   ! END IF
 
       !-------------------------------------------------------------------------------------------------
       ! Copy things from the InitData to the ParamData
@@ -156,8 +147,13 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
    ParamData%RefHt            =  InitData%ReferenceHeight
    ParamData%RefLength        =  InitData%RefLength
 
-
    IF ( InitData%UseInputFile ) THEN
+
+      ! Get a unit number to use
+
+      CALL GetNewUnit(UnitWind, TmpErrStat, TmpErrMsg)
+      CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
+      IF (ErrStat >= AbortErrLev) RETURN
 
       !-------------------------------------------------------------------------------------------------
       ! Open the file for reading
@@ -216,7 +212,11 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
       ! Allocate the data arrays
       !-------------------------------------------------------------------------------------------------
 
-      CALL Alloc_ParamDataArrays( ParamData, UnitWind, TmpErrStat, TmpErrMsg)
+      CALL Alloc_ParamDataArrays( ParamData, TmpErrStat, TmpErrMsg)
+      IF ( ErrStat >= AbortErrLev ) THEN
+         CLOSE(UnitWind)
+         RETURN
+      END IF
 
       !-------------------------------------------------------------------------------------------------
       ! Rewind the file (to the beginning) and skip the comment lines
@@ -259,29 +259,34 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
 
       END DO !I
 
+      !-------------------------------------------------------------------------------------------------
+      ! Close the file
+      !-------------------------------------------------------------------------------------------------
+
+      CLOSE( UnitWind )
+
    ELSE
 
       NumComments = 0
       DO I=1, SIZE(InitData%PassedFileData%Lines)
-        
          Line = InitData%PassedFileData%Lines(I)
          IF ( (INDEX( Line, '!' ) > 0) .OR. (INDEX( Line, '#' ) > 0) .OR. (INDEX( Line, '%' ) > 0) ) THEN
             NumComments = NumComments + 1
- 
          END if
       END DO
 
       ParamData%NumDataLines = SIZE(InitData%PassedFileData%Lines) - NumComments
-      CALL Alloc_ParamDataArrays( ParamData, UnitWind, TmpErrStat, TmpErrMsg)
-      
+      CALL Alloc_ParamDataArrays( ParamData, TmpErrStat, TmpErrMsg)
+      IF ( ErrStat >= AbortErrLev ) THEN
+         RETURN
+      ENDIF
       DO I=1,ParamData%NumDataLines
 
-         LineNo = NumComments + 1
-         CALL ParseAry( InitData%PassedFileData, LineNo, "Wind type 2 line"//TRIM(Num2LStr(NumComments+I)), TmpData, NumCols, TmpErrStat, TmpErrMsg )
+         LineNo = NumComments + I
+         CALL ParseAry( InitData%PassedFileData, LineNo, "Wind type 2 line"//TRIM(Num2LStr(NumComments+I)), TmpData(1:NumCols), NumCols, TmpErrStat, TmpErrMsg )
          CALL SetErrStat(TmpErrStat,'Error retrieving data from the uniform wind file line'//TRIM(Num2LStr(NumComments+I)),   &
                ErrStat,ErrMsg,RoutineName)
          IF ( ErrStat >= AbortErrLev ) THEN
-            CLOSE(UnitWind)
             RETURN
          ENDIF
 
@@ -330,8 +335,6 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
 
    END DO !I
 
-
-
       !-------------------------------------------------------------------------------------------------
       ! Find out information on the timesteps and range
       !-------------------------------------------------------------------------------------------------
@@ -366,15 +369,6 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
 
       ! Number of timesteps
    InitOutData%WindFileNumTSteps    =  ParamData%NumDataLines
-
-
-
-      !-------------------------------------------------------------------------------------------------
-      ! Close the file
-      !-------------------------------------------------------------------------------------------------
-
-   CLOSE( UnitWind )
-
 
       !-------------------------------------------------------------------------------------------------
       ! Print warnings and messages
@@ -440,13 +434,12 @@ SUBROUTINE IfW_UniformWind_Init(InitData, ParamData, MiscVars, Interval, InitOut
 
 END SUBROUTINE IfW_UniformWind_Init
 
-SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
+SUBROUTINE Alloc_ParamDataArrays( ParamData, ErrStat, ErrMsg )
 
    IMPLICIT                                     NONE
    CHARACTER(*),           PARAMETER                           :: RoutineName="Alloc_ParamDataArrays"
 
    TYPE(IfW_UniformWind_ParameterType),         INTENT(INOUT)  :: ParamData         !< Parameters
-   INTEGER(IntKi),                              INTENT(IN   )  :: UnitWind     ! Unit number for the InflowWind input file
 
       ! Error handling
    INTEGER(IntKi),                              INTENT(  OUT)  :: ErrStat           !< determines if an error has been encountered
@@ -455,6 +448,9 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       ! Temporary variables for error handling
    INTEGER(IntKi)                                              :: TmpErrStat        ! Temp variable for the error status
    CHARACTER(ErrMsgLen)                                        :: TmpErrMsg         ! Temporary error message
+
+   ErrStat     = ErrID_None
+   ErrMsg      = ""
 
    !-------------------------------------------------------------------------------------------------
    ! Allocate arrays for the uniform wind data
@@ -468,7 +464,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%Tdata, ParamData%NumDataLines, 'Uniform wind time', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -477,7 +472,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%V, ParamData%NumDataLines, 'Uniform wind horizontal wind speed', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -486,7 +480,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%Delta, ParamData%NumDataLines, 'Uniform wind direction', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -495,7 +488,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%VZ, ParamData%NumDataLines, 'Uniform vertical wind speed', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -504,7 +496,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%HShr, ParamData%NumDataLines, 'Uniform horizontal linear shear', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -513,7 +504,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%VShr, ParamData%NumDataLines, 'Uniform vertical power-law shear exponent', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -522,7 +512,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%VLinShr, ParamData%NumDataLines, 'Uniform vertical linear shear', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
@@ -531,7 +520,6 @@ SUBROUTINE Alloc_ParamDataArrays( ParamData, UnitWind, ErrStat, ErrMsg )
       CALL AllocAry( ParamData%VGust, ParamData%NumDataLines, 'Uniform gust velocity', TmpErrStat, TmpErrMsg )
       CALL SetErrStat(TmpErrStat,TmpErrMsg,ErrStat,ErrMsg,RoutineName)
       IF ( ErrStat >= AbortErrLev ) THEN
-         CLOSE(UnitWind)
          RETURN
       ENDIF
    END IF
