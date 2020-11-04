@@ -1,7 +1,7 @@
 module test_outputs
 
     use pFUnit_mod
-    use test_tools
+    use ifw_test_tools
     use InflowWind_Subs
     use InflowWind_Types
 

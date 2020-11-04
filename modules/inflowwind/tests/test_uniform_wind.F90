@@ -1,7 +1,7 @@
 module test_uniform_wind
 
     use pFUnit_mod
-    use test_tools
+    use ifw_test_tools
     use InflowWind
     use InflowWind_Subs
     use InflowWind_Types

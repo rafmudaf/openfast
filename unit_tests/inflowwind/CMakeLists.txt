@@ -30,7 +30,7 @@ include_directories(
 )
 
 set(testlist
-    test_tools
+    ifw_test_tools
     test_steady_wind
     test_uniform_wind
     test_turbsim_wind
