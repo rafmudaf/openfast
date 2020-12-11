@@ -43,6 +43,8 @@ MODULE NWTC_Base
    INTEGER(IntKi), PARAMETER     :: NWTC_Verbose = 10                             !< The maximum level of verbosity
    INTEGER(IntKi), PARAMETER     :: NWTC_VerboseLevel = 5                         !< a number in [0, NWTC_Verbose]: 0 = no output; NWTC_Verbose=verbose; 
 
+   INTEGER,        PARAMETER     :: IntfStrLen  = 1025                            !< Length of strings through C interfaces
+
       ! Global Error-level variables:
 
    INTEGER(IntKi), PARAMETER     :: ErrID_None   = 0                              !< ErrStat parameter indicating "no error"

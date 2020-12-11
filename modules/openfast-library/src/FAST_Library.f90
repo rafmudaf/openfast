@@ -20,7 +20,6 @@ MODULE FAST_Data
       ! Local parameters:
    REAL(DbKi),     PARAMETER             :: t_initial = 0.0_DbKi     ! Initial time
    INTEGER(IntKi)                        :: NumTurbines 
-   INTEGER,        PARAMETER             :: IntfStrLen  = 1025       ! length of strings through the C interface
    INTEGER(IntKi), PARAMETER             :: MAXOUTPUTS = 4000        ! Maximum number of outputs
    INTEGER(IntKi), PARAMETER             :: MAXInitINPUTS = 53       ! Maximum number of initialization values from Simulink
    INTEGER(IntKi), PARAMETER             :: NumFixedInputs = 51
