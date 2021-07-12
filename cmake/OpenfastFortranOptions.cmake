@@ -81,9 +81,15 @@ macro(check_f2008_features)
   check_fortran_source_compiles(
     "program test
      use iso_fortran_env, only: compiler_version, real32, real64, real128
+     use ieee_arithmetic
+
      integer, parameter :: quki = real128
      integer, parameter :: dbki = real64
      integer, parameter :: reki = real32
+
+     real :: real_number = 1.0
+     logical :: is_fin
+     is_fin = IEEE_IS_FINITE( real_number )
 
      end program test"
      HAS_FORTRAN2008
