@@ -135,7 +135,7 @@ jobs:
             -DCTEST_PLOT_ERRORS:BOOL=ON \
             ${GITHUB_WORKSPACE}
       - name: Build OpenFAST
-        working-directory: ${{runner.workspace}}/build
+        working-directory: ${{runner.workspace}}/openfast/build
         run: |
           cmake --build . --target aerodyn_driver -- -j ${{env.NUM_PROCS}}
           cmake --build . --target beamdyn_driver -- -j ${{env.NUM_PROCS}}
@@ -177,7 +177,7 @@ jobs:
         with:
           name: regression-tests-debug
           path: |
-            ${{runner.workspace}}/build/reg_tests/modules
+            ${{runner.workspace}}/openfast/build/reg_tests/modules
 
   unit-test:
     runs-on: ubuntu-20.04
@@ -252,9 +252,9 @@ jobs:
         with:
           submodules: recursive
       - name: Setup
-        run: cmake -E make_directory ${{runner.workspace}}/build
+        run: cmake -E make_directory ${{runner.workspace}}/openfast/build
       - name: Configure
-        working-directory: ${{runner.workspace}}/build
+        working-directory: ${{runner.workspace}}/openfast/build
         run: |
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/install \
@@ -264,10 +264,10 @@ jobs:
             -DGENERATE_TYPES:BOOL=ON \
             ${GITHUB_WORKSPACE}
       - name: Build all
-        working-directory: ${{runner.workspace}}/build
+        working-directory: ${{runner.workspace}}/openfast/build
         run: cmake --build . --target all -- -j ${{env.NUM_PROCS}}
       - name: Test
-        working-directory: ${{runner.workspace}}/build
+        working-directory: ${{runner.workspace}}/openfast/build
         run: ./glue-codes/openfast/openfast -v
 
   # cpp-interface-tests:
