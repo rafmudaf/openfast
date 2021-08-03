@@ -68,6 +68,7 @@ jobs:
           cmake --build . --target hydrodyn_driver -- -j ${{env.NUM_PROCS}}
           cmake --build . --target subdyn_driver -- -j ${{env.NUM_PROCS}}
           cmake --build . --target openfast -- -j ${{env.NUM_PROCS}}
+          cmake --build . --target regression_tests -- -j ${{env.NUM_PROCS}}
 
       - name: Run AeroDyn tests
         uses: ./.github/actions/tests-module-aerodyn
