@@ -31,12 +31,12 @@ include_directories(
 
 set(testlist
     test_tools
-    test_BD_ComputeIniNodalCrv
-    test_BD_CrvCompose
-    test_BD_CheckRotMat
-    test_BD_CrvExtractCrv
-    test_BD_CrvMatrixR
-    test_BD_CrvMatrixH
+    # test_BD_ComputeIniNodalCrv
+    # test_BD_CrvCompose
+    # test_BD_CheckRotMat
+    # test_BD_CrvExtractCrv
+    # test_BD_CrvMatrixR
+    # test_BD_CrvMatrixH
     test_ExtractRelativeRotation
     test_BD_InputGlobalLocal
     test_BD_DistrLoadCopy
