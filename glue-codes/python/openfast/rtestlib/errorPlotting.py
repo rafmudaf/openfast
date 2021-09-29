@@ -28,8 +28,8 @@ import shutil
 
 import numpy as np
 
-import rtestlib as rtl
-from fast_io import load_output
+from . import rtestlib as rtl
+from .fast_io import load_output
 
 def _validateAndExpandInputs(argv):
     rtl.validateInputOrExit(argv, 3, "solution1 solution2 attribute")

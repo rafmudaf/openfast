@@ -21,8 +21,8 @@
 import sys, os
 import numpy as np
 from numpy import linalg as LA
-from fast_io import load_output
-import rtestlib as rtl
+from .fast_io import load_output
+from . import rtestlib as rtl
 
 def readFASTOut(fastoutput):
     try:

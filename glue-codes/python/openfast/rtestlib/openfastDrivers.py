@@ -25,7 +25,7 @@ import os
 import sys
 import shutil
 import subprocess
-import rtestlib as rtl
+from . import rtestlib as rtl
 
 def _runCase(executable, inputFile, logFile, stdout):
     if logFile is None:

@@ -28,7 +28,7 @@ import argparse
 import shutil
 import glob
 import subprocess
-from openfast import rtestlib  as rtl
+from openfast.rtestlib import rtestlib  as rtl
 from openfast.rtestlib import openfastDrivers
 from openfast.rtestlib import pass_fail
 from openfast.rtestlib.errorPlotting import exportCaseSummary
