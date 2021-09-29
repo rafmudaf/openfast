@@ -24,15 +24,13 @@
 
 import os
 import sys
-basepath = os.path.dirname(__file__)
-sys.path.insert(0, os.path.sep.join([basepath, "lib"]))
 import argparse
 import shutil
 import subprocess
-import rtestlib as rtl
-import openfastDrivers
-import pass_fail
-from errorPlotting import exportCaseSummary
+from openfast import rtestlib  as rtl
+from openfast.rtestlib import openfastDrivers
+from openfast.rtestlib import pass_fail
+from openfast.rtestlib.errorPlotting import exportCaseSummary
 
 ##### Main program
 
@@ -120,7 +118,7 @@ exportCaseSummary(testBuildDirectory, caseName, results, results_max, tolerance)
 # failing case
 if not pass_fail.passRegressionTest(normalizedNorm, tolerance):
     if plotError:
-        from errorPlotting import finalizePlotDirectory, plotOpenfastError
+        from openfast.rtestlib.errorPlotting import finalizePlotDirectory, plotOpenfastError
         ixFailChannels = [i for i in range(len(testInfo["attribute_names"])) if normalizedNorm[i] > tolerance]
         failChannels = [channel for i, channel in enumerate(testInfo["attribute_names"]) if i in ixFailChannels]
         failResults = [res for i, res in enumerate(results) if i in ixFailChannels]

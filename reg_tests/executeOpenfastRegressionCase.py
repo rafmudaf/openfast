@@ -24,15 +24,13 @@
 
 import os
 import sys
-basepath = os.path.dirname(__file__)
-sys.path.insert(0, os.path.sep.join([basepath, "lib"]))
 import argparse
 import shutil
 import subprocess
-import rtestlib as rtl
-import openfastDrivers
-import pass_fail
-from errorPlotting import exportCaseSummary
+from openfast import rtestlib  as rtl
+from openfast.rtestlib import openfastDrivers
+from openfast.rtestlib import pass_fail
+from openfast.rtestlib.errorPlotting import exportCaseSummary
 
 ##### Helper functions
 def ignoreBaselineItems(directory, contents):
@@ -171,7 +169,7 @@ exportCaseSummary(testBuildDirectory, caseName, results, results_max, tolerance)
 # failing case
 if not pass_fail.passRegressionTest(normalizedNorm, tolerance):
     if plotError:
-        from errorPlotting import finalizePlotDirectory, plotOpenfastError
+        from openfast.rtestlib.errorPlotting import finalizePlotDirectory, plotOpenfastError
         for channel in testInfo["attribute_names"]:
             try:
                 plotOpenfastError(localOutFile, baselineOutFile, channel)
