@@ -1,1 +1,0 @@
-.. _openfast_output:

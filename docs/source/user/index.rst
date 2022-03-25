@@ -44,6 +44,7 @@ General
 .. toctree::
    :maxdepth: 1
 
+   introduction.rst
    fast_to_openfast.rst
    api_change.rst
    input_file_overview.rst

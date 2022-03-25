@@ -1,4 +1,7 @@
-.. _openfast_input:
+.. _openfast-input:
+
+OpenFAST Input and Output Files
+===============================
 
 FAST and each of its modules have their own input files; see Figure 4.
 

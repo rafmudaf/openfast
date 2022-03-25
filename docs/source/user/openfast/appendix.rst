@@ -1,1 +1,6 @@
-.. _openfast_appendix:
+.. _openfast-appendix:
+
+Appendix
+========
+
+Sample Input File ...

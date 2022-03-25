@@ -4,9 +4,8 @@ OpenFAST User's Guide
 .. toctree::
    :maxdepth: 2
    
-   introduction.rst
-   running_openfast.rst
    input_files.rst
-   output_files.rst
+   running_openfast.rst
+   simulink.rst
+   cppapi.rst
    appendix.rst
-

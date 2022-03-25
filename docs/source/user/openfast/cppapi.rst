@@ -1,5 +1,7 @@
-C++ API User's Guide
-====================
+.. _openfast-cpp-api:
+
+C++ API
+=======
 
 .. only:: html
 
