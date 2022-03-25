@@ -1,4 +1,4 @@
-BeamDyn User Guide and Theory Manual
+BeamDyn User's Guide and Theory Manual
 ======================================
 
 This document offers a quick reference guide for the BeamDyn software

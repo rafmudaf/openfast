@@ -1,4 +1,4 @@
-AeroDyn Users Guide and Theory Manual
+AeroDyn User's Guide and Theory Manual
 ======================================
 
 This document offers a quick reference guide for the AeroDyn software

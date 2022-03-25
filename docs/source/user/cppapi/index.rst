@@ -1,5 +1,5 @@
-C++ API Users Guide
-===================
+C++ API User's Guide
+====================
 
 .. only:: html
 
