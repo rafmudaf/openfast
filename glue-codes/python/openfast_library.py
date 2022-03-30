@@ -3,7 +3,6 @@ from ctypes import (
     POINTER,
     create_string_buffer,
     byref,
-    cast,
     c_int,
     c_double,
     c_char,
@@ -449,3 +448,192 @@ class OpenFASTStandAlone(OpenFAST):
         #
         # We assume here t_initial is always 0
         return int(np.ceil(self.t_max / self.dt) + 1)
+
+class OpenFastCoupled(OpenFAST):
+    def __init__(self, fast_lib: FastLibAPI, 
+                 input_file_name: str, 
+                 n_turbines: int, i_turb: int, 
+                 t_max: float,
+                 num_actuator_force_points_blade: int,
+                 num_actuator_force_points_tower: int,
+                 turbine_position: Tuple[float, float, float],
+                 nacelle_cd: float, rotor_area: float, density: float, 
+                 restart=False):
+        super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
+        self.i_turb = i_turb
+        self.num_controller_inputs_from_supercontroller = 0
+        self.num_controller_outputs_to_supercontroller = 0
+        self.num_actuator_force_points_blade = num_actuator_force_points_blade
+        self.num_actuator_force_points_tower = num_actuator_force_points_tower
+        self.turbine_position = turbine_position
+        self.nacelle_cd = nacelle_cd
+        self.rotor_area = rotor_area,
+        self.density = density
+        # correction from OpenFAST.cpp but simplified??
+        self.nacelle_correction = (8/7)**2
+
+        # NOTE: first velocity point is velocity at nacelle, then blades, then tower
+
+        self.u = np.zeros(0)
+        self.v = np.zeros(0)
+        self.w = np.zeros(0)
+
+        self.fx = np.zeros(0)
+        self.fy = np.zeros(0)
+        self.fz = np.zeros(0)
+
+        if restart:
+            self.fast_restart()
+        else:
+            self.fast_init()
+
+    def fast_restart(self):
+        raise NotImplementedError("Restart not yet implemented")
+
+    def fast_init(self):
+        super().fast_init()
+        self.dt, self.n_blades, self.n_blade_elements, self.opFM_input, self.opFM_output = self.fast_lib.opFM_init(self.i_turb,
+                                                                                                                   self.t_max,
+                                                                                                                   self.input_file_name,
+                                                                                                                   self.i_turb,
+                                                                                                                   self.num_controller_inputs_from_supercontroller,
+                                                                                                                   self.num_controller_outputs_to_supercontroller,
+                                                                                                                   self.num_actuator_force_points_blade,
+                                                                                                                   self.num_actuator_force_points_tower,
+                                                                                                                   self.turbine_position)
+        self.n_nodes = self.opFM_output.u_Len
+        self.n_vel_points_blades = self.n_blades*self.n_blade_elements
+        self.n_vel_points_tower = self.n_nodes - self.n_vel_points_blades - 1
+
+        self.n_force_points_blade = self.n_force_points_blade*self.n_blades
+        self.n_force_points_tower = self.num_actuator_force_points_tower
+
+    def get_vel_coordinates(self):
+        return (
+            np.ctypeslib.as_array(self.opFM_input.pxVel),
+            np.ctypeslib.as_array(self.opFM_input.pyVel),
+            np.ctypeslib.as_array(self.opFM_input.pzVel)
+        )
+
+    def get_force_coordinates(self):
+        return (
+            np.ctypeslib.as_array(self.opFM_input.pxForce),
+            np.ctypeslib.as_array(self.opFM_input.pyForce),
+            np.ctypeslib.as_array(self.opFM_input.pzForce)
+        )
+
+    def get_velocities(self):
+        return (
+            np.ctypeslib.as_array(self.opFM_input.u),
+            np.ctypeslib.as_array(self.opFM_input.v),
+            np.ctypeslib.as_array(self.opFM_input.w)
+        )
+
+    def get_forces(self):
+        return (
+            np.ctypeslib.as_array(self.opFM_input.fx),
+            np.ctypeslib.as_array(self.opFM_input.fy),
+            np.ctypeslib.as_array(self.opFM_input.fz)
+        )
+
+    def set_vel_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
+        self.opFM_input.pxVel[:] = np.asfortranarray(x, dtype=np.float64)
+        self.opFM_input.pxVel[:] = np.asfortranarray(y, dtype=np.float64)
+        self.opFM_input.pxVel[:] = np.asfortranarray(z, dtype=np.float64)
+
+    def set_force_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
+        self.opFM_input.pxForce[:] = np.asfortranarray(x, dtype=np.float64)
+        self.opFM_input.pxForce[:] = np.asfortranarray(y, dtype=np.float64)
+        self.opFM_input.pxForce[:] = np.asfortranarray(z, dtype=np.float64)
+
+    def set_velocity(self, u_nacelle: float, v_nacelle: float, w_nacelle: float, 
+    u_blades: np.ndarray, v_blades: np.ndarray, w_blades: np.ndarray, 
+    u_tower: np.ndarray, v_tower: np.ndarray, w_tower: np.ndarray):
+        u = np.concatenate(np.array([u_nacelle]), u_blades, u_tower)
+        v = np.concatenate(np.array([v_nacelle]), v_blades, v_tower)
+        w = np.concatenate(np.array([w_nacelle]), w_blades, w_tower)
+        self.interpolate_vel_from_force_nodes_to_vel_nodes(u, v, w)
+
+    def _set_velocities(self, u: np.ndarray, v: np.ndarray, w: np.ndarray):
+        self.opFM_output.u[:] = np.asfortranarray(u, dtype=np.float64)
+        self.opFM_output.v[:] = np.asfortranarray(v, dtype=np.float64)
+        self.opFM_output.w[:] = np.asfortranarray(w, dtype=np.float64)
+
+    def interpolate_vel_from_force_nodes_to_vel_nodes(self, u_f: np.ndarray, v_f: np.ndarray, w_f: np.ndarray):
+        u = np.zeros(self.n_nodes)
+        v = np.zeros(self.n_nodes)
+        w = np.zeros(self.n_nodes)
+
+        # Nacelle
+        u[0] = u_f[0]
+        v[0] = v_f[0]
+        w[0] = w_f[0]
+
+        n_blade_nodes = self.n_blades*self.n_force_points_blade
+
+        pos_x, pos_y, pos_z = self.get_force_coordinates()
+        rel_pos_blade_x = pos_x[1:n_blade_nodes+1] - pos_x[0]
+        rel_pos_blade_y = pos_y[1:n_blade_nodes+1] - pos_y[0]
+        rel_pos_blade_z = pos_z[1:n_blade_nodes+1] - pos_z[0]
+        rel_pos_tower_x = pos_x[n_blade_nodes+1:] - pos_x[n_blade_nodes+1]
+        rel_pos_tower_y = pos_y[n_blade_nodes+1:] - pos_y[n_blade_nodes+1]
+        rel_pos_tower_z = pos_z[n_blade_nodes+1:] - pos_z[n_blade_nodes+1]
+
+        dist_forces_blades = np.sqrt(rel_pos_blade_x*rel_pos_blade_x +
+                                     rel_pos_blade_y*rel_pos_blade_y + rel_pos_blade_z*rel_pos_blade_z)
+        dist_forces_tower = np.sqrt(rel_pos_tower_x*rel_pos_tower_x +
+                                    rel_pos_tower_y*rel_pos_tower_y + rel_pos_tower_z*rel_pos_tower_z)
+
+        pos_x, pos_y, pos_z = self.get_vel_coordinates()
+        rel_pos_blade_x = pos_x[1:n_blade_nodes+1] - pos_x[0]
+        rel_pos_blade_y = pos_y[1:n_blade_nodes+1] - pos_y[0]
+        rel_pos_blade_z = pos_z[1:n_blade_nodes+1] - pos_z[0]
+        rel_pos_tower_x = pos_x[n_blade_nodes+1:] - pos_x[n_blade_nodes+1]
+        rel_pos_tower_y = pos_y[n_blade_nodes+1:] - pos_y[n_blade_nodes+1]
+        rel_pos_tower_z = pos_z[n_blade_nodes+1:] - pos_z[n_blade_nodes+1]
+
+        dist_vels_blades = np.sqrt(rel_pos_blade_x*rel_pos_blade_x +
+                                   rel_pos_blade_y*rel_pos_blade_y + rel_pos_blade_z*rel_pos_blade_z)
+        dist_vels_tower = np.sqrt(rel_pos_tower_x*rel_pos_tower_x +
+                                  rel_pos_tower_y*rel_pos_tower_y + rel_pos_tower_z*rel_pos_tower_z)
+
+        u[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, u_f)
+        v[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, v_f)
+        w[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, w_f)
+
+        u[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, u_f)
+        v[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, v_f)
+        w[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, w_f)
+
+        self._set_velocities(u, v, w)
+
+    def get_nacelle_force(self, u, v, w):
+        v_mag = u*u + v*v + w*w
+        c = 0.5*self.density*self.nacelle_cd * \
+            self.rotor_area*v_mag*self.nacelle_correction
+        return c*u, c*v, c*w
+
+    def get_blade_forces(self):
+        fx, fy, fz = self.get_forces()
+        n_nodes = self.n_blades*self.n_blade_elements
+        return (
+            fx[1:n_nodes+1], fy[1:n_nodes+1], fz[1:n_nodes+1]
+        )
+
+    def get_tower_forces(self):
+        fx, fy, fz = self.get_forces()
+        return (fx[self.n_vel_points_blades+1:],
+                fy[self.n_vel_points_blades+1:],
+                fz[self.n_vel_points_blades+1:]
+                )
+
+    def solution0(self):
+        self.fast_lib.opFM_solution0(self.i_turb)
+
+    def step(self):
+        self.fast_lib.opFM_step(self.i_turb)
+
+    def get_hub_position(self):
+        return (self.opFM_input.pxVel[0] + self.turbine_position[0],
+                self.opFM_input.pyVel[0] + self.turbine_position[1],
+                self.opFM_input.pzVel[0] + self.turbine_position[1])
