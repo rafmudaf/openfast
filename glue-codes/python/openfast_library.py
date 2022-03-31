@@ -1,100 +1,11 @@
-from ctypes import (
-    CDLL,
-    POINTER,
-    create_string_buffer,
-    byref,
-    c_int,
-    c_double,
-    c_char,
-    c_bool,
-    c_float,
-    Structure
-)
 import os
-from typing import Callable, Optional, Tuple
+from ctypes import (CDLL, POINTER, byref, c_bool, c_char, c_double,
+                    c_int, create_string_buffer)
+from typing import Optional
+
 import numpy as np
-
+import openfast_types as of_types
 ERROR_MESSAGE_LENGTH = 1025
-
-
-def make_int(name: str):
-    return (name, POINTER(c_int))
-
-
-def make_float(name: str):
-    return (name, POINTER(c_float))
-
-
-def make_double(name: str):
-    return (name, POINTER(c_double))
-
-
-def make_char(name: str):
-    return (name, POINTER(c_char))
-
-
-def make_arr(name: str, make_pointer: Callable):
-    return make_pointer(name), make_int(name+"_Len")
-
-
-def make_int_arr(name: str):
-    return make_arr(name, make_int)
-
-
-def make_float_arr(name: str):
-    return make_arr(name, make_float)
-
-
-def make_double_arr(name: str):
-    return make_arr(name, make_double)
-
-
-def make_char_arr(name: str):
-    return make_arr(name, make_char)
-
-
-class OpFM_InputType_C(Structure):  # output from fast
-    _fields_ = [
-        *make_float_arr("pxVel"),
-        *make_float_arr("pyVel"),
-        *make_float_arr("pzVel"),
-        *make_float_arr("pxForce"),
-        *make_float_arr("pyForce"),
-        *make_float_arr("pzForce"),
-        *make_float_arr("xdotForce"),
-        *make_float_arr("ydotForce"),
-        *make_float_arr("zdotForce"),
-        *make_float_arr("pOrientation"),
-        *make_float_arr("fx"),
-        *make_float_arr("fy"),
-        *make_float_arr("fz"),
-        *make_float_arr("momentx"),
-        *make_float_arr("momenty"),
-        *make_float_arr("momentz"),
-        *make_float_arr("forceNodesChord")
-    ]
-
-
-class OpFM_OutputType_C(Structure):  # input to fast
-    _fields_ = [
-        *make_float_arr("u"),
-        *make_float_arr("v"),
-        *make_float_arr("w"),
-        *make_float_arr("WriteOutput"),
-    ]
-
-
-class SC_DX_InputType_C(Structure):
-    _fields_ = [
-        *make_float_arr("toSC")
-    ]
-
-
-class SC_DX_OutputType_C(Structure):
-    _fields_ = [
-        *make_float_arr("fromSc"),
-        *make_float_arr("fromSCglob")
-    ]
 
 
 class FastLibAPI(CDLL):
@@ -117,8 +28,7 @@ class FastLibAPI(CDLL):
         self._inp_array[0] = -1.0  # Sensor type -
 
         self.ended = False
-
-        self.allocated = False
+        self.allocated_turbines = 0
 
     def _initialize_routines(self):
         self.FAST_AllocateTurbines.argtypes = [
@@ -186,19 +96,25 @@ class FastLibAPI(CDLL):
             POINTER(c_int),         # NumSC2CtrlGlob IN
             POINTER(c_int),         # NumSC2Ctrl IN
             POINTER(c_int),         # NumCtrl2SC IN
-            POINTER(c_float),       # InitScOutputsGlob IN
-            POINTER(c_float),       # InitScOutputsTurbine IN
+            # InitScOutputsGlob IN
+            np.ctypeslib.ndpointer(dtype=np.float32),
+            # InitScOutputsTurbine IN
+            np.ctypeslib.ndpointer(dtype=np.float32),
             POINTER(c_int),         # NumActForcePtsBlade IN
             POINTER(c_int),         # NumActForcePtsTower IN
-            POINTER(c_float),       # TurbPosn IN
+            np.ctypeslib.ndpointer(dtype=np.float32),       # TurbPosn IN
             POINTER(c_int),         # AbortErrLev_c OUT
             POINTER(c_double),      # dt_c OUT
             POINTER(c_int),         # NumBl OUT
             POINTER(c_int),         # NumBlElem OUT
-            POINTER(OpFM_InputType_C),      # OpFM_Input_from_FAST INOUT
-            POINTER(OpFM_OutputType_C),     # OpFM_Output_to_FAST INOUT
-            POINTER(SC_DX_InputType_C),        # SC_Input_from_FAST INOUT
-            POINTER(SC_DX_OutputType_C),       # SC_Output_to_FAST INOUT
+            # OpFM_Input_from_FAST INOUT
+            POINTER(of_types.OpFM_InputType_C),
+            # OpFM_Output_to_FAST INOUT
+            POINTER(of_types.OpFM_OutputType_C),
+            # SC_Input_from_FAST INOUT
+            POINTER(of_types.SC_DX_InputType_C),
+            # SC_Output_to_FAST INOUT
+            POINTER(of_types.SC_DX_OutputType_C),
             POINTER(c_int),         # ErrStat_c OUT
             POINTER(c_char)         # ErrMsg_c(IntfStrLen) OUT
         ]
@@ -228,7 +144,7 @@ class FastLibAPI(CDLL):
         if self.fatal_error(error_status):
             raise RuntimeError(f"Error {error_status.value}: {error_message}")
 
-    def allocate_turbines(self, n_turbines):
+    def allocate_turbines(self, n_turbines: int):
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_AllocateTurbines(
@@ -237,7 +153,7 @@ class FastLibAPI(CDLL):
             error_message
         )
         self.check_error(error_status, error_message)
-        self.allocated = True
+        self.allocated_turbines = n_turbines
 
     def sizes(self, i_turb: int, input_file_name: str, t_max: Optional[float] = None):
         num_outs = c_int(0)
@@ -256,8 +172,8 @@ class FastLibAPI(CDLL):
             byref(error_status),
             error_message,
             channel_names,
+            t_max if t_max is None else byref(c_double(t_max)),
             None,
-            None
         )
         self.check_error(error_status, error_message)
 
@@ -315,17 +231,18 @@ class FastLibAPI(CDLL):
         dt = c_double(0)
         num_bl = c_int(0)
         num_bl_elem = c_int(0)
-        opFM_input = OpFM_InputType_C()
-        opFM_output = OpFM_OutputType_C()
-        sc_input = SC_DX_InputType_C()
-        sc_output = SC_DX_OutputType_C()
+        opFM_input = of_types.OpFM_InputType()
+        opFM_output = of_types.OpFM_OutputType()
+        sc_input = of_types.SC_DX_InputType()
+        sc_output = of_types.SC_DX_OutputType()
+        print(opFM_output)
+        # print(opFM_output.u)
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_OpFM_Init(
             byref(c_int(i_turb)),
             byref(c_double(t_max)),
             create_string_buffer(input_file_name.encode("UTF-8")),
-            byref(c_int(len(input_file_name))),
             byref(c_int(turb_id)),
             byref(c_int(num_sc_2_ctrl_global)),
             byref(c_int(num_sc_2_ctrl)),
@@ -339,10 +256,10 @@ class FastLibAPI(CDLL):
             byref(dt),
             byref(num_bl),
             byref(num_bl_elem),
-            byref(opFM_input),
-            byref(opFM_output),
-            byref(sc_input),
-            byref(sc_output),
+            byref(opFM_input.c_struct),
+            byref(opFM_output.c_struct),
+            byref(sc_input.c_struct),
+            byref(sc_output.c_struct),
             byref(error_status),
             error_message
         )
@@ -386,254 +303,3 @@ class FastLibAPI(CDLL):
         )
         self.check_error(error_status, error_message)
         self.ended = True
-
-
-class OpenFAST:
-    def __init__(self, fast_lib: FastLibAPI, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
-        self.input_file_name = input_file_name
-        self.t_max = t_max
-        self.fast_lib = fast_lib
-        self.n_turbines = n_turbines
-        self.i_turb = i_turb
-        self.allocated_turbines = 0
-
-    def fast_init(self):
-        if not self.fast_lib.allocated:
-            self.fast_lib.allocate_turbines(self.n_turbines)
-        self.allocated_turbines += 1
-
-    def fast_end(self):
-        self.fast_lib.end(self.i_turb)
-        self.allocated_turbines -= 1
-        if self.allocated_turbines == 0:
-            self.fast_lib.deallocate_turbines()
-
-
-class OpenFASTStandAlone(OpenFAST):
-    def __init__(self, fast_lib: FastLibAPI, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
-        super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
-
-    def fast_init(self):
-        super().fast_init()
-        self.num_outs, self.dt, self.t_max, self.output_channel_names = self.fast_lib.sizes(
-            self.i_turb, self.input_file_name)
-
-        self.output_values = np.empty(
-            (self.total_time_steps, self.num_outs))
-
-    def fast_sim(self):
-        self.output_values[0] = self.fast_lib.start(self.i_turb, self.num_outs)
-        for i in range(1, self.total_time_steps):
-            end_early, self.output_values[i] = self.fast_lib.update(
-                self.i_turb, self.num_outs)
-            if end_early:
-                break
-
-    def fast_run(self):
-        self.fast_init()
-        self.fast_sim()
-        self.fast_end()
-
-    @property
-    def total_time_steps(self):
-        # From FAST_Subs FAST_Init:
-        # p%n_TMax_m1  = CEILING( ( (p%TMax - t_initial) / p%DT ) ) - 1 ! We're going to go from step 0 to n_TMax (thus the -1 here)
-        # Then in FAST_Prog:
-        # TIME_STEP_LOOP:  DO n_t_global = Restart_step, Turbine(1)%p_FAST%n_TMax_m1
-        #
-        # Note that Fortran indexing starts at 1 and includes the upper bound
-        # Python indexing starts at 0 and does not include the upper bound
-        # The for-loop in this interface begins at 1 (there's an init step before)
-        # and that's why we have the +1 below
-        #
-        # We assume here t_initial is always 0
-        return int(np.ceil(self.t_max / self.dt) + 1)
-
-class OpenFastCoupled(OpenFAST):
-    def __init__(self, fast_lib: FastLibAPI, 
-                 input_file_name: str, 
-                 n_turbines: int, i_turb: int, 
-                 t_max: float,
-                 num_actuator_force_points_blade: int,
-                 num_actuator_force_points_tower: int,
-                 turbine_position: Tuple[float, float, float],
-                 nacelle_cd: float, rotor_area: float, density: float, 
-                 restart=False):
-        super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
-        self.i_turb = i_turb
-        self.num_controller_inputs_from_supercontroller = 0
-        self.num_controller_outputs_to_supercontroller = 0
-        self.num_actuator_force_points_blade = num_actuator_force_points_blade
-        self.num_actuator_force_points_tower = num_actuator_force_points_tower
-        self.turbine_position = turbine_position
-        self.nacelle_cd = nacelle_cd
-        self.rotor_area = rotor_area,
-        self.density = density
-        # correction from OpenFAST.cpp but simplified??
-        self.nacelle_correction = (8/7)**2
-
-        # NOTE: first velocity point is velocity at nacelle, then blades, then tower
-
-        self.u = np.zeros(0)
-        self.v = np.zeros(0)
-        self.w = np.zeros(0)
-
-        self.fx = np.zeros(0)
-        self.fy = np.zeros(0)
-        self.fz = np.zeros(0)
-
-        if restart:
-            self.fast_restart()
-        else:
-            self.fast_init()
-
-    def fast_restart(self):
-        raise NotImplementedError("Restart not yet implemented")
-
-    def fast_init(self):
-        super().fast_init()
-        self.dt, self.n_blades, self.n_blade_elements, self.opFM_input, self.opFM_output = self.fast_lib.opFM_init(self.i_turb,
-                                                                                                                   self.t_max,
-                                                                                                                   self.input_file_name,
-                                                                                                                   self.i_turb,
-                                                                                                                   self.num_controller_inputs_from_supercontroller,
-                                                                                                                   self.num_controller_outputs_to_supercontroller,
-                                                                                                                   self.num_actuator_force_points_blade,
-                                                                                                                   self.num_actuator_force_points_tower,
-                                                                                                                   self.turbine_position)
-        self.n_nodes = self.opFM_output.u_Len
-        self.n_vel_points_blades = self.n_blades*self.n_blade_elements
-        self.n_vel_points_tower = self.n_nodes - self.n_vel_points_blades - 1
-
-        self.n_force_points_blade = self.n_force_points_blade*self.n_blades
-        self.n_force_points_tower = self.num_actuator_force_points_tower
-
-    def get_vel_coordinates(self):
-        return (
-            np.ctypeslib.as_array(self.opFM_input.pxVel),
-            np.ctypeslib.as_array(self.opFM_input.pyVel),
-            np.ctypeslib.as_array(self.opFM_input.pzVel)
-        )
-
-    def get_force_coordinates(self):
-        return (
-            np.ctypeslib.as_array(self.opFM_input.pxForce),
-            np.ctypeslib.as_array(self.opFM_input.pyForce),
-            np.ctypeslib.as_array(self.opFM_input.pzForce)
-        )
-
-    def get_velocities(self):
-        return (
-            np.ctypeslib.as_array(self.opFM_input.u),
-            np.ctypeslib.as_array(self.opFM_input.v),
-            np.ctypeslib.as_array(self.opFM_input.w)
-        )
-
-    def get_forces(self):
-        return (
-            np.ctypeslib.as_array(self.opFM_input.fx),
-            np.ctypeslib.as_array(self.opFM_input.fy),
-            np.ctypeslib.as_array(self.opFM_input.fz)
-        )
-
-    def set_vel_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
-        self.opFM_input.pxVel[:] = np.asfortranarray(x, dtype=np.float64)
-        self.opFM_input.pxVel[:] = np.asfortranarray(y, dtype=np.float64)
-        self.opFM_input.pxVel[:] = np.asfortranarray(z, dtype=np.float64)
-
-    def set_force_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
-        self.opFM_input.pxForce[:] = np.asfortranarray(x, dtype=np.float64)
-        self.opFM_input.pxForce[:] = np.asfortranarray(y, dtype=np.float64)
-        self.opFM_input.pxForce[:] = np.asfortranarray(z, dtype=np.float64)
-
-    def set_velocity(self, u_nacelle: float, v_nacelle: float, w_nacelle: float, 
-    u_blades: np.ndarray, v_blades: np.ndarray, w_blades: np.ndarray, 
-    u_tower: np.ndarray, v_tower: np.ndarray, w_tower: np.ndarray):
-        u = np.concatenate(np.array([u_nacelle]), u_blades, u_tower)
-        v = np.concatenate(np.array([v_nacelle]), v_blades, v_tower)
-        w = np.concatenate(np.array([w_nacelle]), w_blades, w_tower)
-        self.interpolate_vel_from_force_nodes_to_vel_nodes(u, v, w)
-
-    def _set_velocities(self, u: np.ndarray, v: np.ndarray, w: np.ndarray):
-        self.opFM_output.u[:] = np.asfortranarray(u, dtype=np.float64)
-        self.opFM_output.v[:] = np.asfortranarray(v, dtype=np.float64)
-        self.opFM_output.w[:] = np.asfortranarray(w, dtype=np.float64)
-
-    def interpolate_vel_from_force_nodes_to_vel_nodes(self, u_f: np.ndarray, v_f: np.ndarray, w_f: np.ndarray):
-        u = np.zeros(self.n_nodes)
-        v = np.zeros(self.n_nodes)
-        w = np.zeros(self.n_nodes)
-
-        # Nacelle
-        u[0] = u_f[0]
-        v[0] = v_f[0]
-        w[0] = w_f[0]
-
-        n_blade_nodes = self.n_blades*self.n_force_points_blade
-
-        pos_x, pos_y, pos_z = self.get_force_coordinates()
-        rel_pos_blade_x = pos_x[1:n_blade_nodes+1] - pos_x[0]
-        rel_pos_blade_y = pos_y[1:n_blade_nodes+1] - pos_y[0]
-        rel_pos_blade_z = pos_z[1:n_blade_nodes+1] - pos_z[0]
-        rel_pos_tower_x = pos_x[n_blade_nodes+1:] - pos_x[n_blade_nodes+1]
-        rel_pos_tower_y = pos_y[n_blade_nodes+1:] - pos_y[n_blade_nodes+1]
-        rel_pos_tower_z = pos_z[n_blade_nodes+1:] - pos_z[n_blade_nodes+1]
-
-        dist_forces_blades = np.sqrt(rel_pos_blade_x*rel_pos_blade_x +
-                                     rel_pos_blade_y*rel_pos_blade_y + rel_pos_blade_z*rel_pos_blade_z)
-        dist_forces_tower = np.sqrt(rel_pos_tower_x*rel_pos_tower_x +
-                                    rel_pos_tower_y*rel_pos_tower_y + rel_pos_tower_z*rel_pos_tower_z)
-
-        pos_x, pos_y, pos_z = self.get_vel_coordinates()
-        rel_pos_blade_x = pos_x[1:n_blade_nodes+1] - pos_x[0]
-        rel_pos_blade_y = pos_y[1:n_blade_nodes+1] - pos_y[0]
-        rel_pos_blade_z = pos_z[1:n_blade_nodes+1] - pos_z[0]
-        rel_pos_tower_x = pos_x[n_blade_nodes+1:] - pos_x[n_blade_nodes+1]
-        rel_pos_tower_y = pos_y[n_blade_nodes+1:] - pos_y[n_blade_nodes+1]
-        rel_pos_tower_z = pos_z[n_blade_nodes+1:] - pos_z[n_blade_nodes+1]
-
-        dist_vels_blades = np.sqrt(rel_pos_blade_x*rel_pos_blade_x +
-                                   rel_pos_blade_y*rel_pos_blade_y + rel_pos_blade_z*rel_pos_blade_z)
-        dist_vels_tower = np.sqrt(rel_pos_tower_x*rel_pos_tower_x +
-                                  rel_pos_tower_y*rel_pos_tower_y + rel_pos_tower_z*rel_pos_tower_z)
-
-        u[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, u_f)
-        v[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, v_f)
-        w[1:n_blade_nodes + 1] = np.interp(dist_vels_blades, dist_forces_blades, w_f)
-
-        u[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, u_f)
-        v[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, v_f)
-        w[n_blade_nodes+1] = np.interp(dist_vels_tower, dist_forces_tower, w_f)
-
-        self._set_velocities(u, v, w)
-
-    def get_nacelle_force(self, u, v, w):
-        v_mag = u*u + v*v + w*w
-        c = 0.5*self.density*self.nacelle_cd * \
-            self.rotor_area*v_mag*self.nacelle_correction
-        return c*u, c*v, c*w
-
-    def get_blade_forces(self):
-        fx, fy, fz = self.get_forces()
-        n_nodes = self.n_blades*self.n_blade_elements
-        return (
-            fx[1:n_nodes+1], fy[1:n_nodes+1], fz[1:n_nodes+1]
-        )
-
-    def get_tower_forces(self):
-        fx, fy, fz = self.get_forces()
-        return (fx[self.n_vel_points_blades+1:],
-                fy[self.n_vel_points_blades+1:],
-                fz[self.n_vel_points_blades+1:]
-                )
-
-    def solution0(self):
-        self.fast_lib.opFM_solution0(self.i_turb)
-
-    def step(self):
-        self.fast_lib.opFM_step(self.i_turb)
-
-    def get_hub_position(self):
-        return (self.opFM_input.pxVel[0] + self.turbine_position[0],
-                self.opFM_input.pyVel[0] + self.turbine_position[1],
-                self.opFM_input.pzVel[0] + self.turbine_position[1])
