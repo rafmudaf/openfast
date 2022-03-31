@@ -1,4 +1,4 @@
-from ctypes import (POINTER, Structure, c_char, c_double, c_float, c_int)
+from ctypes import (POINTER, Structure, c_char, c_double, c_float, c_int, c_void_p)
 from typing import Any, Type
 
 import numpy as np
@@ -60,25 +60,25 @@ class ArrStructWrapper:
 
 class OpFM_InputType_C(Structure):  # output from fast
     _arrays_ = [
-        ("pxVel", np.float64),
-        ("pyVel", np.float64),
-        ("pzVel", np.float64),
-        ("pxForce", np.float64),
-        ("pyForce", np.float64),
-        ("pzForce", np.float64),
-        ("xdotForce", np.float64),
-        ("ydotForce", np.float64),
-        ("zdotForce", np.float64),
-        ("pOrientation", np.float64),
-        ("fx", np.float64),
-        ("fy", np.float64),
-        ("fz", np.float64),
-        ("momentx", np.float64),
-        ("momenty", np.float64),
-        ("momentz", np.float64),
-        ("forceNodesChord", np.float64)
+        ("pxVel", np.float32),
+        ("pyVel", np.float32),
+        ("pzVel", np.float32),
+        ("pxForce", np.float32),
+        ("pyForce", np.float32),
+        ("pzForce", np.float32),
+        ("xdotForce", np.float32),
+        ("ydotForce", np.float32),
+        ("zdotForce", np.float32),
+        ("pOrientation", np.float32),
+        ("fx", np.float32),
+        ("fy", np.float32),
+        ("fz", np.float32),
+        ("momentx", np.float32),
+        ("momenty", np.float32),
+        ("momentz", np.float32),
+        ("forceNodesChord", np.float32)
     ]
-    _fields_ = [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
+    _fields_ = [("object", c_void_p)] + [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
         + [len for arr, len in [make_arr(array, _dtype)
                                 for array, _dtype in _arrays_]]
 
@@ -88,9 +88,9 @@ class OpFM_InputType(ArrStructWrapper):
 
 
 class OpFM_OutputType_C(Structure):  # input to fast
-    _arrays_ = [("u", np.float64), ("v", np.float64),
-                ("w", np.float64), ("WriteOutput", np.float64), ]
-    _fields_ = [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
+    _arrays_ = [("u", np.float32), ("v", np.float32),
+                ("w", np.float32), ("WriteOutput", np.float32), ]
+    _fields_ = [("object", c_void_p)] + [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
         + [len for arr, len in [make_arr(array, _dtype)
                                 for array, _dtype in _arrays_]]
 
@@ -100,8 +100,8 @@ class OpFM_OutputType(ArrStructWrapper):
 
 
 class SC_DX_InputType_C(Structure):
-    _arrays_ = [("toSc", np.float64)]
-    _fields_ = [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
+    _arrays_ = [("toSc", np.float32)]
+    _fields_ = [("object", c_void_p)] + [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
         + [len for arr, len in [make_arr(array, _dtype)
                                 for array, _dtype in _arrays_]]
 
@@ -111,8 +111,8 @@ class SC_DX_InputType(ArrStructWrapper):
 
 
 class SC_DX_OutputType_C(Structure):
-    _arrays_ = [("fromSc", np.float64), ("fromScGlob", np.float64)]
-    _fields_ = [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
+    _arrays_ = [("fromSc", np.float32), ("fromScGlob", np.float32)]
+    _fields_ = [("object", c_void_p)] + [arr for arr, len in [make_arr(array, _dtype) for array, _dtype in _arrays_]] \
         + [len for arr, len in [make_arr(array, _dtype)
                                 for array, _dtype in _arrays_]]
 

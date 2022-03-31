@@ -3,7 +3,7 @@ import openfast
 import openfast_library
 project_root = '/home/henry/Software/openFast/python_driver/openfast'
 library_path = project_root + '/build/modules/openfast-library/libopenfastlib.so'
-reg_test_path = project_root + "/reg_tests/r-test/glue-codes/openfast/AOC_YFix_WSt/AOC_YFix_WSt.fst"
+reg_test_path = project_root + "/reg_tests/r-test/glue-codes/openfast-cpp/5MW_Land_DLL_WTurb_cpp/5MW_Land_DLL_WTurb_cpp.fst"
 
 
 def serial(input_file):

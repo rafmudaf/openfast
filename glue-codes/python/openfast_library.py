@@ -10,11 +10,9 @@ ERROR_MESSAGE_LENGTH = 1025
 
 class FastLibAPI(CDLL):
 
-    def __init__(self, library_path: str, input_file_name: str):
+    def __init__(self, library_path: str):
         super().__init__(library_path)
         self.library_path = library_path
-        self.input_file_name = create_string_buffer(
-            os.path.abspath(input_file_name).encode('utf-8'))
 
         self._initialize_routines()
 
@@ -235,8 +233,6 @@ class FastLibAPI(CDLL):
         opFM_output = of_types.OpFM_OutputType()
         sc_input = of_types.SC_DX_InputType()
         sc_output = of_types.SC_DX_OutputType()
-        print(opFM_output)
-        # print(opFM_output.u)
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_OpFM_Init(
