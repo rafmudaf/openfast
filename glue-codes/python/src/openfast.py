@@ -16,11 +16,11 @@ class OpenFAST:
         input_file_name : str
             Path to the input file for Fast
         n_turbines : int
-            total number of turbines
+            Total number of turbines
         i_turb : int
             Index of the turbine modelled by this instance
         t_max : float
-            maximum time of the simulation in s
+            Maximum time of the simulation in s
         """
         self.input_file_name = input_file_name
         self.t_max = t_max
@@ -53,11 +53,11 @@ class OpenFASTStandAlone(OpenFAST):
         input_file_name : str
             Path to the input file for Fast
         n_turbines : int
-            total number of turbines
+            Total number of turbines
         i_turb : int
             Index of the turbine modelled by this instance
         t_max : float
-            maximum time of the simulation in s
+            Maximum time of the simulation in s
         """
         super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
 
@@ -118,11 +118,11 @@ class OpenFastCoupled(OpenFAST):
         input_file_name : str
             Path to the input file for Fast.
         n_turbines : int
-            total number of turbines.
+            Total number of turbines.
         i_turb : int
             Index of the turbine modelled by this instance.
         t_max : float
-            maximum time of the simulation in s.
+            Maximum time of the simulation in s.
         num_actuator_force_points_blade : int
             Number of points per blade for which to calculate the forces.
         num_actuator_force_points_tower : int
@@ -195,15 +195,25 @@ class OpenFastCoupled(OpenFAST):
         self.n_force_points_tower = self.num_actuator_force_points_tower
 
     def fast_solution0(self):
+        """Calculate initial solution."""
         self.fast_lib.opFM_solution0(self.i_turb)
 
-    def solution0(self):
-        self.fast_lib.opFM_solution0(self.i_turb)
-
-    def step(self):
+    def fast_step(self):
+        """Advance turbine one timestep."""
         self.fast_lib.opFM_step(self.i_turb)
 
     def get_vel_coordinates(self):
+        """Get the coordinates of the velocity points.
+
+        Returns
+        -------
+        pxVel: np.ndarray    
+            X-coordinates in m.
+        pyVel: np.ndarray    
+            Y-coordinates in m.
+        pzVel: np.ndarray    
+            Z-coordinates in m.
+        """
         return (
             self.opFM_input.pxVel,
             self.opFM_input.pyVel,
@@ -211,6 +221,17 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def get_force_coordinates(self):
+        """Get the coordinates of the force points.
+
+        Returns
+        -------
+        pxForce: np.ndarray    
+            X-coordinates in m.
+        pyForce: np.ndarray    
+            Y-coordinates in m.
+        pzForce: np.ndarray    
+            Z-coordinates in m.
+        """
         return (
             self.opFM_input.pxForce,
             self.opFM_input.pyForce,
@@ -218,6 +239,17 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def get_velocities(self):
+        """Get the velocities at the velocity points.
+
+        Returns
+        -------
+        u: np.ndarray    
+            U-component in m/s.
+        v: np.ndarray    
+            V-component in m/s.
+        w: np.ndarray    
+            W-component in m/s.
+        """
         return (
             self.opFM_input.u,
             self.opFM_input.v,
@@ -225,6 +257,17 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def get_relative_velocity_at_force_nodes(self, u_f: np.ndarray, v_f: np.ndarray, w_f: np.ndarray):
+        """Get the velocities at the force points relative to the turbine blade.
+
+        Returns
+        -------
+        u: np.ndarray    
+            U-component in m/s.
+        v: np.ndarray    
+            V-component in m/s.
+        w: np.ndarray    
+            W-component in m/s.
+        """
         return (
             u_f - self.opFM_input.xdotForce,
             v_f - self.opFM_input.ydotForce,
@@ -232,6 +275,17 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def get_forces(self):
+        """Get the forces at the force points.
+
+        Returns
+        -------
+        fx: np.ndarray    
+            X-component in N.
+        fy: np.ndarray    
+            Y-component in N.
+        fz: np.ndarray    
+            Z-component in N.
+        """
         return (
             self.opFM_input.fx,
             self.opFM_input.fy,
@@ -239,11 +293,33 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def set_vel_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
+        """Set the coordinates of the velocity points.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            New x-coordinate in m.
+        y : np.ndarray
+            New y-coordinate in m.
+        z : np.ndarray
+            New z-coordinate in m.
+        """
         np.copyto(self.opFM_output.pxVel, x.astype(np.float64))
         np.copyto(self.opFM_output.pyVel, y.astype(np.float64))
         np.copyto(self.opFM_output.pzVel, z.astype(np.float64))
 
     def set_force_coordinates(self, x: np.ndarray, y: np.ndarray, z: np.ndarray):
+        """Set the coordinates of the velocity points.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            New x-coordinate in m.
+        y : np.ndarray
+            New y-coordinate in m.
+        z : np.ndarray
+            New z-coordinate in m.
+        """
         np.copyto(self.opFM_output.pxForce, x.astype(np.float64))
         np.copyto(self.opFM_output.pyForce, y.astype(np.float64))
         np.copyto(self.opFM_output.pzForce, z.astype(np.float64))
@@ -252,17 +328,73 @@ class OpenFastCoupled(OpenFAST):
                      u_nacelle: float, v_nacelle: float, w_nacelle: float,
                      u_blades: np.ndarray, v_blades: np.ndarray, w_blades: np.ndarray,
                      u_tower: np.ndarray, v_tower: np.ndarray, w_tower: np.ndarray):
+        """Set the velocity at the forcing points. Automatically interpolates to the velocity points.
+
+        Parameters
+        ----------
+        u_nacelle : float
+            U-component of the velocity at the nacelle in m/s.
+        v_nacelle : float
+            V-component of the velocity at the nacelle in m/s.
+        w_nacelle : float
+            W-component of the velocity at the nacelle in m/s.
+        u_blades : np.ndarray
+            U-component of the velocity at the blades in m/s.
+        v_blades : np.ndarray
+            V-component of the velocity at the blades in m/s.
+        w_blades : np.ndarray
+            W-component of the velocity at the blades in m/s.
+        u_tower : np.ndarray
+            U-component of the velocity at the tower in m/s.
+        v_tower : np.ndarray
+            V-component of the velocity at the tower in m/s.
+        w_tower : np.ndarray
+            W-component of the velocity at the tower in m/s.
+        """
         u = np.concatenate((np.array([u_nacelle, ]), u_blades, u_tower))
         v = np.concatenate((np.array([v_nacelle, ]), v_blades, v_tower))
         w = np.concatenate((np.array([w_nacelle, ]), w_blades, w_tower))
         self.interpolate_vel_from_force_nodes_to_vel_nodes(u, v, w)
 
     def set_velocities(self, u: np.ndarray, v: np.ndarray, w: np.ndarray):
+        """Set velocities at the velocity points
+
+        Parameters
+        ----------
+        u : np.ndarray
+            U-component of the velocity in m/s.
+        v : np.ndarray
+            V-component of the velocity at the nacelle in m/s.
+        w : np.ndarray
+            w-component of the velocity at the nacelle in m/s.
+        """
         np.copyto(self.opFM_output.u, u.astype(np.float32))
         np.copyto(self.opFM_output.v, v.astype(np.float32))
         np.copyto(self.opFM_output.w, w.astype(np.float32))
 
-    def get_relative_positions(self, pos_x: np.ndarray, pos_y: np.ndarray, pos_z: np.ndarray, n_nodes_per_blade: int):
+    def get_relative_distances(self, pos_x: np.ndarray, pos_y: np.ndarray, pos_z: np.ndarray, n_nodes_per_blade: int):
+        """Calculate the relative distances of the blade and tower nodes.
+        Assumes that the first node is at the center of the rotor
+        and the first node of the tower nodes is at the bottom.
+
+        Parameters
+        ----------
+        pos_x : np.ndarray
+            X-component of the absolute position of the blade and tower nodes in m.
+        pos_y : np.ndarray
+            Y-component of the absolute position of the blade and tower nodes in m.
+        pos_z : np.ndarray
+            Z-component of the absolute position of the blade and tower nodes in m.
+        n_nodes_per_blade : int
+            Number of nodes per blade.
+
+        Returns
+        -------
+        dist_blades : np.ndarray
+            Distances of the blade nodes to the center of the rotor in m.
+        dist_tower : np.ndarray
+            Distances of the tower nodes to the bottom node of the tower in m.
+        """
         n_blade_nodes = self.n_blades*n_nodes_per_blade
 
         rel_pos_blade_x = pos_x[1:n_blade_nodes+1] - pos_x[0]
@@ -280,6 +412,17 @@ class OpenFastCoupled(OpenFAST):
         return dist_blades, dist_tower
 
     def interpolate_vel_from_force_nodes_to_vel_nodes(self, u_f: np.ndarray, v_f: np.ndarray, w_f: np.ndarray):
+        """Interpolates the given velocities from the force nodes to the velocity nodes.
+
+        Parameters
+        ----------
+        u_f : np.ndarray
+            u-component of the velocity at the force-nodes in m/s.
+        v_f : np.ndarray
+            u-component of the velocity at the force-nodes in m/s.
+        w_f : np.ndarray
+            u-component of the velocity at the force-nodes in m/s.
+        """
         u = np.zeros(self.n_vel_points)
         v = np.zeros(self.n_vel_points)
         w = np.zeros(self.n_vel_points)
@@ -290,11 +433,11 @@ class OpenFastCoupled(OpenFAST):
         w[0] = w_f[0]
 
         pos_x, pos_y, pos_z = self.get_force_coordinates()
-        dist_forces_blades, dist_forces_tower = self.get_relative_positions(
+        dist_forces_blades, dist_forces_tower = self.get_relative_distances(
             pos_x, pos_y, pos_z, self.n_force_points_blade)
 
         pos_x, pos_y, pos_z = self.get_vel_coordinates()
-        dist_vels_blades, dist_vels_tower = self.get_relative_positions(
+        dist_vels_blades, dist_vels_tower = self.get_relative_distances(
             pos_x, pos_y, pos_z, self.n_vel_points_blade)
 
         end_force = 0
@@ -325,13 +468,44 @@ class OpenFastCoupled(OpenFAST):
 
         self.set_velocities(u, v, w)
 
-    def get_nacelle_force(self, u, v, w):
+    def get_nacelle_force(self, u: float, v: float, w: float):
+        """Calculates the drag force by the nacelle.
+
+        Parameters
+        ----------
+        u : float
+            u-component of the velocity at the nacelle in m/s.
+        v : float
+            v-component of the velocity at the nacelle in m/s.
+        w : float
+            w-component of the velocity at the nacelle in m/s.
+
+        Returns
+        -------
+        fx : float
+            x-component of the force in N.        
+        fy : float
+            y-component of the force in N.        
+        fz : float
+            z-component of the force in N.
+        """
         v_mag = u*u + v*v + w*w
         c = 0.5*self.density*self.nacelle_cd * \
             self.rotor_area*v_mag*self.nacelle_correction
         return c*u, c*v, c*w
 
     def get_blade_forces(self):
+        """Get the forces at the blades.
+
+        Returns
+        -------
+        fx : np.ndarray
+            x-component of the force in N.        
+        fy : np.ndarray
+            y-component of the force in N.        
+        fz : np.ndarray
+            z-component of the force in N.
+        """
         fx, fy, fz = self.get_forces()
         n_nodes = self.n_blades*self.n_blade_elements
         return (
@@ -339,6 +513,17 @@ class OpenFastCoupled(OpenFAST):
         )
 
     def get_tower_forces(self):
+        """Get the forces at the tower.
+
+        Returns
+        -------
+        fx : np.ndarray
+            x-component of the force in N.        
+        fy : np.ndarray
+            y-component of the force in N.        
+        fz : np.ndarray
+            z-component of the force in N.
+        """
         fx, fy, fz = self.get_forces()
         return (
             fx[self.n_vel_points_blades+1:],
@@ -346,9 +531,18 @@ class OpenFastCoupled(OpenFAST):
             fz[self.n_vel_points_blades+1:]
         )
 
-
-
     def get_hub_position(self):
+        """Get the hub position.
+
+        Returns
+        -------
+        x : float
+            x-component of the position in m.        
+        y : float
+            y-component of the position in m.        
+        z :float
+            z-component of the position in m.
+        """
         return (
             self.opFM_input.pxVel[0] + self.turbine_position[0],
             self.opFM_input.pyVel[0] + self.turbine_position[1],

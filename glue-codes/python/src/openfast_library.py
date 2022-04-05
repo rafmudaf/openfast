@@ -1,5 +1,5 @@
 from ctypes import (CDLL, POINTER, byref, c_bool, c_char, c_double, c_int,
-                    create_string_buffer)
+                    create_string_buffer, Array)
 from typing import Optional
 
 import numpy as np
@@ -7,6 +7,7 @@ import numpy as np
 import openfast_types as of_types
 
 ERROR_MESSAGE_LENGTH = 1025
+char_array = Array[c_char]
 
 
 class FastLibAPI(CDLL):
@@ -139,7 +140,7 @@ class FastLibAPI(CDLL):
     def fatal_error(self, error_status: c_int) -> bool:
         return error_status.value >= self.abort_error_level.value
 
-    def check_error(self, error_status: c_int, error_message):
+    def check_error(self, error_status: c_int, error_message: char_array):
         if self.fatal_error(error_status):
             raise RuntimeError(
                 f"Error {error_status.value}: {error_message.value.decode('UTF-8')}")
