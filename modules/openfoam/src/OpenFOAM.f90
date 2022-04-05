@@ -113,6 +113,7 @@ SUBROUTINE Init_OpFM( InitInp, p_FAST, AirDens, u_AD14, u_AD, initOut_AD, y_AD, 
       !............................................................................................
       ! Allocate arrays and define initial guesses for the OpenFOAM inputs here:
       !............................................................................................
+   WRITE(*,*)
    CALL AllocPAry( OpFM%u%pxVel, OpFM%p%NnodesVel, 'pxVel', ErrStat2, ErrMsg2 ); CALL SetErrStat( ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName )
    CALL AllocPAry( OpFM%u%pyVel, OpFM%p%NnodesVel, 'pyVel', ErrStat2, ErrMsg2 ); CALL SetErrStat( ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName )
    CALL AllocPAry( OpFM%u%pzVel, OpFM%p%NnodesVel, 'pzVel', ErrStat2, ErrMsg2 ); CALL SetErrStat( ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName )
@@ -151,16 +152,18 @@ SUBROUTINE Init_OpFM( InitInp, p_FAST, AirDens, u_AD14, u_AD, initOut_AD, y_AD, 
    OpFM%u%c_obj%momenty_Len = OpFM%p%NnodesForce; OpFM%u%c_obj%momenty = C_LOC( OpFM%u%momenty(1) )
    OpFM%u%c_obj%momentz_Len = OpFM%p%NnodesForce; OpFM%u%c_obj%momentz = C_LOC( OpFM%u%momentz(1) )
    OpFM%u%c_obj%forceNodesChord_Len = OpFM%p%NnodesForce; OpFM%u%c_obj%forceNodesChord = C_LOC( OpFM%u%forceNodesChord(1) )
-
+   WRITE(*,*)
       ! initialize the arrays:
    call OpFM_CreateActForceBladeTowerNodes(OpFM%p, ErrStat2, ErrMsg2) !Creates the blade and tower nodes in radial and tower height co-ordinates
+   WRITE(*,*)
    call OpFM_InterpolateForceNodesChord(initOut_AD, OpFM%p, OpFM%u, ErrStat2, ErrMsg2) !Interpolates the chord distribution to the force nodes 
+   WRITE(*,*)
    call OpFM_CreateActForceMotionsMesh( p_FAST, y_ED, InitInp, OpFM, ErrStat2, ErrMsg2)
-
+   WRITE(*,*)
       !............................................................................................
    ! Allocate arrays and set up mappings to point loads (for AD15 only):
       ! (bjj: note that normally I'd put these things in the FAST_ModuleMapType, but I don't want
-      ! to add OpenFOAM integrations in the rest fo the code).
+      ! to add OpenFOAM integrations in the rest of the code).
       !............................................................................................
    ! Allocate space for mapping data structures
    ALLOCATE( OpFM%m%ActForceLoads(OpFM%p%NMappings), OpFM%m%Line2_to_Line2_Loads(OpFM%p%NMappings), OpFM%m%Line2_to_Line2_Motions(OpFM%p%NMappings),STAT=ErrStat2)
@@ -186,7 +189,7 @@ SUBROUTINE Init_OpFM( InitInp, p_FAST, AirDens, u_AD14, u_AD, initOut_AD, y_AD, 
            , ErrMess  = ErrMsg2               )
       OpFM%m%ActForceLoadsPoints(k)%RemapFlag = .true.
    end do
-   
+   write(*,*)
    ! create the mapping data structures:
    DO k=1,OpFM%p%NumBl
       IF (p_FAST%CompElast == Module_ED ) THEN
@@ -212,7 +215,7 @@ SUBROUTINE Init_OpFM( InitInp, p_FAST, AirDens, u_AD14, u_AD, initOut_AD, y_AD, 
       end if
       
    end do
-   
+   write(*,*)
    call SetOpFMPositions(p_FAST, u_AD14, u_AD, y_ED, OpFM)
    OpFM%u%fx = 0.0_ReKi
    OpFM%u%fy = 0.0_ReKi
@@ -226,7 +229,7 @@ SUBROUTINE Init_OpFM( InitInp, p_FAST, AirDens, u_AD14, u_AD, initOut_AD, y_AD, 
    CALL AllocPAry( OpFM%y%w, OpFM%p%NnodesVel, 'w', ErrStat2, ErrMsg2 ); CALL SetErrStat( ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName )
 
    IF (ErrStat >= AbortErrLev) RETURN
-
+   write(*,*)
       ! make sure the C versions are synced with these arrays
    OpFM%y%c_obj%u_Len = OpFM%p%NnodesVel; OpFM%y%c_obj%u = C_LOC( OpFM%y%u(1) )
    OpFM%y%c_obj%v_Len = OpFM%p%NnodesVel; OpFM%y%c_obj%v = C_LOC( OpFM%y%v(1) )
