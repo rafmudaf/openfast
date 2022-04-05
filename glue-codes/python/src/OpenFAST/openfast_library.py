@@ -1,20 +1,26 @@
-from ctypes import (CDLL, POINTER, byref, c_bool, c_char, c_double, c_int,
-                    create_string_buffer, Array)
+import sys
+from ctypes import (CDLL, POINTER, Array, byref, c_bool, c_char, c_double,
+                    c_int, create_string_buffer)
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
-import openfast_types as of_types
+from .openfast_types import (OpFM_InputType, OpFM_InputType_C, 
+                             OpFM_OutputType, OpFM_OutputType_C,
+                             SC_DX_InputType, SC_DX_InputType_C,
+                             SC_DX_OutputType, SC_DX_OutputType_C)
 
 ERROR_MESSAGE_LENGTH = 1025
 char_array = Array[c_char]
 
+library_path = Path(__file__).parent.parent.parent.parent.parent/Path("install/lib/libopenfastlib").with_suffix(".so" if sys.platform == "linux" else ".dll")
+
 
 class FastLibAPI(CDLL):
 
-    def __init__(self, library_path: str):
+    def __init__(self, library_path: str = str(library_path)):
         super().__init__(library_path)
-        self.library_path = library_path
 
         self._initialize_routines()
 
@@ -108,13 +114,13 @@ class FastLibAPI(CDLL):
             POINTER(c_int),         # NumBl OUT
             POINTER(c_int),         # NumBlElem OUT
             # OpFM_Input_from_FAST INOUT
-            POINTER(of_types.OpFM_InputType_C),
+            POINTER(OpFM_InputType_C),
             # OpFM_Output_to_FAST INOUT
-            POINTER(of_types.OpFM_OutputType_C),
+            POINTER(OpFM_OutputType_C),
             # SC_Input_from_FAST INOUT
-            POINTER(of_types.SC_DX_InputType_C),
+            POINTER(SC_DX_InputType_C),
             # SC_Output_to_FAST INOUT
-            POINTER(of_types.SC_DX_OutputType_C),
+            POINTER(SC_DX_OutputType_C),
             POINTER(c_int),         # ErrStat_c OUT
             POINTER(c_char)         # ErrMsg_c(IntfStrLen) OUT
         ]
@@ -232,10 +238,10 @@ class FastLibAPI(CDLL):
         dt = c_double(0)
         num_bl = c_int(0)
         num_bl_elem = c_int(0)
-        opFM_input = of_types.OpFM_InputType()
-        opFM_output = of_types.OpFM_OutputType()
-        sc_input = of_types.SC_DX_InputType()
-        sc_output = of_types.SC_DX_OutputType()
+        opFM_input = OpFM_InputType()
+        opFM_output = OpFM_OutputType()
+        sc_input = SC_DX_InputType()
+        sc_output = SC_DX_OutputType()
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_OpFM_Init(

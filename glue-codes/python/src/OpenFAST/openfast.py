@@ -2,17 +2,15 @@ from typing import Tuple
 
 import numpy as np
 
-import openfast_library
+from .openfast_library import FastLibAPI
 
 
 class OpenFAST:
-    def __init__(self, fast_lib: openfast_library.FastLibAPI, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
+    def __init__(self, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
         """Base class to interact with individual turbines in OpenFAST
 
         Parameters
         ----------
-        fast_lib : openfast_library.FastLibAPI
-            Instance of FastLibApi
         input_file_name : str
             Path to the input file for Fast
         n_turbines : int
@@ -22,9 +20,9 @@ class OpenFAST:
         t_max : float
             Maximum time of the simulation in s
         """
+        self.fast_lib = FastLibAPI()
         self.input_file_name = input_file_name
         self.t_max = t_max
-        self.fast_lib = fast_lib
         self.n_turbines = n_turbines
         self.i_turb = i_turb
 
@@ -43,7 +41,7 @@ class OpenFAST:
 
 
 class OpenFASTStandAlone(OpenFAST):
-    def __init__(self, fast_lib: openfast_library.FastLibAPI, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
+    def __init__(self, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
         """Run Fast as standalone
 
         Parameters
@@ -59,7 +57,7 @@ class OpenFASTStandAlone(OpenFAST):
         t_max : float
             Maximum time of the simulation in s
         """
-        super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
+        super().__init__(input_file_name, n_turbines, i_turb, t_max)
 
     def fast_init(self):
         super().fast_init()
@@ -100,7 +98,7 @@ class OpenFASTStandAlone(OpenFAST):
 
 
 class OpenFastCoupled(OpenFAST):
-    def __init__(self, fast_lib: openfast_library.FastLibAPI,
+    def __init__(self,
                  input_file_name: str,
                  n_turbines: int, i_turb: int,
                  t_max: float,
@@ -143,7 +141,7 @@ class OpenFastCoupled(OpenFAST):
         ValueError
             _description_
         """
-        super().__init__(fast_lib, input_file_name, n_turbines, i_turb, t_max)
+        super().__init__(input_file_name, n_turbines, i_turb, t_max)
         if i_turb >= n_turbines:
             raise ValueError(
                 "n_turbines has to be bigger than i_turb (i_turb runs from 0 to n_turbines-1)")
