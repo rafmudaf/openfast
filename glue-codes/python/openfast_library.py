@@ -1,10 +1,11 @@
-import os
-from ctypes import (CDLL, POINTER, byref, c_bool, c_char, c_double,
-                    c_int, create_string_buffer)
+from ctypes import (CDLL, POINTER, byref, c_bool, c_char, c_double, c_int,
+                    create_string_buffer)
 from typing import Optional
 
 import numpy as np
+
 import openfast_types as of_types
+
 ERROR_MESSAGE_LENGTH = 1025
 
 
@@ -140,7 +141,8 @@ class FastLibAPI(CDLL):
 
     def check_error(self, error_status: c_int, error_message):
         if self.fatal_error(error_status):
-            raise RuntimeError(f"Error {error_status.value}: {error_message}")
+            raise RuntimeError(
+                f"Error {error_status.value}: {error_message.value.decode('UTF-8')}")
 
     def allocate_turbines(self, n_turbines: int):
         error_status = c_int(0)
