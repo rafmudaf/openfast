@@ -2,7 +2,7 @@ import sys
 from ctypes import (CDLL, POINTER, Array, byref, c_bool, c_char, c_double,
                     c_int, create_string_buffer)
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import numpy as np
 
@@ -144,14 +144,46 @@ class FastLibAPI(CDLL):
         self.FAST_OpFM_Step.restype = c_int
 
     def fatal_error(self, error_status: c_int) -> bool:
+        """Check if error status is greater or equal to `abort_error_level`.
+
+        Parameters
+        ----------
+        error_status : c_int
+            Error status to check.
+
+        Returns
+        -------
+        bool
+            True if error status is greater or equal to `abort_error_level`.
+        """
         return error_status.value >= self.abort_error_level.value
 
     def check_error(self, error_status: c_int, error_message: char_array):
+        """Check if `error_status` is a fatal error and raise error.
+
+        Parameters
+        ----------
+        error_status : c_int
+            Error code to check.
+        error_message : char_array
+            Error message to display.
+
+        Raises
+        ------
+        RuntimeError
+        """
         if self.fatal_error(error_status):
             raise RuntimeError(
                 f"Error {error_status.value}: {error_message.value.decode('UTF-8')}")
 
     def allocate_turbines(self, n_turbines: int):
+        """Allocate turbines in OpenFAST.
+
+        Parameters
+        ----------
+        n_turbines : int
+            Total number of turbines to allocate.
+        """
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_AllocateTurbines(
@@ -163,6 +195,29 @@ class FastLibAPI(CDLL):
         self.allocated_turbines = n_turbines
 
     def sizes(self, i_turb: int, input_file_name: str, t_max: Optional[float] = None):
+        """
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine
+        input_file_name : str
+            Name of the input file
+        t_max : Optional[float], optional
+            Maximum simulated time, by default None. 
+            If `None` takes the value read from the input file.
+
+        Returns
+        -------
+        num_outs : int
+            Number of outputs
+        dt : float
+            Width of the timestep in s.
+        t_max_read : float
+            Maximum simulated time.
+        output_channel_names : List[str]]
+            List with the names of the output channels.
+        """
         num_outs = c_int(0)
         dt = c_double(0)
         t_max_read = c_double(0)
@@ -190,6 +245,20 @@ class FastLibAPI(CDLL):
         return num_outs.value, dt.value, t_max_read.value, output_channel_names
 
     def start(self, i_turb: int, num_outputs: int):
+        """Calls OpenFAST's start routine.
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine.
+        num_outputs : int
+            Number of outputs.
+
+        Returns
+        -------
+        np.ndarray
+            Output array.
+        """
         output_array = np.zeros(num_outputs, np.float64)
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
@@ -206,6 +275,22 @@ class FastLibAPI(CDLL):
         return output_array
 
     def update(self, i_turb: int, num_outputs: int):
+        """Update FAST
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine.
+        num_outputs : int
+            Number of outputs.
+
+        Returns
+        -------
+        end_early : bool
+            `True` if simulation is ended early
+        output_array : np.ndarray
+            Output from FAST update.
+        """
         output_array = np.zeros(num_outputs, np.float64)
         end_early = c_bool(False)
         error_status = c_int(0)
@@ -235,6 +320,48 @@ class FastLibAPI(CDLL):
                   init_sc_outputs_global: np.ndarray,
                   init_sc_outputs_turbine: np.ndarray,
                   turbine_position: np.ndarray):
+        """Initialize FAST for coupling with external velocities.
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine to initialize.
+        t_max : float
+            Maximum time of the simulation in s.
+        input_file_name : str
+            Name of the input file for OpenFAST.
+        turb_id : int
+            Turbine ID (can be different from Turbine index)
+        num_sc_2_ctrl_global : int
+            Number of parameters to pass from super controller to global controller.
+        num_sc_2_ctrl : int
+            Number of parameters to pass from super controller to controller.
+        num_ctrl_2_sc : int
+            Number of parameters to pass from controller to supercontroller.
+        num_act_force_pts_bld : int
+            Number of actuator force points per blade.
+        num_act_force_pts_twr : int
+            Number of actuator force points per blade.
+        init_sc_outputs_global : np.ndarray
+            Array with global initialization values from super controller.
+        init_sc_outputs_turbine : np.ndarray
+            Array with local initialization values from super controller.
+        turbine_position : np.ndarray
+            Position of the turbine nacelle.
+
+        Returns
+        -------
+        dt : float
+            Width of the timestep of OpenFAST in s.
+        num_bl : dt
+            Number of blades.
+        num_bl_elem : int
+            Number of blade elements at which to compute the forces.
+        opFM_input : OpFM_InputType
+            Input to the coupled simulation / output from OpenFAST.
+        opFM_output : OpFM_OutputType
+            Output from the coupled simulation / input to OpenFAST.
+        """
         dt = c_double(0)
         num_bl = c_int(0)
         num_bl_elem = c_int(0)
@@ -272,6 +399,13 @@ class FastLibAPI(CDLL):
         return dt.value, num_bl.value, num_bl_elem.value, opFM_input, opFM_output
 
     def opFM_solution0(self, i_turb: int):
+        """Calculates an initial solution at timestep 0.
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine.
+        """
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_OpFM_Solution0(
@@ -282,6 +416,13 @@ class FastLibAPI(CDLL):
         self.check_error(error_status, error_message)
 
     def opFM_step(self, i_turb: int):
+        """Advances OpenFAST one timestep.
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine.
+        """
         error_status = c_int(0)
         error_message = create_string_buffer(ERROR_MESSAGE_LENGTH)
         self.FAST_OpFM_Step(
@@ -292,12 +433,21 @@ class FastLibAPI(CDLL):
         self.check_error(error_status, error_message)
 
     def end(self, i_turb: int):
+        """Ends the simulation of Turbine `i_turb`.
+
+        Parameters
+        ----------
+        i_turb : int
+            Index of the turbine.
+        """
         self.FAST_End(
             byref(c_int(i_turb)),
             byref(c_bool(False))
         )
 
     def deallocate_turbines(self):
+        """Deallocates all turbines.
+        """
         if self.ended:
             return
         error_status = c_int(0)
