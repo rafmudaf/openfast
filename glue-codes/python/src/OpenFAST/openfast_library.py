@@ -2,7 +2,7 @@ import sys
 from ctypes import (CDLL, POINTER, Array, byref, c_bool, c_char, c_double,
                     c_int, create_string_buffer)
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional
 
 import numpy as np
 

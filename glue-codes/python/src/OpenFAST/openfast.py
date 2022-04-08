@@ -141,18 +141,26 @@ class OpenFastCoupled(OpenFAST):
         Raises
         ------
         ValueError
-            _description_
+            `n_turbines` must be larger than `i_turb`
         """
         super().__init__(input_file_name, n_turbines, i_turb, t_max)
         if i_turb >= n_turbines:
             raise ValueError(
                 """n_turbines has to be bigger than i_turb
                 (i_turb runs from 0 to n_turbines-1)""")
+        if num_actuator_force_points_blade <= 0:
+            raise ValueError(
+                """num_actuator_force_points_blade has to be larger than 0"""
+            )
+        if num_actuator_force_points_tower <= 0:
+            raise ValueError(
+                """num_actuator_force_points_tower has to be larger than 0"""
+            )
         self.i_turb = i_turb
         self.num_controller_inputs_from_supercontroller = 0
         self.num_controller_outputs_to_supercontroller = 0
-        self.num_actuator_force_points_blade = num_actuator_force_points_blade
-        self.num_actuator_force_points_tower = num_actuator_force_points_tower
+        self.n_force_points_blade = num_actuator_force_points_blade
+        self.n_force_points_tower = num_actuator_force_points_tower
         self.turbine_position = np.array(list(turbine_position), np.float32)
         self.nacelle_cd = nacelle_cd
         self.rotor_area = rotor_area
@@ -180,8 +188,8 @@ class OpenFastCoupled(OpenFAST):
                                     self.input_file_name,
                                     self.i_turb,
                                     0, 0, 0,
-                                    self.num_actuator_force_points_blade,
-                                    self.num_actuator_force_points_tower,
+                                    self.n_force_points_blade,
+                                    self.n_force_points_tower,
                                     sc_out_glob,
                                     sc_out_turbine,
                                     self.turbine_position)
@@ -192,9 +200,7 @@ class OpenFastCoupled(OpenFAST):
         self.n_vel_points_tower = self.n_vel_points - \
             self.n_vel_points_blade*self.n_blades - 1
 
-        self.n_force_points_blade = self.num_actuator_force_points_blade
-        self.n_force_points_all_blades = self.num_actuator_force_points_blade*self.n_blades
-        self.n_force_points_tower = self.num_actuator_force_points_tower
+        self.n_force_points_all_blades = self.n_force_points_blade*self.n_blades
         self.n_force_points = 1 + self.n_force_points_all_blades + self.n_force_points_tower
 
     def fast_solution0(self):
@@ -217,11 +223,9 @@ class OpenFastCoupled(OpenFAST):
         z :float
             z-component of the position in m.
         """
-        return (
-            self.opFM_input.pxVel[0] + self.turbine_position[0],
-            self.opFM_input.pyVel[0] + self.turbine_position[1],
-            self.opFM_input.pzVel[0] + self.turbine_position[1]
-        )
+        return self.opFM_input.pxVel[0] + self.turbine_position[0], \
+               self.opFM_input.pyVel[0] + self.turbine_position[1], \
+               self.opFM_input.pzVel[0] + self.turbine_position[1]
 
     def get_hub_shaft_direction(self) -> np.ndarray:
         """Get the hub shaft direction pointing downwind.
@@ -231,7 +235,7 @@ class OpenFastCoupled(OpenFAST):
         np.ndarray
             Hub shaft direction.
         """
-        return self.opFM_input.pOrientation[0::3]
+        return self.opFM_input.pOrientation[0:3:9]
 
     def get_vel_coordinates(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get the coordinates of the velocity points.
@@ -245,29 +249,27 @@ class OpenFastCoupled(OpenFAST):
         pzVel: np.ndarray
             Z-coordinates in m.
         """
-        return (
-            self.opFM_input.pxVel + self.turbine_position[0],
-            self.opFM_input.pyVel + self.turbine_position[0],
+        return \
+            self.opFM_input.pxVel + self.turbine_position[0], \
+            self.opFM_input.pyVel + self.turbine_position[0], \
             self.opFM_input.pzVel + self.turbine_position[0]
-        )
 
     def get_force_coordinates(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get the coordinates of the force points.
 
         Returns
         -------
-        pxForce: np.ndarray    
+        pxForce: np.ndarray
             X-coordinates in m.
-        pyForce: np.ndarray    
+        pyForce: np.ndarray
             Y-coordinates in m.
-        pzForce: np.ndarray    
+        pzForce: np.ndarray
             Z-coordinates in m.
         """
-        return (
-            self.opFM_input.pxForce + self.turbine_position[0],
-            self.opFM_input.pyForce + self.turbine_position[0],
+        return \
+            self.opFM_input.pxForce + self.turbine_position[0], \
+            self.opFM_input.pyForce + self.turbine_position[0], \
             self.opFM_input.pzForce + self.turbine_position[0]
-        )
 
     def get_force_node_orientation(self) -> np.ndarray:
         """Get the orientation of the force points.
@@ -292,11 +294,11 @@ class OpenFastCoupled(OpenFAST):
             W-component in m/s.
         """
         u_f, v_f, w_f = self.interpolate_vel_from_vel_points_to_force_points(*self.get_velocity_at_vel_points())
-        return (
-            u_f - self.opFM_input.xdotForce,
-            v_f - self.opFM_input.ydotForce,
+        return \
+            u_f - self.opFM_input.xdotForce, \
+            v_f - self.opFM_input.ydotForce, \
             w_f - self.opFM_input.zdotForce
-        )
+        
 
 
     def get_velocity_at_vel_points(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -311,11 +313,10 @@ class OpenFastCoupled(OpenFAST):
         w: np.ndarray
             W-component in m/s.
         """
-        return (
-            self.opFM_input.u,
-            self.opFM_input.v,
+        return \
+            self.opFM_input.u, \
+            self.opFM_input.v, \
             self.opFM_input.w
-        )
 
     def get_velocity_at_force_points(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get the velocities at the force points.
@@ -329,11 +330,10 @@ class OpenFastCoupled(OpenFAST):
         w: np.ndarray
             W-component in m/s.
         """
-        return (
-            self.opFM_input.u,
-            self.opFM_input.v,
+        return \
+            self.opFM_input.u, \
+            self.opFM_input.v, \
             self.opFM_input.w
-        )
 
     def get_forces(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get the forces at the force points.
@@ -347,11 +347,10 @@ class OpenFastCoupled(OpenFAST):
         fz: np.ndarray
             Z-component in N.
         """
-        return (
-            self.opFM_input.fx,
-            self.opFM_input.fy,
+        return \
+            self.opFM_input.fx, \
+            self.opFM_input.fy, \
             self.opFM_input.fz
-        )
 
     def get_chords(self):
         """Get the blade chords and tower diameters.
@@ -610,7 +609,7 @@ class OpenFastCoupled(OpenFAST):
         w[1+end_force:] = np.interp(dist_forces_tower,
                                   dist_vels_tower, w_v[1+end_vel:])
 
-        return u,v,w
+        return u, v, w
 
     def get_nacelle_force(self, u: float, v: float, w: float):
         """Calculates the drag force by the nacelle.
@@ -652,7 +651,7 @@ class OpenFastCoupled(OpenFAST):
         """
         fx, fy, fz = self.get_forces()
         return tuple(
-            f[1:self.n_force_points_all_blades+1]
+            f[1:self.n_force_points_all_blades + 1]
             for f in self.get_forces())  # type: ignore
 
 
@@ -662,9 +661,9 @@ class OpenFastCoupled(OpenFAST):
         Returns
         -------
         fx : np.ndarray
-            x-component of the force in N.        
+            x-component of the force in N.
         fy : np.ndarray
-            y-component of the force in N.        
+            y-component of the force in N.
         fz : np.ndarray
             z-component of the force in N.
         """
