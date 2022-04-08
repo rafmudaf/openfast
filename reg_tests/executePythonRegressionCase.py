@@ -36,7 +36,7 @@ import rtestlib as rtl
 import openfastDrivers
 import pass_fail
 from errorPlotting import exportCaseSummary
-import openfast_library
+import OpenFAST
 
 ##### Helper functions
 def ignoreBaselineItems(directory, contents):
@@ -159,10 +159,10 @@ if not noExec:
     else:
         raise SystemError("Platform could not be determined: platform.system -> {}".format(platform.system()))
 
-    openfastlib = openfast_library.FastLibAPI(openfastlib_path, caseInputFile)
-    openfastlib.fast_run()
+    openfast = OpenFAST.OpenFASTStandAlone(caseInputFile, 1, 0, None)
+    openfast.fast_run()
 
-    output_channel_names = openfastlib.output_channel_names
+    output_channel_names = openfast.output_channel_names
 
 ### Build the filesystem navigation variables for running the regression test
 baselineOutFile = os.path.join(targetOutputDirectory, caseName + ".outb")
@@ -171,7 +171,7 @@ rtl.validateFileOrExit(baselineOutFile)
 testInfo = {
     "attribute_names": output_channel_names
 }
-testData = openfastlib.output_values
+testData = openfast.output_values
 baselineData, baselineInfo, _ = pass_fail.readFASTOut(baselineOutFile)
 performance = pass_fail.calculateNorms(testData, baselineData)
 normalizedNorm = performance[:, 1]
