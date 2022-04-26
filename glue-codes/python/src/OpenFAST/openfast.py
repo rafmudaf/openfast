@@ -97,7 +97,7 @@ class OpenFASTStandAlone(OpenFAST):
         self.fast_end()
 
 
-class OpenFastCoupled(OpenFAST):
+class OpenFASTCoupled(OpenFAST):
     def __init__(self,
                  input_file_name: str,
                  n_turbines: int, i_turb: int,
@@ -202,6 +202,8 @@ class OpenFastCoupled(OpenFAST):
 
         self.n_force_points_all_blades = self.n_force_points_blade*self.n_blades
         self.n_force_points = 1 + self.n_force_points_all_blades + self.n_force_points_tower
+        self.num_outs, _, _, self.output_channel_names = \
+            self.fast_lib.sizes(self.i_turb, self.input_file_name)
 
     def fast_solution0(self):
         """Calculate initial solution."""

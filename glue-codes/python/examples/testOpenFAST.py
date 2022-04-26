@@ -31,7 +31,7 @@ def openfoam(input_file_name):
 
     v_0 = 9
 
-    of = OF.OpenFastCoupled(input_file_name, 1, 0, 25, n_points_per_blade, n_points_tower, turbine_position, 0.5, rotor_area, air_density)
+    of = OF.OpenFASTCoupled(input_file_name, 1, 0, 25, n_points_per_blade, n_points_tower, turbine_position, 0.5, rotor_area, air_density)
     for i in range(of.total_time_steps):
         of.set_velocity(0, 0, 0,
                         np.ones(n_points_per_blade*3)*v_0,  np.zeros(n_points_per_blade*3), np.zeros(n_points_per_blade*3), 
