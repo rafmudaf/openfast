@@ -208,8 +208,6 @@ class OpenFASTCoupled(OpenFAST):
 
         self.n_force_points_all_blades = self.n_force_points_blade*self.n_blades
         self.n_force_points = 1 + self.n_force_points_all_blades + self.n_force_points_tower
-        self.num_outs, _, _, self.output_channel_names = \
-            self.fast_lib.sizes(self.i_turb, self.input_file_name)
 
     def fast_solution0(self):
         """Calculate initial solution."""
@@ -233,7 +231,7 @@ class OpenFASTCoupled(OpenFAST):
         """
         return self.opFM_input.pxVel[0] + self.turbine_position[0], \
                self.opFM_input.pyVel[0] + self.turbine_position[1], \
-               self.opFM_input.pzVel[0] + self.turbine_position[1]
+               self.opFM_input.pzVel[0] + self.turbine_position[2]
 
     def get_hub_shaft_direction(self) -> np.ndarray:
         """Get the hub shaft direction pointing downwind.
@@ -681,3 +679,16 @@ class OpenFASTCoupled(OpenFAST):
             fy[self.n_force_points_all_blades+1:],
             fz[self.n_force_points_all_blades+1:]
         )
+
+    def get_azimuth(self) -> float:
+        """Get the azimuthal angle of the first blade in rad.
+
+        Returns
+        -------
+        float
+            Azimuth angle of the first blade in rad from -Pi to Pi.
+        """
+        return np.arctan2(self.opFM_input.pyVel[0] - self.opFM_input.pyVel[1],
+                          self.opFM_input.pzVel[1] - self.opFM_input.pzVel[0])
+
+
