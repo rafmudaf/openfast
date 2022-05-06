@@ -1,12 +1,15 @@
-from typing import Tuple
+from typing import Tuple, Union
+from pathlib import Path
 
 import numpy as np
 
 from .openfast_library import FastLibAPI
 
 
+FileName = Union[str, Path]
+
 class OpenFAST:
-    def __init__(self, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
+    def __init__(self, input_file_name: FileName, n_turbines: int, i_turb: int, t_max: float):
         """Base class to interact with individual turbines in OpenFAST
 
         Parameters
@@ -21,7 +24,7 @@ class OpenFAST:
             Maximum time of the simulation in s
         """
         self.fast_lib = FastLibAPI()
-        self.input_file_name = input_file_name
+        self.input_file_name = str(input_file_name)
         self.t_max = t_max
         self.n_turbines = n_turbines
         self.i_turb = i_turb
@@ -56,7 +59,7 @@ class OpenFAST:
 
 
 class OpenFASTStandAlone(OpenFAST):
-    def __init__(self, input_file_name: str, n_turbines: int, i_turb: int, t_max: float):
+    def __init__(self, input_file_name: FileName, n_turbines: int, i_turb: int, t_max: float):
         """Run Fast as standalone
 
         Parameters
@@ -99,7 +102,7 @@ class OpenFASTStandAlone(OpenFAST):
 
 class OpenFASTCoupled(OpenFAST):
     def __init__(self,
-                 input_file_name: str,
+                 input_file_name: FileName,
                  n_turbines: int, i_turb: int,
                  t_max: float,
                  num_actuator_force_points_blade: int,
@@ -193,8 +196,11 @@ class OpenFASTCoupled(OpenFAST):
                                     sc_out_glob,
                                     sc_out_turbine,
                                     self.turbine_position)
-
-        self.n_vel_points = self.opFM_output.u.shape[0]
+        try:
+            self.n_vel_points = self.opFM_output.u.shape[0]
+        except ValueError:
+            raise ValueError(
+                """opFM_output not allocated. Is compInflow in the fast input file set to the correct value (2)?""")
 
         self.n_vel_points_blade = self.n_blade_elements
         self.n_vel_points_tower = self.n_vel_points - \
