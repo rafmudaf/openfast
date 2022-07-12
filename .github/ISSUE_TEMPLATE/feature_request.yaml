@@ -18,5 +18,3 @@ body:
     attributes:
       label: Related URLs
       description: If this feature request is derived from a GitHub Issue or Discussion, enter the url here.
-    validations:
-      required: true

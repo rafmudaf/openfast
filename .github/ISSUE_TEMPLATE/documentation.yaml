@@ -19,5 +19,3 @@ body:
       description: If this issue references online documentation, enter the complete url here.
       placeholder:
         https://openfast.readthedocs.io/<full link here>.html
-    validations:
-      required: true
