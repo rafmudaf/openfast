@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/openfast/openfast/discussions/new
+    about: Discuss potential issues or ideas here prior to opening a GitHub Issue
+  - name: NREL Forum
+    url: https://forums.nrel.gov/top?period=quarterly
+    about: This is the best place for detailed questions and dialogue
