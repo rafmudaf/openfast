@@ -21,9 +21,11 @@ env:
   # C_COMPILER: /opt/intel/oneapi/compiler/latest/linux/bin/intel64/icc
   # GCOV_EXE: gcov-10
   NUM_PROCS: 8
+  LINUX_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
   LINUX_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
   LINUX_FORTRAN_COMPONENTS: intel-oneapi-compiler-fortran
   LINUX_FORTRAN_COMPONENTS_WEB: intel.oneapi.lin.ifort-compiler
+  LINUX_MKL_COMPONENTS_WEB: intel.oneapi.lin.mkl.devel
 
 
 
@@ -57,10 +59,13 @@ jobs:
         with:
           path: |
             /opt/intel/oneapi/compiler
+            /opt/intel/oneapi/mkl
           key: install-${{ env.CACHE_NUMBER }}-${{ env.LINUX_HPCKIT_URL }}-${{ env.LINUX_FORTRAN_COMPONENTS_WEB }}-compiler-${{ hashFiles('**/.github/scripts/oneapi/cache_exclude_linux.sh') }}
       - name: Install oneAPI
         if: steps.cache-install.outputs.cache-hit != 'true'
-        run: .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL $LINUX_FORTRAN_COMPONENTS_WEB
+        run: |
+          .github/scripts/oneapi/install_linux.sh $LINUX_BASEKIT_URL $LINUX_MKL_COMPONENTS_WEB
+          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL $LINUX_FORTRAN_COMPONENTS_WEB
       - name: exclude unused files from cache
         if: steps.cache-install.outputs.cache-hit != 'true'
         run: .github/scripts/oneapi/cache_exclude_linux.sh
