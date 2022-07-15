@@ -69,7 +69,10 @@ jobs:
       - name: Configure build
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
-          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
+          echo $FC
+          echo $MKL_ROOT
+          which ifort
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
@@ -127,7 +130,7 @@ jobs:
       - name: Configure build
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
-          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
@@ -185,7 +188,7 @@ jobs:
       - name: Configure build
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
-          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
