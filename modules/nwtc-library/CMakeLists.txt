@@ -127,7 +127,12 @@ if(BUILD_OPENFAST_SIMULINK_API)
   find_package(Matlab REQUIRED)
   target_link_libraries(nwtclibs ${LAPACK_LIBRARIES} ${CMAKE_DL_LIBS} ${Matlab_MEX_LIBRARY})
 else()
-  target_link_libraries(nwtclibs ${LAPACK_LIBRARIES} ${CMAKE_DL_LIBS})
+  if (MKL_FOUND)
+    # target_link_libraries(nwtclibs ${CMAKE_DL_LIBS} ${mkl_static_libs})
+    target_link_libraries(nwtclibs ${CMAKE_DL_LIBS} MKL::mkl_core MKL::mkl_intel_lp64 MKL::mkl_sequential)
+  else()
+    target_link_libraries(nwtclibs ${LAPACK_LIBRARIES} ${CMAKE_DL_LIBS})
+  endif()
 endif()
 
 install(TARGETS nwtclibs
