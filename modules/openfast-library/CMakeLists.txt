@@ -44,17 +44,23 @@ target_link_libraries(openfast_prelib
   icefloelib
   maplib
 )
+set_property(TARGET openfast_prelib PROPERTY LINKER_LANGUAGE Fortran)
 
 add_library(openfast_postlib
   src/FAST_Lin.f90
   src/FAST_Mods.f90
+  src/FAST_Init.f90
+  src/FAST_IO.f90
+  src/FAST_VTK.f90
   src/FAST_Subs.f90
   src/FAST_Solver.f90
   )
 target_link_libraries(openfast_postlib openfast_prelib scdataexlib foamfastlib versioninfolib)
+set_property(TARGET openfast_postlib PROPERTY LINKER_LANGUAGE Fortran)
 
 add_library(openfastlib src/FAST_Library.f90)
 target_link_libraries(openfastlib openfast_postlib openfast_prelib scdataexlib foamfastlib)
+set_property(TARGET openfastlib PROPERTY LINKER_LANGUAGE Fortran)
 
 string(TOUPPER ${CMAKE_Fortran_COMPILER_ID} _compiler_id)
 string(TOUPPER ${CMAKE_BUILD_TYPE} _build_type)

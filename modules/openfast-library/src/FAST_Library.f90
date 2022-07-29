@@ -12,8 +12,12 @@
 MODULE FAST_Data
 
    USE, INTRINSIC :: ISO_C_Binding
-   USE FAST_Subs   ! all of the ModuleName and ModuleName_types modules are inherited from FAST_Subs
-                       
+
+   USE FAST_ModTypes
+   USE FAST_Initialization, ONLY: FAST_InitializeAll_T
+   USE FAST_IO, ONLY: FillOutputAry_T
+   USE FAST_Subs, ONLY: ExitThisProgram_T, FAST_CreateCheckpoint_T, FAST_Linearize_T, FAST_RestoreFromCheckpoint_T, FAST_Solution0_T, FAST_Solution_T
+
    IMPLICIT  NONE
    SAVE
    
@@ -364,9 +368,7 @@ end subroutine FAST_HubPosition
 subroutine FAST_SetExternalInputs(iTurb, NumInputs_c, InputAry, m_FAST)
 
    USE, INTRINSIC :: ISO_C_Binding
-   USE FAST_Types
-!   USE FAST_Data, only: NumFixedInputs
-   
+
    IMPLICIT  NONE
 
    INTEGER(C_INT),         INTENT(IN   ) :: iTurb            ! Turbine number 
