@@ -26,6 +26,7 @@
 PROGRAM FAST_Farm
 
    USE FAST_Farm_Subs
+   USE VersionInfo, ONLY: CheckArgs
 
    IMPLICIT NONE
 
