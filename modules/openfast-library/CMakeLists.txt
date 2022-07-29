@@ -59,7 +59,7 @@ target_link_libraries(openfast_postlib openfast_prelib scdataexlib foamfastlib v
 set_property(TARGET openfast_postlib PROPERTY LINKER_LANGUAGE Fortran)
 
 add_library(openfastlib src/FAST_Library.f90)
-target_link_libraries(openfastlib openfast_postlib openfast_prelib scdataexlib foamfastlib)
+target_link_libraries(openfastlib openfast_postlib foamfastlib)
 set_property(TARGET openfastlib PROPERTY LINKER_LANGUAGE Fortran)
 
 string(TOUPPER ${CMAKE_Fortran_COMPILER_ID} _compiler_id)
