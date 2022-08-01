@@ -329,5 +329,38 @@ END FUNCTION GetVersion
       END FUNCTION
 
    END SUBROUTINE CheckArgs
+!----------------------------------------------------------------------------------------------------------------------------------
+!> This routine gets the name of the FAST input file from the command line. It also returns a logical indicating if this there
+!! was a "DWM" argument after the file name.
+   SUBROUTINE GetInputFileName(InputFile,UseDWM,ErrStat,ErrMsg)
+      CHARACTER(*),             INTENT(OUT)           :: InputFile         !< A CHARACTER string containing the name of the primary FAST input file (if not present, we'll get it from the command line)
+      LOGICAL,                  INTENT(OUT)           :: UseDWM            !< whether the last argument from the command line is "DWM"
+      INTEGER(IntKi),           INTENT(OUT)           :: ErrStat           !< Error status
+      CHARACTER(*),             INTENT(OUT)           :: ErrMsg            !< Error message
    
+      INTEGER(IntKi)                                  :: ErrStat2          ! local error stat
+      CHARACTER(1024)                                 :: LastArg           ! A second command-line argument that will allow DWM module to be used in AeroDyn
+   
+      ErrStat = ErrID_None
+      ErrMsg = ''
+   
+      UseDWM = .FALSE.  ! by default, we're not going to use the DWM module
+      InputFile = ""  ! initialize to empty string to make sure it's input from the command line
+      CALL CheckArgs( InputFile, ErrStat2, LastArg )  ! if ErrStat2 /= ErrID_None, we'll ignore and deal with the problem when we try to read the input file
+   
+      IF (LEN_TRIM(InputFile) == 0) THEN ! no input file was specified
+         ErrStat = ErrID_Fatal
+         ErrMsg  = 'The required input file was not specified on the command line.'
+         RETURN
+      END IF
+   
+      IF (LEN_TRIM(LastArg) > 0) THEN ! see if DWM was specified as the second option
+         CALL Conv2UC( LastArg )
+         IF ( TRIM(LastArg) == "DWM" ) THEN
+            UseDWM    = .TRUE.
+         END IF
+      END IF
+   
+   END SUBROUTINE GetInputFileName
+
 END MODULE
