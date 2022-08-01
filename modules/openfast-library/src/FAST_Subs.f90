@@ -23,7 +23,7 @@ MODULE FAST_Subs
 
    USE FAST_ModTypes
    USE FAST_Initialization, ONLY: FAST_ProgStart
-   USE FAST_IO, ONLY: FAST_EndOutput, FAST_InitIOarrays, FAST_WrSum, WriteOutputToFile, NeedWriteOutput
+   USE FAST_IO, ONLY: FAST_EndOutput, FAST_InitIOarrays, WriteOutputToFile, NeedWriteOutput
    USE FAST_Linear, ONLY: FAST_CalcSteady, FAST_Linearize_OP, PerturbOP, SetOperatingPoint
    USE FAST_Solver
    USE FAST_VTK, ONLY: WriteVTK, WrVTK_AllMeshes, ReadModeShapeFile, ReadModeShapeMatlabFile

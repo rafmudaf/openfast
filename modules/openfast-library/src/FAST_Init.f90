@@ -22,6 +22,7 @@
 MODULE FAST_Initialization
 
    USE FAST_ModTypes
+   USE FAST_Solver,       ONLY: ResetRemapFlags
    USE FAST_Linear,       ONLY: Init_Lin
    USE AeroDyn,           ONLY: AD_Init
    USE AeroDyn14,         ONLY: AD14_Init
@@ -35,7 +36,7 @@ MODULE FAST_Initialization
    USE HydroDyn,          ONLY: HydroDyn_Init
    USE IceDyn,            ONLY: IceD_Init
    USE IceFloe,           ONLY: IceFloe_Init
-   USE ServoDyn,          ONLY: SrvD_Init, Cmpl4SFun, Cmpl4LV, TrimCase_none
+   USE ServoDyn,          ONLY: SrvD_Init, Cmpl4SFun, Cmpl4LV, TrimCase_none, TrimCase_pitch, TrimCase_torque, TrimCase_yaw
    USE SubDyn,            ONLY: SD_Init
    USE OpenFOAM,          ONLY: Init_OpFM
    USE SC_DataEx,         ONLY: SC_DX_Init
