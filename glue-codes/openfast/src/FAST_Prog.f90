@@ -32,7 +32,9 @@ PROGRAM FAST
 
 
 USE FAST_Subs   ! all of the ModuleName and ModuleName_types modules are inherited from FAST_Subs
-                       
+USE FAST_Initialization
+USE VersionInfo, ONLY: CheckArgs
+
 IMPLICIT  NONE
    
    ! Local parameters:

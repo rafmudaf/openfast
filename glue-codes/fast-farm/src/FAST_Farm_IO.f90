@@ -1,7 +1,9 @@
 module FAST_Farm_IO
    
 USE NWTC_Library
-USE FAST_Farm_Types
+USE WakeDynamics_Types
+USE AWAE_Types
+USE FAST_Farm_Types, ONLY: All_FastFarm_Data, ModuleFF_AWAE, ModuleFF_FWrap, ModuleFF_SC, ModuleFF_WD
 
 IMPLICIT NONE
      ! The maximum number of output channels which can be output by the code.

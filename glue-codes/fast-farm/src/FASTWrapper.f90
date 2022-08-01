@@ -26,6 +26,7 @@ MODULE FASTWrapper
 
    USE FASTWrapper_Types
    USE NWTC_Library
+   USE FAST_Initialization, ONLY: FAST_InitializeAll_T
    USE FAST_Subs
 
 

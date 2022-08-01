@@ -34,7 +34,7 @@ target_link_libraries(sctypeslib nwtclibs)
 
 add_library(scfastlib
   src/SuperController.f90)
-target_link_libraries(scfastlib sctypeslib openfast_prelib nwtclibs)
+target_link_libraries(scfastlib sctypeslib nwtclibs)
 
 install(TARGETS sctypeslib scfastlib scdataextypeslib scdataexlib
   EXPORT "${CMAKE_PROJECT_NAME}Libraries"
