@@ -53,7 +53,7 @@ add_library(openfast_postlib
   )
 target_link_libraries(openfast_postlib openfast_prelib scdataexlib foamfastlib versioninfolib)
 
-add_library(openfastlib SHARED src/FAST_Library.f90)
+add_library(openfastlib SHARED src/FAST_Library.f90 src/FAST_OpenFOAM.f90)
 target_link_libraries(openfastlib openfast_postlib openfast_prelib scdataexlib foamfastlib)
 set_property(TARGET openfastlib PROPERTY LINKER_LANGUAGE Fortran)
 
