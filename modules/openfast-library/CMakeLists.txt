@@ -53,8 +53,15 @@ add_library(openfast_postlib
   )
 target_link_libraries(openfast_postlib openfast_prelib scdataexlib foamfastlib versioninfolib)
 
-add_library(openfastlib SHARED src/FAST_Library.f90 src/FAST_OpenFOAM.f90)
-target_link_libraries(openfastlib openfast_postlib openfast_prelib scdataexlib foamfastlib)
+set(FASTLIB_SOURCES src/FAST_Library.f90)
+if(BUILD_OPENFAST_CPP_API)
+  list(APPEND FASTLIB_SOURCES src/FAST_OpenFOAM.f90)
+endif()
+add_library(openfastlib SHARED ${FASTLIB_SOURCES})
+target_link_libraries(openfastlib openfast_postlib openfast_prelib scdataexlib)
+if(BUILD_OPENFAST_CPP_API)
+  target_link_libraries(openfastlib foamfastlib)
+endif()
 set_property(TARGET openfastlib PROPERTY LINKER_LANGUAGE Fortran)
 
 string(TOUPPER ${CMAKE_Fortran_COMPILER_ID} _compiler_id)
