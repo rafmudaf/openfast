@@ -23,7 +23,6 @@ MODULE FAST_Initialization
 
    USE FAST_ModTypes
    USE FAST_Linear,       ONLY: Init_Lin
-   USE FAST_VTK,          ONLY: SetVTKParameters_B4HD, SetVTKParameters
    USE AeroDyn,           ONLY: AD_Init
    USE AeroDyn14,         ONLY: AD14_Init
    USE InflowWind,        ONLY: InflowWind_Init
@@ -3257,6 +3256,436 @@ SUBROUTINE SetModuleSubstepTime(ModuleID, p_FAST, y_FAST, ErrStat, ErrMsg)
 
 END SUBROUTINE SetModuleSubstepTime
 
+!----------------------------------------------------------------------------------------------------------------------------------
+!> This subroutine sets up some of the information needed for plotting VTK surfaces. It initializes only the data needed before
+!! HD initialization. (HD needs some of this data so it can return the wave elevation data we want.)
+SUBROUTINE SetVTKParameters_B4HD(p_FAST, InitOutData_ED, InitInData_HD, BD, ErrStat, ErrMsg)
+
+   TYPE(FAST_ParameterType),     INTENT(INOUT) :: p_FAST           !< The parameters of the glue code
+   TYPE(ED_InitOutputType),      INTENT(IN   ) :: InitOutData_ED   !< The initialization output from structural dynamics module
+   TYPE(HydroDyn_InitInputType), INTENT(INOUT) :: InitInData_HD    !< The initialization input to HydroDyn
+   TYPE(BeamDyn_Data),           INTENT(IN   ) :: BD               !< BeamDyn data
+   INTEGER(IntKi),               INTENT(  OUT) :: ErrStat          !< Error status of the operation
+   CHARACTER(*),                 INTENT(  OUT) :: ErrMsg           !< Error message if ErrStat /= ErrID_None
+
+
+   REAL(SiKi)                              :: BladeLength, Width, WidthBy2
+   REAL(SiKi)                              :: dx, dy
+   INTEGER(IntKi)                          :: i, j, n
+   INTEGER(IntKi)                          :: ErrStat2
+   CHARACTER(ErrMsgLen)                    :: ErrMsg2
+   CHARACTER(*), PARAMETER                 :: RoutineName = 'SetVTKParameters_B4HD'
+
+
+   ErrStat = ErrID_None
+   ErrMsg  = ""
+
+      ! Get radius for ground (blade length + hub radius):
+   if ( p_FAST%CompElast == Module_BD ) then
+      BladeLength = TwoNorm(BD%y(1)%BldMotion%Position(:,1) - BD%y(1)%BldMotion%Position(:,BD%y(1)%BldMotion%Nnodes))
+   else
+      BladeLength = InitOutData_ED%BladeLength
+   end if
+   p_FAST%VTK_Surface%HubRad    = InitOutData_ED%HubRad
+   p_FAST%VTK_Surface%GroundRad = BladeLength + p_FAST%VTK_Surface%HubRad
+
+   !........................................................................................................
+   ! We don't use the rest of this routine for stick-figure output
+   if (p_FAST%VTK_Type /= VTK_Surf) return
+   !........................................................................................................
+
+      ! initialize wave elevation data:
+   if ( p_FAST%CompHydro == Module_HD ) then
+
+      p_FAST%VTK_surface%NWaveElevPts(1) = 25
+      p_FAST%VTK_surface%NWaveElevPts(2) = 25
+
+      call allocAry( InitInData_HD%WaveElevXY, 2, p_FAST%VTK_surface%NWaveElevPts(1)*p_FAST%VTK_surface%NWaveElevPts(2), 'WaveElevXY', ErrStat2, ErrMsg2)
+         call SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, RoutineName)
+         if (ErrStat >= AbortErrLev) return
+
+      Width = p_FAST%VTK_Surface%GroundRad * VTK_GroundFactor
+      dx = Width / (p_FAST%VTK_surface%NWaveElevPts(1) - 1)
+      dy = Width / (p_FAST%VTK_surface%NWaveElevPts(2) - 1)
+
+      WidthBy2 = Width / 2.0_SiKi
+      n = 1
+      do i=1,p_FAST%VTK_surface%NWaveElevPts(1)
+         do j=1,p_FAST%VTK_surface%NWaveElevPts(2)
+            InitInData_HD%WaveElevXY(1,n) = dx*(i-1) - WidthBy2 !+ p_FAST%TurbinePos(1) ! HD takes p_FAST%TurbinePos into account already
+            InitInData_HD%WaveElevXY(2,n) = dy*(j-1) - WidthBy2 !+ p_FAST%TurbinePos(2)
+            n = n+1
+         end do
+      end do
+
+   end if
+
+
+END SUBROUTINE SetVTKParameters_B4HD
+!----------------------------------------------------------------------------------------------------------------------------------
+!> This subroutine sets up the information needed for plotting VTK surfaces.
+SUBROUTINE SetVTKParameters(p_FAST, InitOutData_ED, InitOutData_AD, InitInData_HD, InitOutData_HD, ED, BD, AD, HD, ErrStat, ErrMsg)
+
+   TYPE(FAST_ParameterType),     INTENT(INOUT) :: p_FAST           !< The parameters of the glue code
+   TYPE(ED_InitOutputType),      INTENT(IN   ) :: InitOutData_ED   !< The initialization output from structural dynamics module
+   TYPE(AD_InitOutputType),      INTENT(INOUT) :: InitOutData_AD   !< The initialization output from AeroDyn
+   TYPE(HydroDyn_InitInputType), INTENT(INOUT) :: InitInData_HD    !< The initialization input to HydroDyn
+   TYPE(HydroDyn_InitOutputType),INTENT(INOUT) :: InitOutData_HD   !< The initialization output from HydroDyn
+   TYPE(ElastoDyn_Data),         INTENT(IN   ) :: ED               !< ElastoDyn data
+   TYPE(BeamDyn_Data),           INTENT(IN   ) :: BD               !< BeamDyn data
+   TYPE(AeroDyn_Data),           INTENT(IN   ) :: AD               !< AeroDyn data
+   TYPE(HydroDyn_Data),          INTENT(IN   ) :: HD               !< HydroDyn data
+   INTEGER(IntKi),               INTENT(  OUT) :: ErrStat          !< Error status of the operation
+   CHARACTER(*),                 INTENT(  OUT) :: ErrMsg           !< Error message if ErrStat /= ErrID_None
+
+   REAL(SiKi)                              :: RefPoint(3), RefLengths(2)
+   REAL(SiKi)                              :: x, y
+   REAL(SiKi)                              :: TwrDiam_top, TwrDiam_base, TwrRatio, TwrLength
+   INTEGER(IntKi)                          :: topNode, baseNode
+   INTEGER(IntKi)                          :: NumBl, k
+   CHARACTER(1024)                         :: vtkroot
+   INTEGER(IntKi)                          :: ErrStat2
+   CHARACTER(ErrMsgLen)                    :: ErrMsg2
+   CHARACTER(*), PARAMETER                 :: RoutineName = 'SetVTKParameters'
+
+
+   ErrStat = ErrID_None
+   ErrMsg  = ""
+
+   ! get the name of the output directory for vtk files (in a subdirectory called "vtk" of the output directory), and
+   ! create the VTK directory if it does not exist
+
+   call GetPath ( p_FAST%OutFileRoot, p_FAST%VTK_OutFileRoot, vtkroot ) ! the returned p_FAST%VTK_OutFileRoot includes a file separator character at the end
+   p_FAST%VTK_OutFileRoot = trim(p_FAST%VTK_OutFileRoot) // 'vtk'
+
+   call MKDIR( trim(p_FAST%VTK_OutFileRoot) )
+
+   p_FAST%VTK_OutFileRoot = trim( p_FAST%VTK_OutFileRoot ) // PathSep // trim(vtkroot)
+
+
+   ! calculate the number of digits in 'y_FAST%NOutSteps' (Maximum number of output steps to be written)
+   ! this will be used to pad the write-out step in the VTK filename with zeros in calls to MeshWrVTK()
+   if (p_FAST%WrVTK == VTK_ModeShapes .AND. p_FAST%VTK_modes%VTKLinTim==1) then
+      if (p_FAST%NLinTimes < 1) p_FAST%NLinTimes = 1 !in case we reached here with an error
+      p_FAST%VTK_tWidth = CEILING( log10( real( p_FAST%NLinTimes) ) ) + 1
+   else
+      p_FAST%VTK_tWidth = CEILING( log10( real(p_FAST%n_TMax_m1+1, ReKi) / p_FAST%n_VTKTime ) ) + 1
+   end if
+
+   ! determine number of blades
+   NumBl = InitOutData_ED%NumBl
+
+   ! initialize the vtk data
+
+   p_FAST%VTK_Surface%NumSectors = 25
+   ! NOTE: we set p_FAST%VTK_Surface%GroundRad and p_FAST%VTK_Surface%HubRad in SetVTKParameters_B4HD
+
+
+   ! write the ground or seabed reference polygon:
+   RefPoint = p_FAST%TurbinePos
+   if (p_FAST%CompHydro == MODULE_HD) then
+      RefLengths = p_FAST%VTK_Surface%GroundRad*VTK_GroundFactor/2.0_SiKi
+
+      ! note that p_FAST%TurbinePos(3) must be 0 for offshore turbines
+      RefPoint(3) = p_FAST%TurbinePos(3) - InitOutData_HD%WtrDpth
+      call WrVTK_Ground ( RefPoint, RefLengths, trim(p_FAST%VTK_OutFileRoot) // '.SeabedSurface', ErrStat2, ErrMsg2 )
+
+      RefPoint(3) = p_FAST%TurbinePos(3) - InitOutData_HD%MSL2SWL
+      call WrVTK_Ground ( RefPoint, RefLengths, trim(p_FAST%VTK_OutFileRoot) // '.StillWaterSurface', ErrStat2, ErrMsg2 )
+   else
+      RefLengths = p_FAST%VTK_Surface%GroundRad !array = scalar
+      call WrVTK_Ground ( RefPoint, RefLengths, trim(p_FAST%VTK_OutFileRoot) // '.GroundSurface', ErrStat2, ErrMsg2 )
+   end if
+
+
+   !........................................................................................................
+   ! We don't use the rest of this routine for stick-figure output
+   if (p_FAST%VTK_Type /= VTK_Surf) return
+   !........................................................................................................
+
+      ! we're going to create a box using these dimensions
+   y  =          ED%y%HubPtMotion%Position(3,  1) - ED%y%NacelleMotion%Position(3,  1)
+   x  = TwoNorm( ED%y%HubPtMotion%Position(1:2,1) - ED%y%NacelleMotion%Position(1:2,1) ) - p_FAST%VTK_Surface%HubRad
+
+
+   p_FAST%VTK_Surface%NacelleBox(:,1) = (/ -x,  y, 0.0_SiKi /)
+   p_FAST%VTK_Surface%NacelleBox(:,2) = (/  x,  y, 0.0_SiKi /)
+   p_FAST%VTK_Surface%NacelleBox(:,3) = (/  x, -y, 0.0_SiKi /)
+   p_FAST%VTK_Surface%NacelleBox(:,4) = (/ -x, -y, 0.0_SiKi /)
+   p_FAST%VTK_Surface%NacelleBox(:,5) = (/ -x, -y, 2*y      /)
+   p_FAST%VTK_Surface%NacelleBox(:,6) = (/  x, -y, 2*y      /)
+   p_FAST%VTK_Surface%NacelleBox(:,7) = (/  x,  y, 2*y      /)
+   p_FAST%VTK_Surface%NacelleBox(:,8) = (/ -x,  y, 2*y      /)
+
+   !.......................
+   ! tapered tower
+   !.......................
+
+   CALL AllocAry(p_FAST%VTK_Surface%TowerRad,ED%y%TowerLn2Mesh%NNodes,'VTK_Surface%TowerRad',ErrStat2,ErrMsg2)
+      CALL SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+      IF (ErrStat >= AbortErrLev) RETURN
+
+   topNode   = ED%y%TowerLn2Mesh%NNodes - 1
+   baseNode  = ED%y%TowerLn2Mesh%refNode
+   TwrLength = TwoNorm( ED%y%TowerLn2Mesh%position(:,topNode) - ED%y%TowerLn2Mesh%position(:,baseNode) ) ! this is the assumed length of the tower
+   TwrRatio  = TwrLength / 87.6_SiKi  ! use ratio of the tower length to the length of the 5MW tower
+   TwrDiam_top  = 3.87*TwrRatio
+   TwrDiam_base = 6.0*TwrRatio
+
+   TwrRatio = 0.5 * (TwrDiam_top - TwrDiam_base) / TwrLength
+   do k=1,ED%y%TowerLn2Mesh%NNodes
+      TwrLength = TwoNorm( ED%y%TowerLn2Mesh%position(:,k) - ED%y%TowerLn2Mesh%position(:,baseNode) )
+      p_FAST%VTK_Surface%TowerRad(k) = 0.5*TwrDiam_Base + TwrRatio*TwrLength
+   end do
+
+
+
+   !.......................
+   ! blade surfaces
+   !.......................
+   allocate(p_FAST%VTK_Surface%BladeShape(NumBl),stat=ErrStat2)
+   if (errStat2/=0) then
+      call setErrStat(ErrID_Fatal,'Error allocating VTK_Surface%BladeShape.',ErrStat,ErrMsg,RoutineName)
+      return
+   end if
+
+   IF ( p_FAST%CompAero == Module_AD ) THEN  ! These meshes may have airfoil data associated with nodes...
+
+      IF (ALLOCATED(InitOutData_AD%rotors(1)%BladeShape)) THEN
+         do k=1,NumBl   
+            call move_alloc( InitOutData_AD%rotors(1)%BladeShape(k)%AirfoilCoords, p_FAST%VTK_Surface%BladeShape(k)%AirfoilCoords )
+         end do
+      ELSE
+#ifndef USE_DEFAULT_BLADE_SURFACE
+         call setErrStat(ErrID_Fatal,'Cannot do surface visualization without airfoil coordinates defined in AeroDyn.',ErrStat,ErrMsg,RoutineName)
+         return
+      END IF
+   ELSE
+      call setErrStat(ErrID_Fatal,'Cannot do surface visualization without using AeroDyn.',ErrStat,ErrMsg,RoutineName)
+      return
+   END IF
+#else
+      ! AD used without airfoil coordinates specified
+
+         rootNode = 1
+      
+         DO K=1,NumBl   
+            tipNode  = AD%Input(1)%rotors(1)%BladeMotion(K)%NNodes
+            cylNode  = min(3,AD%Input(1)%rotors(1)%BladeMotion(K)%Nnodes)
+         
+            call SetVTKDefaultBladeParams(AD%Input(1)%rotors(1)%BladeMotion(K), p_FAST%VTK_Surface%BladeShape(K), tipNode, rootNode, cylNode, ErrStat2, ErrMsg2)
+               CALL SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+               IF (ErrStat >= AbortErrLev) RETURN
+         END DO
+      END IF
+
+   ELSE IF ( p_FAST%CompElast == Module_BD ) THEN
+      rootNode = 1
+      DO K=1,NumBl
+         tipNode  = BD%y(k)%BldMotion%NNodes
+         cylNode  = min(3,BD%y(k)%BldMotion%NNodes)
+
+         call SetVTKDefaultBladeParams(BD%y(k)%BldMotion, p_FAST%VTK_Surface%BladeShape(K), tipNode, rootNode, cylNode, ErrStat2, ErrMsg2)
+            CALL SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+            IF (ErrStat >= AbortErrLev) RETURN
+      END DO
+   ELSE
+      DO K=1,NumBl
+         rootNode = ED%y%BladeLn2Mesh(K)%NNodes
+         tipNode  = ED%y%BladeLn2Mesh(K)%NNodes-1
+         cylNode  = min(2,ED%y%BladeLn2Mesh(K)%NNodes)
+
+         call SetVTKDefaultBladeParams(ED%y%BladeLn2Mesh(K), p_FAST%VTK_Surface%BladeShape(K), tipNode, rootNode, cylNode, ErrStat2, ErrMsg2)
+            CALL SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+            IF (ErrStat >= AbortErrLev) RETURN
+      END DO
+   END IF
+#endif
+
+
+   !.......................
+   ! wave elevation
+   !.......................
+
+   !bjj: interpolate here instead of each time step?
+   if ( allocated(InitOutData_HD%WaveElevSeries) ) then
+      call move_alloc( InitInData_HD%WaveElevXY, p_FAST%VTK_Surface%WaveElevXY )
+      call move_alloc( InitOutData_HD%WaveElevSeries, p_FAST%VTK_Surface%WaveElev )
+
+         ! put the following lines in loops to avoid stack-size issues:
+      do k=1,size(p_FAST%VTK_Surface%WaveElevXY,2)
+         p_FAST%VTK_Surface%WaveElevXY(:,k) = p_FAST%VTK_Surface%WaveElevXY(:,k) + p_FAST%TurbinePos(1:2)
+      end do
+
+      ! note that p_FAST%TurbinePos(3) must be 0 for offshore turbines
+      !do k=1,size(p_FAST%VTK_Surface%WaveElev,2)
+      !   p_FAST%VTK_Surface%WaveElev(:,k) = p_FAST%VTK_Surface%WaveElev(:,k) + p_FAST%TurbinePos(3)  ! not sure this is really accurate if p_FAST%TurbinePos(3) is non-zero
+      !end do
+
+   end if
+
+   !.......................
+   ! morison surfaces
+   !.......................
+   
+   IF ( HD%Input(1)%Morison%Mesh%Committed ) THEN      
+    !TODO: FIX for visualization GJH 4/23/20  
+    !  call move_alloc(InitOutData_HD%Morison%Morison_Rad, p_FAST%VTK_Surface%MorisonRad)
+      
+   END IF
+
+END SUBROUTINE SetVTKParameters
+!----------------------------------------------------------------------------------------------------------------------------------
+!> This subroutine comes up with some default airfoils for blade surfaces for a given blade mesh, M.
+SUBROUTINE SetVTKDefaultBladeParams(M, BladeShape, tipNode, rootNode, cylNode, ErrStat, ErrMsg)
+
+   TYPE(MeshType),               INTENT(IN   ) :: M                !< The Mesh the defaults should be calculated for
+   TYPE(FAST_VTK_BLSurfaceType), INTENT(INOUT) :: BladeShape       !< BladeShape to set to default values
+   INTEGER(IntKi),               INTENT(IN   ) :: rootNode         !< Index of root node (innermost node) for this mesh
+   INTEGER(IntKi),               INTENT(IN   ) :: tipNode          !< Index of tip node (outermost node) for this mesh
+   INTEGER(IntKi),               INTENT(IN   ) :: cylNode          !< Index of last node to have a cylinder shape
+   INTEGER(IntKi),               INTENT(  OUT) :: ErrStat          !< Error status of the operation
+   CHARACTER(*),                 INTENT(  OUT) :: ErrMsg           !< Error message if ErrStat /= ErrID_None
+
+
+   REAL(SiKi)                                  :: bladeLength, chord, pitchAxis
+   REAL(SiKi)                                  :: bladeLengthFract, bladeLengthFract2, ratio, posLength ! temporary quantities
+   REAL(SiKi)                                  :: cylinderLength, x, y, angle
+   INTEGER(IntKi)                              :: i, j
+   INTEGER(IntKi)                              :: ErrStat2
+   CHARACTER(ErrMsgLen)                        :: ErrMsg2
+   CHARACTER(*), PARAMETER                     :: RoutineName = 'SetVTKDefaultBladeParams'
+
+   !Note: jmj does not like this default option
+
+   integer, parameter :: N = 66
+
+   ! default airfoil shape coordinates; uses S809 values from http://wind.nrel.gov/airfoils/Shapes/S809_Shape.html:
+   real, parameter, dimension(N) :: xc=(/ 1.0,0.996203,0.98519,0.967844,0.945073,0.917488,0.885293,0.848455,0.80747,0.763042,0.715952,0.667064,0.617331,0.56783,0.519832,0.474243,0.428461,0.382612,0.33726,0.29297,0.250247,0.209576,0.171409,0.136174,0.104263,0.076035,0.051823,0.03191,0.01659,0.006026,0.000658,0.000204,0.0,0.000213,0.001045,0.001208,0.002398,0.009313,0.02323,0.04232,0.065877,0.093426,0.124111,0.157653,0.193738,0.231914,0.271438,0.311968,0.35337,0.395329,0.438273,0.48192,0.527928,0.576211,0.626092,0.676744,0.727211,0.776432,0.823285,0.86663,0.905365,0.938474,0.965086,0.984478,0.996141,1.0 /)
+   real, parameter, dimension(N) :: yc=(/ 0.0,0.000487,0.002373,0.00596,0.011024,0.017033,0.023458,0.03028,0.037766,0.045974,0.054872,0.064353,0.074214,0.084095,0.093268,0.099392,0.10176,0.10184,0.10007,0.096703,0.091908,0.085851,0.078687,0.07058,0.061697,0.052224,0.042352,0.032299,0.02229,0.012615,0.003723,0.001942,-0.00002,-0.001794,-0.003477,-0.003724,-0.005266,-0.011499,-0.020399,-0.030269,-0.040821,-0.051923,-0.063082,-0.07373,-0.083567,-0.092442,-0.099905,-0.105281,-0.108181,-0.108011,-0.104552,-0.097347,-0.086571,-0.073979,-0.060644,-0.047441,-0.0351,-0.024204,-0.015163,-0.008204,-0.003363,-0.000487,0.000743,0.000775,0.00029,0.0 /)
+
+   call AllocAry(BladeShape%AirfoilCoords, 2, N, M%NNodes, 'BladeShape%AirfoilCoords', ErrStat2, ErrMsg2)
+      CALL SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+      IF (ErrStat >= AbortErrLev) RETURN
+
+   ! Chord length and pitch axis location are given by scaling law
+   bladeLength       = TwoNorm( M%position(:,tipNode) - M%Position(:,rootNode) )
+   cylinderLength    = TwoNorm( M%Position(:,cylNode) - M%Position(:,rootNode) )
+   bladeLengthFract  = 0.22*bladeLength
+   bladeLengthFract2 = bladeLength-bladeLengthFract != 0.78*bladeLength
+
+   DO i=1,M%Nnodes
+      posLength = TwoNorm( M%Position(:,i) - M%Position(:,rootNode) )
+
+      IF (posLength .LE. bladeLengthFract) THEN
+         ratio     = posLength/bladeLengthFract
+         chord     =  (0.06 + 0.02*ratio)*bladeLength
+         pitchAxis =   0.25 + 0.125*ratio
+      ELSE
+         chord     = (0.08 - 0.06*(posLength-bladeLengthFract)/bladeLengthFract2)*bladeLength
+         pitchAxis = 0.375
+      END IF
+
+      IF (posLength .LE. cylinderLength) THEN
+         ! create a cylinder for this node
+
+         chord = chord/2.0_SiKi
+
+         DO j=1,N
+            ! normalized x,y coordinates for airfoil
+            x = yc(j)
+            y = xc(j) - 0.5
+
+            angle = ATAN2( y, x)
+
+               ! x,y coordinates for cylinder
+            BladeShape%AirfoilCoords(1,j,i) = chord*COS(angle) ! x (note that "chord" is really representing chord/2 here)
+            BladeShape%AirfoilCoords(2,j,i) = chord*SIN(angle) ! y (note that "chord" is really representing chord/2 here)
+         END DO
+
+      ELSE
+         ! create an airfoil for this node
+
+         DO j=1,N
+            ! normalized x,y coordinates for airfoil, assuming an upwind turbine
+            x = yc(j)
+            y = xc(j) - pitchAxis
+
+               ! x,y coordinates for airfoil
+            BladeShape%AirfoilCoords(1,j,i) =  chord*x
+            BladeShape%AirfoilCoords(2,j,i) =  chord*y
+         END DO
+
+      END IF
+
+   END DO ! nodes on mesh
+
+END SUBROUTINE SetVTKDefaultBladeParams
+!----------------------------------------------------------------------------------------------------------------------------------
+!> This routine writes the ground or seabed reference surface information in VTK format.
+!! see VTK file information format for XML, here: http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+SUBROUTINE WrVTK_Ground ( RefPoint, HalfLengths, FileRootName, ErrStat, ErrMsg )
+
+   REAL(SiKi),      INTENT(IN)           :: RefPoint(3)     !< reference point (plane will be created around it)
+   REAL(SiKi),      INTENT(IN)           :: HalfLengths(2)  !< half of the X-Y lengths of plane surrounding RefPoint
+   CHARACTER(*),    INTENT(IN)           :: FileRootName    !< Name of the file to write the output in (excluding extension)
+
+   INTEGER(IntKi),  INTENT(OUT)          :: ErrStat         !< Indicates whether an error occurred (see NWTC_Library)
+   CHARACTER(*),    INTENT(OUT)          :: ErrMsg          !< Error message associated with the ErrStat
+
+
+   ! local variables
+   INTEGER(IntKi)                        :: Un            ! fortran unit number
+   INTEGER(IntKi)                        :: ix            ! loop counters
+   CHARACTER(1024)                       :: FileName
+   INTEGER(IntKi), parameter             :: NumberOfPoints = 4
+   INTEGER(IntKi), parameter             :: NumberOfLines = 0
+   INTEGER(IntKi), parameter             :: NumberOfPolys = 1
+
+   INTEGER(IntKi)                        :: ErrStat2
+   CHARACTER(ErrMsgLen)                  :: ErrMsg2
+   CHARACTER(*),PARAMETER                :: RoutineName = 'WrVTK_Ground'
+
+   ErrStat = ErrID_None
+   ErrMsg  = ""
+
+   !.................................................................
+   ! write the data that potentially changes each time step:
+   !.................................................................
+
+   ! PolyData (.vtp) - Serial vtkPolyData (unstructured) file
+   FileName = TRIM(FileRootName)//'.vtp'
+
+   call WrVTK_header( FileName, NumberOfPoints, NumberOfLines, NumberOfPolys, Un, ErrStat2, ErrMsg2 )
+      call SetErrStat(ErrStat2,ErrMsg2,ErrStat,ErrMsg,RoutineName)
+      if (ErrStat >= AbortErrLev) return
+
+! points (nodes, augmented with NumSegments):
+      WRITE(Un,'(A)')         '      <Points>'
+      WRITE(Un,'(A)')         '        <DataArray type="Float32" NumberOfComponents="3" format="ascii">'
+
+      WRITE(Un,VTK_AryFmt) RefPoint(1) + HalfLengths(1) , RefPoint(2) + HalfLengths(2), RefPoint(3)
+      WRITE(Un,VTK_AryFmt) RefPoint(1) + HalfLengths(1) , RefPoint(2) - HalfLengths(2), RefPoint(3)
+      WRITE(Un,VTK_AryFmt) RefPoint(1) - HalfLengths(1) , RefPoint(2) - HalfLengths(2), RefPoint(3)
+      WRITE(Un,VTK_AryFmt) RefPoint(1) - HalfLengths(1) , RefPoint(2) + HalfLengths(2), RefPoint(3)
+
+      WRITE(Un,'(A)')         '        </DataArray>'
+      WRITE(Un,'(A)')         '      </Points>'
+
+
+      WRITE(Un,'(A)')         '      <Polys>'
+      WRITE(Un,'(A)')         '        <DataArray type="Int32" Name="connectivity" format="ascii">'
+      WRITE(Un,'('//trim(num2lstr(NumberOfPoints))//'(i7))') (ix, ix=0,NumberOfPoints-1)
+      WRITE(Un,'(A)')         '        </DataArray>'
+
+      WRITE(Un,'(A)')         '        <DataArray type="Int32" Name="offsets" format="ascii">'
+      WRITE(Un,'(i7)') NumberOfPoints
+      WRITE(Un,'(A)')         '        </DataArray>'
+      WRITE(Un,'(A)')         '      </Polys>'
+
+      call WrVTK_footer( Un )
+
+END SUBROUTINE WrVTK_Ground
 !----------------------------------------------------------------------------------------------------------------------------------
 !> This routine reads in the primary FAST input file, does some validation, and places the values it reads in the
 !!   parameter structure (p). It prints to an echo file if requested.
