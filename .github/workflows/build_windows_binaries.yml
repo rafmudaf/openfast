@@ -27,6 +27,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
+      with:
+        fetch-depth: 0
     - name: Cache install Intel oneAPI
       id: cache-install
       uses: actions/cache@v2
