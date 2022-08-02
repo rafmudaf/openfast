@@ -11,7 +11,8 @@ env:
   WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18680/w_HPCKit_p_2022.2.0.173_offline.exe
   WINDOWS_CPP_COMPONENTS: intel.oneapi.win.cpp-compiler
   WINDOWS_FORTRAN_COMPONENTS: intel.oneapi.win.ifort-compiler
-  CACHE_NUMBER: 1
+  WINDOWS_MKL_COMPONENTS: intel.oneapi.win.mkl.devel
+  CACHE_NUMBER: 2
   SAMPLES_TAG: 2022.2.0
   COMPILER_VERSION: 2022.1.0
   VS_VER: vs2022
@@ -33,10 +34,13 @@ jobs:
         path: |
             C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat
             C:\Program Files (x86)\Intel\oneAPI\compiler
+            C:\Program Files (x86)\Intel\oneAPI\mkl
         key: install-${{ env.CACHE_NUMBER }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_FORTRAN_COMPONENTS }}-compiler-${{ hashFiles('**/scripts/cache_exclude_windows.sh') }}
     - name: Install oneAPI
       if: steps.cache-install.outputs.cache-hit != 'true'
-      run: .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
+      run: |
+        .github/scripts/oneapi/install_windows.bat $WINDOWS_BASEKIT_URL $WINDOWS_MKL_COMPONENTS
+        .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
 
     - name: Setup workspace
