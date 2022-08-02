@@ -10,7 +10,10 @@ for /f "tokens=* usebackq" %%f in (`dir /b "C:\Program Files (x86)\Intel\oneAPI\
 @call "C:\Program Files (x86)\Intel\oneAPI\compiler\%LATEST_VERSION%\env\vars.bat"
 
 cd ${{runner.workspace}}\openfast\build
-cmake -G"NMake Makefiles" -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}\openfast\install -DCMAKE_BUILD_TYPE:STRING=Release ${GITHUB_WORKSPACE}
+cmake .. ^
+  -G"NMake Makefiles" ^
+  -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}\openfast\install ^
+  -DCMAKE_BUILD_TYPE:STRING=Release
 @REM -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
 @REM  -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
 @REM  -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
