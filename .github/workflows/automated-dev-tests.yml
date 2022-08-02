@@ -24,9 +24,9 @@ env:
   LINUX_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
   LINUX_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
   LINUX_MKL_COMPONENTS_WEB: intel.oneapi.lin.mkl.devel
-  LINUX_FORTRAN_COMPONENTS: intel-oneapi-compiler-fortran
+  LINUX_CPP_COMPONENTS_WEB: intel.oneapi.lin.dpcpp-cpp-compiler-pro
   LINUX_FORTRAN_COMPONENTS_WEB: intel.oneapi.lin.ifort-compiler
-  CACHE_NUMBER: 1
+  CACHE_NUMBER: 2
 
 jobs:
 
@@ -65,37 +65,37 @@ jobs:
         if: steps.cache-install.outputs.cache-hit != 'true'
         run: |
           .github/scripts/oneapi/install_linux.sh $LINUX_BASEKIT_URL $LINUX_MKL_COMPONENTS_WEB
-          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL $LINUX_FORTRAN_COMPONENTS_WEB
+          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL "$LINUX_CPP_COMPONENTS_WEB:$LINUX_FORTRAN_COMPONENTS_WEB"
       - name: exclude unused files from cache
         if: steps.cache-install.outputs.cache-hit != 'true'
         run: .github/scripts/oneapi/cache_exclude_linux.sh
 
-      - name: Setup workspace
-        run: cmake -E make_directory ${{runner.workspace}}/openfast/build
-      - name: Configure build
-        working-directory: ${{runner.workspace}}/openfast/build
-        run: |
-          source /opt/intel/oneapi/compiler/latest/env/vars.sh
-          source /opt/intel/oneapi/mkl/latest/env/vars.sh
-          echo $FC
-          echo $MKL_ROOT
-          which ifort
-          cmake \
-            -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
-            -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
-            -DCMAKE_BUILD_TYPE:STRING=DEBUG \
-            -DBUILD_SHARED_LIBS:BOOL=OFF \
-            ${GITHUB_WORKSPACE}
-            # -DCTEST_PLOT_ERRORS:BOOL=ON \
-            # -DBUILD_TESTING:BOOL=ON \
-            # -DVARIABLE_TRACKING=OFF \
-            # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
-            # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
-            # -DDOUBLE_PRECISION=OFF \
-      - name: Build all
-        working-directory: ${{runner.workspace}}/openfast/build
-        run: |
-          cmake --build . --target turbsim -- -j ${{env.NUM_PROCS}}
+      # - name: Setup workspace
+      #   run: cmake -E make_directory ${{runner.workspace}}/openfast/build
+      # - name: Configure build
+      #   working-directory: ${{runner.workspace}}/openfast/build
+      #   run: |
+      #     source /opt/intel/oneapi/compiler/latest/env/vars.sh
+      #     source /opt/intel/oneapi/mkl/latest/env/vars.sh
+      #     echo $FC
+      #     echo $MKL_ROOT
+      #     which ifort
+      #     cmake \
+      #       -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
+      #       -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
+      #       -DCMAKE_BUILD_TYPE:STRING=DEBUG \
+      #       -DBUILD_SHARED_LIBS:BOOL=OFF \
+      #       ${GITHUB_WORKSPACE}
+      #       # -DCTEST_PLOT_ERRORS:BOOL=ON \
+      #       # -DBUILD_TESTING:BOOL=ON \
+      #       # -DVARIABLE_TRACKING=OFF \
+      #       # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
+      #       # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
+      #       # -DDOUBLE_PRECISION=OFF \
+      # - name: Build all
+      #   working-directory: ${{runner.workspace}}/openfast/build
+      #   run: |
+      #     cmake --build . --target turbsim -- -j ${{env.NUM_PROCS}}
       - name: Cache the workspace
         uses: actions/cache@v3.0.4
         with:
