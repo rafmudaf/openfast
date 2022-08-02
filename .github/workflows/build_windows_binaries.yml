@@ -41,27 +41,8 @@ jobs:
 
     - name: Setup workspace
       run: cmake -E make_directory ${{runner.workspace}}\openfast\build
-    - name: Configure build
-      run: |
-        @call "C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat" ${VS_VER}
-
-        for /f "tokens=* usebackq" %%f in (`dir /b "C:\Program Files (x86)\Intel\oneAPI\compiler\" ^| findstr /V latest ^| sort`) do @set "LATEST_VERSION=%%f"
-        @call "C:\Program Files (x86)\Intel\oneAPI\compiler\%LATEST_VERSION%\env\vars.bat"
-
-        cd ${{runner.workspace}}\openfast\build
-        cmake \
-          -G"NMake Makefiles" \
-          -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}\openfast\install \
-          -DCMAKE_BUILD_TYPE:STRING=Release \
-          ${GITHUB_WORKSPACE}
-          # -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
-          # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
-          # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
     - name: Build module drivers
-      working-directory: ${{runner.workspace}}\openfast\build
-      run: |
-        cmake --build . --target regression_test_module_drivers -- -j ${{env.NUM_PROCS}}
-
+      run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
 
     - name: exclude unused files from cache
       if: steps.cache-install.outputs.cache-hit != 'true'
