@@ -37,8 +37,8 @@ jobs:
       run: |
         .github/scripts/oneapi/install_windows.bat $WINDOWS_BASEKIT_URL $WINDOWS_MKL_COMPONENTS
         .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
-    # - name: Build OpenFAST
-    #   run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
+    - name: Build OpenFAST
+      run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
     - name: Exclude unused files from cache
       if: steps.cache-install.outputs.cache-hit != 'true'
       shell: bash
@@ -49,5 +49,6 @@ jobs:
       with:
         name: windows-binaries
         path: |
-          # ${{runner.workspace}}/openfast/build/glue-codes/openfast/
-          ${{runner.workspace}}/openfast/build/modules/beamdyn/beamdyn_driver.exe
+          ${{runner.workspace}}/openfast/build/glue-codes/openfast/openfast.exe
+          ${{runner.workspace}}/openfast/build/glue-codes/fast-farm/FAST.Farm.exe
+          ${{runner.workspace}}/openfast/build/modules/turbsim/turbsim.exe

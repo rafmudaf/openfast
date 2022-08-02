@@ -1,6 +1,3 @@
-REM SPDX-FileCopyrightText: 2022 Intel Corporation
-REM
-REM SPDX-License-Identifier: MIT
 
 set VS_VER=%1
 
@@ -24,9 +21,9 @@ cmake ^
   -S "D:\a\openfast\openfast" ^
   -B "D:\a\openfast\openfast\build" ^
   -G "NMake Makefiles" ^
+  -DBUILD_FASTFARM:BOOL=ON ^
   -DCMAKE_BUILD_TYPE:STRING=Release
 
-cmake --build "D:\a\openfast\openfast\build" --target beamdyn_driver
-@REM cmake --build "D:\a\openfast\openfast\build" --target openfast
-@REM cmake --build "D:\a\openfast\openfast\build" --target openfast
-@REM cmake --build "D:\a\openfast\openfast\build" --target turbsim
+cmake --build "D:\a\openfast\openfast\build" --target openfast
+cmake --build "D:\a\openfast\openfast\build" --target turbsim
+cmake --build "D:\a\openfast\openfast\build" --target FAST.Farm
