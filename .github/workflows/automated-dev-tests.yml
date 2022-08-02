@@ -77,9 +77,19 @@ jobs:
         run: |
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
           source /opt/intel/oneapi/mkl/latest/env/vars.sh
-          echo $FC
-          echo $MKL_ROOT
-          which ifort
+
+          echo "*** ls /opt/intel/oneapi"
+          ls /opt/intel/oneapi
+          echo "***"
+
+          echo "*** ls /opt/intel/oneapi/compiler/latest/linux/lib"
+          ls /opt/intel/oneapi/compiler/latest/linux/lib
+          echo "***"
+
+          echo "*** ls /opt/intel/oneapi/compiler/latest/linux/lib"
+          ls /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64
+          echo "***"
+
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
