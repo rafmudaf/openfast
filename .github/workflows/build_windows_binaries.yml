@@ -42,9 +42,6 @@ jobs:
         .github/scripts/oneapi/install_windows.bat $WINDOWS_BASEKIT_URL $WINDOWS_MKL_COMPONENTS
         .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
-
-    - name: Setup workspace
-      run: cmake -E make_directory ${{runner.workspace}}\openfast\build
     - name: Build module drivers
       run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
 
@@ -71,4 +68,5 @@ jobs:
       with:
         name: windows-binaries
         path: |
-          ${{runner.workspace}}/openfast/build/glue-codes/openfast/
+          # ${{runner.workspace}}/openfast/build/glue-codes/openfast/
+          ${{runner.workspace}}/openfast/build/modules/beamdyn/beamdyn_driver.exe
