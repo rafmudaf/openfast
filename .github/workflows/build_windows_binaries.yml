@@ -64,3 +64,11 @@ jobs:
           bootstrapper*
           installer*
         retention-days: 7
+
+    - name: Post binaries
+      uses: actions/upload-artifact@v2
+      if: success()
+      with:
+        name: windows-binaries
+        path: |
+          ${{runner.workspace}}/openfast/build/glue-codes/openfast/
