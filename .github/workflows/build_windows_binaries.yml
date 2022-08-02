@@ -1,7 +1,9 @@
 
 name: 'Build Windows Binaries'
 
-on: push
+on:
+  release:
+    types: [published]
 
 env:
   WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18674/w_BaseKit_p_2022.2.0.252_offline.exe
@@ -12,8 +14,8 @@ env:
   VS_VER: vs2022
 
 jobs:
-
   build_windows_binaries:
+    if: github.repository_owner == 'OpenFAST'
     runs-on: windows-latest
     defaults:
       run:
@@ -22,6 +24,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
       with:
+        ref: ${GITHUB_REF}
         fetch-depth: 0
     - name: Cache install Intel oneAPI
       id: cache-install
