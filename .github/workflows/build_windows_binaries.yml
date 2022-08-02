@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
 
 name: 'Build Windows Binaries'
 
@@ -9,17 +6,14 @@ on: push
 env:
   WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18674/w_BaseKit_p_2022.2.0.252_offline.exe
   WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18680/w_HPCKit_p_2022.2.0.173_offline.exe
-  WINDOWS_CPP_COMPONENTS: intel.oneapi.win.cpp-compiler
   WINDOWS_FORTRAN_COMPONENTS: intel.oneapi.win.ifort-compiler
   WINDOWS_MKL_COMPONENTS: intel.oneapi.win.mkl.devel
-  CACHE_NUMBER: 2
-  SAMPLES_TAG: 2022.2.0
-  COMPILER_VERSION: 2022.1.0
+  CACHE_NUMBER: 3
   VS_VER: vs2022
 
 jobs:
 
-  build_windows_fortran:
+  build_windows_binaries:
     runs-on: windows-latest
     defaults:
       run:
@@ -43,27 +37,12 @@ jobs:
       run: |
         .github/scripts/oneapi/install_windows.bat $WINDOWS_BASEKIT_URL $WINDOWS_MKL_COMPONENTS
         .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
-
-    - name: Build module drivers
-      run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
-
-    - name: exclude unused files from cache
+    # - name: Build OpenFAST
+    #   run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
+    - name: Exclude unused files from cache
       if: steps.cache-install.outputs.cache-hit != 'true'
       shell: bash
       run: .github/scripts/oneapi/cache_exclude_windows.sh
-
-    # Delete the following if you don't want to save install logs
-    - name: Saving install logs
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      uses: actions/upload-artifact@v2
-      with:
-        name: InstallLogs_${{ github.job }}
-        path: |
-          extract.log
-          bootstrapper*
-          installer*
-        retention-days: 7
-
     - name: Post binaries
       uses: actions/upload-artifact@v2
       if: success()
