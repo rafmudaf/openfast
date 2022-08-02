@@ -9,6 +9,13 @@ set VS_VER=%1
 for /f "tokens=* usebackq" %%f in (`dir /b "C:\Program Files (x86)\Intel\oneAPI\compiler\" ^| findstr /V latest ^| sort`) do @set "LATEST_VERSION=%%f"
 @call "C:\Program Files (x86)\Intel\oneAPI\compiler\%LATEST_VERSION%\env\vars.bat"
 
+dir "C:\Program Files (x86)\Intel\oneAPI\"
+dir "C:\Program Files (x86)\Intel\oneAPI\mkl\"
+dir "C:\Program Files (x86)\Intel\oneAPI\mkl\%LATEST_VERSION%\"
+dir "C:\Program Files (x86)\Intel\oneAPI\mkl\%LATEST_VERSION%\env\"
+dir "C:\Program Files (x86)\Intel\oneAPI\mkl\%LATEST_VERSION%\env\vars.bat"
+@call "C:\Program Files (x86)\Intel\oneAPI\mkl\%LATEST_VERSION%\env\vars.bat"
+
 @REM cd ${{runner.workspace}}\openfast\build
 cmake ^
   -S "D:\a\openfast\openfast" ^
