@@ -28,4 +28,4 @@ cmake ^
 @REM  -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
 @REM  -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
 
-cmake --build "D:\a\openfast\openfast\build" --target beamdyn_driver -- -j ${{env.NUM_PROCS}}
+cmake --build "D:\a\openfast\openfast\build" --target beamdyn_driver
