@@ -29,17 +29,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-      with:
-        submodules: recursive
-    - name: Setup Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.9'
-        cache: 'pip'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install numpy Bokeh
     - name: Cache install Intel oneAPI
       id: cache-install
       uses: actions/cache@v2
@@ -69,9 +58,6 @@ jobs:
           -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
           -DCMAKE_BUILD_TYPE:STRING=Release \
           ${GITHUB_WORKSPACE}
-          # -DBUILD_TESTING:BOOL=ON \
-          # -DCTEST_PLOT_ERRORS:BOOL=ON \
-          # -DVARIABLE_TRACKING=OFF \
           # -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
           # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
           # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
