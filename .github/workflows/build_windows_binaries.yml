@@ -43,10 +43,10 @@ jobs:
         .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
 
 
-    - name: Setup workspace
-      run: cmake -E make_directory ${{runner.workspace}}\openfast\build
-    - name: Build module drivers
-      run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
+    # - name: Setup workspace
+    #   run: cmake -E make_directory ${{runner.workspace}}\openfast\build
+    # - name: Build module drivers
+    #   run: .github/scripts/oneapi/windows_compile_openfast.bat $VS_VER
 
     - name: exclude unused files from cache
       if: steps.cache-install.outputs.cache-hit != 'true'
