@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2022 Intel Corporation
+#
+# SPDX-License-Identifier: MIT
+
+name: build_all
+
+on: push
+
+env:
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18674/w_BaseKit_p_2022.2.0.252_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18680/w_HPCKit_p_2022.2.0.173_offline.exe
+  LINUX_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18673/l_BaseKit_p_2022.2.0.262_offline.sh
+  LINUX_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/18679/l_HPCKit_p_2022.2.0.191_offline.sh
+  MACOS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/18681/m_HPCKit_p_2022.2.0.158_offline.dmg
+  WINDOWS_CPP_COMPONENTS: intel.oneapi.win.cpp-compiler
+  WINDOWS_FORTRAN_COMPONENTS: intel.oneapi.win.ifort-compiler
+  CACHE_NUMBER: 1
+  SAMPLES_TAG: 2022.2.0
+  COMPILER_VERSION: 2022.1.0
+  VS_VER: vs2022
+
+jobs:
+
+  build_windows_fortran:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v2
+    - name: cache install
+      id: cache-install
+      uses: actions/cache@v2
+      with:
+        path: |
+            C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat
+            C:\Program Files (x86)\Intel\oneAPI\compiler
+        key: install-${{ env.CACHE_NUMBER }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_FORTRAN_COMPONENTS }}-compiler-${{ hashFiles('**/scripts/cache_exclude_windows.sh') }}
+    - name: install
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: .github/scripts/oneapi/install_windows.bat $WINDOWS_HPCKIT_URL $WINDOWS_FORTRAN_COMPONENTS
+    # - name: build
+    #   run: scripts/build_windows.bat fortran $VS_VER $SAMPLES_TAG
+    - name: exclude unused files from cache
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      shell: bash
+      run: .github/scripts/oneapi/cache_exclude_windows.sh
+
+    # Delete the following if you don't want to save install logs
+    - name: Saving install logs
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      uses: actions/upload-artifact@v2
+      with:
+        name: InstallLogs_${{ github.job }}
+        path: |
+          extract.log
+          bootstrapper*
+          installer*
+        retention-days: 7
