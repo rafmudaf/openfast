@@ -78,18 +78,6 @@ jobs:
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
           source /opt/intel/oneapi/mkl/latest/env/vars.sh
 
-          echo "*** ls /opt/intel/oneapi"
-          ls /opt/intel/oneapi
-          echo "***"
-
-          echo "*** ls /opt/intel/oneapi/compiler/latest/linux/lib"
-          ls /opt/intel/oneapi/compiler/latest/linux/lib
-          echo "***"
-
-          echo "*** ls /opt/intel/oneapi/compiler/latest/linux/lib"
-          ls /opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64
-          echo "***"
-
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
@@ -102,10 +90,10 @@ jobs:
             # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
             # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
             # -DDOUBLE_PRECISION=OFF \
-      - name: Build all
-        working-directory: ${{runner.workspace}}/openfast/build
-        run: |
           cmake --build . --target turbsim -- -j ${{env.NUM_PROCS}}
+      # - name: Build all
+      #   working-directory: ${{runner.workspace}}/openfast/build
+      #   run: |
       - name: Cache the workspace
         uses: actions/cache@v3.0.4
         with:
