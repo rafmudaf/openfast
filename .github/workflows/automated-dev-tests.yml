@@ -140,9 +140,9 @@ jobs:
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
             -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo \
+            -DBUILD_TESTING:BOOL=ON \
+            -DCTEST_PLOT_ERRORS:BOOL=ON \
             ${GITHUB_WORKSPACE}
-            # -DBUILD_TESTING:BOOL=ON \
-            # -DCTEST_PLOT_ERRORS:BOOL=ON \
             # -DVARIABLE_TRACKING=OFF \
             # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
             # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
