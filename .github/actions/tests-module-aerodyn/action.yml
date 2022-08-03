@@ -12,6 +12,7 @@ runs:
   using: "composite"
   steps: 
     - run: |
+        source /opt/intel/oneapi/mkl/latest/env/vars.sh
 
         if [[ ${{ inputs.test-target }} == "unit" ]] || [[ ${{ inputs.test-target }} == "all" ]]; then
           ctest -VV -R fvw_utest

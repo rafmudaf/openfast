@@ -5,6 +5,7 @@ runs:
   using: 'composite'
   steps: 
     - run: |
+        source /opt/intel/oneapi/mkl/latest/env/vars.sh
         ctest -VV -L linear -E Ideal
         ctest -VV -j8 -I 1,1,1,2,3,4,5,6,7,8,10,11,12,13,14,15,17,18,21,22,23,24,25,26,27,28,29
       working-directory: ${{runner.workspace}}/openfast/build

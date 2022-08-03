@@ -4,6 +4,8 @@ author: 'Rafael Mudafort https://github.com/rafmudaf'
 runs:
   using: "composite"
   steps: 
-    - run: ctest -VV -j7 -R SD_
+    - run: |
+        source /opt/intel/oneapi/mkl/latest/env/vars.sh
+        ctest -VV -j7 -R SD_
       working-directory: ${{runner.workspace}}/openfast/build
       shell: bash
