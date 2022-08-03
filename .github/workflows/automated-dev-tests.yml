@@ -292,6 +292,22 @@ jobs:
           pip install numpy "Bokeh>=2.4"
           sudo apt-get update -y
           sudo apt-get install -y libhdf5-dev libopenmpi-dev libyaml-cpp-dev
+      - name: Cache install Intel oneAPI
+        id: cache-install
+        uses: actions/cache@v2
+        with:
+          path: |
+            /opt/intel/oneapi/compiler
+            /opt/intel/oneapi/mkl
+          key: install-${{ env.CACHE_NUMBER }}-${{ env.LINUX_HPCKIT_URL }}-${{ env.LINUX_FORTRAN_COMPONENTS_WEB }}-compiler-${{ hashFiles('**/.github/scripts/oneapi/cache_exclude_linux.sh') }}
+      - name: Install oneAPI
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: |
+          .github/scripts/oneapi/install_linux.sh $LINUX_BASEKIT_URL $LINUX_MKL_COMPONENTS_WEB
+          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL "$LINUX_CPP_COMPONENTS_WEB:$LINUX_FORTRAN_COMPONENTS_WEB"
+      - name: exclude unused files from cache
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: .github/scripts/oneapi/cache_exclude_linux.sh
       - name: Build OpenFAST glue-code
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
@@ -325,6 +341,22 @@ jobs:
           pip install numpy "Bokeh>=2.4"
           sudo apt-get update -y
           sudo apt-get install -y libhdf5-dev libopenmpi-dev libyaml-cpp-dev
+      - name: Cache install Intel oneAPI
+        id: cache-install
+        uses: actions/cache@v2
+        with:
+          path: |
+            /opt/intel/oneapi/compiler
+            /opt/intel/oneapi/mkl
+          key: install-${{ env.CACHE_NUMBER }}-${{ env.LINUX_HPCKIT_URL }}-${{ env.LINUX_FORTRAN_COMPONENTS_WEB }}-compiler-${{ hashFiles('**/.github/scripts/oneapi/cache_exclude_linux.sh') }}
+      - name: Install oneAPI
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: |
+          .github/scripts/oneapi/install_linux.sh $LINUX_BASEKIT_URL $LINUX_MKL_COMPONENTS_WEB
+          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL "$LINUX_CPP_COMPONENTS_WEB:$LINUX_FORTRAN_COMPONENTS_WEB"
+      - name: exclude unused files from cache
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: .github/scripts/oneapi/cache_exclude_linux.sh
       - name: Build FAST.Farm
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
@@ -405,6 +437,22 @@ jobs:
           pip install numpy "Bokeh>=2.4"
           sudo apt-get update -y
           sudo apt-get install -y libhdf5-dev libopenmpi-dev libyaml-cpp-dev
+      - name: Cache install Intel oneAPI
+        id: cache-install
+        uses: actions/cache@v2
+        with:
+          path: |
+            /opt/intel/oneapi/compiler
+            /opt/intel/oneapi/mkl
+          key: install-${{ env.CACHE_NUMBER }}-${{ env.LINUX_HPCKIT_URL }}-${{ env.LINUX_FORTRAN_COMPONENTS_WEB }}-compiler-${{ hashFiles('**/.github/scripts/oneapi/cache_exclude_linux.sh') }}
+      - name: Install oneAPI
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: |
+          .github/scripts/oneapi/install_linux.sh $LINUX_BASEKIT_URL $LINUX_MKL_COMPONENTS_WEB
+          .github/scripts/oneapi/install_linux.sh $LINUX_HPCKIT_URL "$LINUX_CPP_COMPONENTS_WEB:$LINUX_FORTRAN_COMPONENTS_WEB"
+      - name: exclude unused files from cache
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: .github/scripts/oneapi/cache_exclude_linux.sh
       - name: Configure Tests
         working-directory: ${{runner.workspace}}/openfast/build
         run: |
