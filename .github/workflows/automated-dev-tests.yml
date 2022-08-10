@@ -1068,3 +1068,4 @@ jobs:
           name: rtest-FF
           path: |
             ${{runner.workspace}}/openfast/build/reg_tests/glue-codes/fast-farm
+            !${{runner.workspace}}/openfast/build/reg_tests/glue-codes/fast-farm/5MW_Baseline
