@@ -77,7 +77,6 @@ jobs:
         run: |
           source /opt/intel/oneapi/compiler/latest/env/vars.sh
           source /opt/intel/oneapi/mkl/latest/env/vars.sh
-
           cmake \
             -DCMAKE_INSTALL_PREFIX:PATH=${{runner.workspace}}/openfast/install \
             -DCMAKE_Fortran_COMPILER:STRING=${{env.FORTRAN_COMPILER}} \
@@ -90,10 +89,13 @@ jobs:
             # -DCMAKE_CXX_COMPILER:STRING=${{env.CXX_COMPILER}} \
             # -DCMAKE_C_COMPILER:STRING=${{env.C_COMPILER}} \
             # -DDOUBLE_PRECISION=OFF \
+      - name: Build all
+        working-directory: ${{runner.workspace}}/openfast/build
+        run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
+          source /opt/intel/oneapi/mkl/latest/env/vars.sh
+
           cmake --build . --target turbsim -- -j ${{env.NUM_PROCS}}
-      # - name: Build all
-      #   working-directory: ${{runner.workspace}}/openfast/build
-      #   run: |
       - name: Cache the workspace
         uses: actions/cache@v3.0.4
         with:
@@ -374,59 +376,61 @@ jobs:
   #           ${{runner.workspace}}/openfast/build/reg_tests/modules
 
 
-  # rtest-modules-debug:
-  #   runs-on: ubuntu-20.04
-  #   needs: build-all-debug
-  #   steps:
-  #     - name: Cache the workspace
-  #       uses: actions/cache@v3.0.4
-  #       with:
-  #         path: ${{runner.workspace}}
-  #         key: build-all-debug-${{ github.sha }}
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v3
-  #       with:
-  #         python-version: '3.9'
-  #         cache: 'pip'
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install numpy "Bokeh>=2.4"
-  #         sudo apt-get update -y
-  #         sudo apt-get install -y libhdf5-dev libopenmpi-dev libyaml-cpp-dev
-  #     - name: Configure Tests
-  #       working-directory: ${{runner.workspace}}/openfast/build
-  #       run: |
-  #         cmake \
-  #           -DBUILD_TESTING:BOOL=ON \
-  #           -DCTEST_PLOT_ERRORS:BOOL=ON \
-  #           ${GITHUB_WORKSPACE}
-  #         cmake --build . --target regression_test_controllers -- -j ${{env.NUM_PROCS}}
-  #     - name: Run AeroDyn tests
-  #       uses: ./.github/actions/tests-module-aerodyn
-  #       with:
-  #         # Don't run regression tests here since they currently fail inconsistently
-  #         test-target: unit
-  #     - name: Run BeamDyn tests
-  #       uses: ./.github/actions/tests-module-beamdyn
-  #     - name: Run HydroDyn tests
-  #       uses: ./.github/actions/tests-module-hydrodyn
-  #     - name: Run InflowWind tests
-  #       uses: ./.github/actions/tests-module-inflowwind
-  #     - name: Run NWTC Library tests
-  #       uses: ./.github/actions/tests-module-nwtclibrary
-  #     - name: Run SubDyn tests
-  #       uses: ./.github/actions/tests-module-subdyn
-  #     - name: Run VersionInfo tests
-  #       uses: ./.github/actions/tests-module-version
-  #     - name: Failing test artifacts
-  #       uses: actions/upload-artifact@v2
-  #       if: failure()
-  #       with:
-  #         name: rtest-modules-debug
-  #         path: |
-  #           ${{runner.workspace}}/openfast/build/reg_tests/modules
-  #           ${{runner.workspace}}/openfast/build/unit_tests
+  rtest-modules-debug:
+    runs-on: ubuntu-20.04
+    needs: build-all-debug
+    steps:
+      - name: Cache the workspace
+        uses: actions/cache@v3.0.4
+        with:
+          path: ${{runner.workspace}}
+          key: build-all-debug-${{ github.sha }}
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy "Bokeh>=2.4"
+          sudo apt-get update -y
+          sudo apt-get install -y libhdf5-dev libopenmpi-dev libyaml-cpp-dev
+      - name: Configure Tests
+        working-directory: ${{runner.workspace}}/openfast/build
+        run: |
+          source /opt/intel/oneapi/compiler/latest/env/vars.sh
+          source /opt/intel/oneapi/mkl/latest/env/vars.sh
+          cmake \
+            -DBUILD_TESTING:BOOL=ON \
+            -DCTEST_PLOT_ERRORS:BOOL=ON \
+            ${GITHUB_WORKSPACE}
+          cmake --build . --target regression_test_controllers -- -j ${{env.NUM_PROCS}}
+      - name: Run AeroDyn tests
+        uses: ./.github/actions/tests-module-aerodyn
+        with:
+          # Don't run regression tests here since they currently fail inconsistently
+          test-target: unit
+      - name: Run BeamDyn tests
+        uses: ./.github/actions/tests-module-beamdyn
+      - name: Run HydroDyn tests
+        uses: ./.github/actions/tests-module-hydrodyn
+      - name: Run InflowWind tests
+        uses: ./.github/actions/tests-module-inflowwind
+      - name: Run NWTC Library tests
+        uses: ./.github/actions/tests-module-nwtclibrary
+      - name: Run SubDyn tests
+        uses: ./.github/actions/tests-module-subdyn
+      - name: Run VersionInfo tests
+        uses: ./.github/actions/tests-module-version
+      - name: Failing test artifacts
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: rtest-modules-debug
+          path: |
+            ${{runner.workspace}}/openfast/build/reg_tests/modules
+            ${{runner.workspace}}/openfast/build/unit_tests
 
 
   # rtest-interfaces:
