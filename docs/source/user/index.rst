@@ -83,7 +83,7 @@ Documentation covers usage of models, underlying theory, and in some cases modul
    ServoDyn <servodyn/index.rst>
    Structural Control <servodyn-stc/StC_index.rst>
    TurbSim <turbsim/index.rst>
-   C++ API <cppapi/index.rst>
+   C++ API <openfast/cppapi.rst>
    FAST.Farm <fast.farm/index.rst>
 
 The following modules do not currently have formal documentation
