@@ -41,10 +41,10 @@ macro(set_fast_fortran)
   get_filename_component(FCNAME "${CMAKE_Fortran_COMPILER}" NAME)
 
   # Abort if we do not have gfortran or Intel Fortran Compiler.
-  if (NOT (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU" OR
-        ${CMAKE_Fortran_COMPILER_ID} MATCHES "^Intel"))
-    message(FATAL_ERROR "OpenFAST requires either GFortran or Intel Fortran Compiler. Compiler detected by CMake: ${FCNAME}.")
-  endif()
+  # if (NOT (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU" OR
+  #       ${CMAKE_Fortran_COMPILER_ID} MATCHES "^Intel"))
+  #   message(FATAL_ERROR "OpenFAST requires GFortran, Intel Fortran, or Flang Compiler. Compiler detected by CMake: ${FCNAME}.")
+  # endif()
 
   # Verify proper compiler versions are available
   # see https://github.com/OpenFAST/openfast/issues/88
@@ -70,6 +70,8 @@ macro(set_fast_fortran)
     set_fast_gfortran()
   elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "^Intel")
     set_fast_intel_fortran()
+  elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang")
+    set_fast_flang()
   endif()
 endmacro(set_fast_fortran)
 
@@ -91,6 +93,8 @@ macro(check_f2008_features)
    if (HAS_FORTRAN2008)
      message(STATUS "Enabling Fortran 2008 features")
      add_definitions(-DHAS_FORTRAN2008_FEATURES)
+   else()
+     message(STATUS "Fortran 2008 features not available")
    endif()
 endmacro(check_f2008_features)
 
@@ -138,6 +142,40 @@ macro(set_fast_gfortran)
 
   check_f2008_features()
 endmacro(set_fast_gfortran)
+
+#
+# SET_FAST_FLANG - Customizations for LLVM / Flang compiler
+#
+macro(set_fast_flang)
+  if(NOT WIN32)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpic ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
+  endif(NOT WIN32)
+
+  # Fix free-form compilation for OpenFAST
+  # set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-form")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
+
+  # Deal with Double/Single precision
+  if (DOUBLE_PRECISION)
+    add_definitions(-DOPENFAST_DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-real-8")
+  endif (DOUBLE_PRECISION)
+
+  # debug flags
+  # if(CMAKE_BUILD_TYPE MATCHES Debug)
+  #   set( CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fcheck=all,no-array-temps -pedantic -fbacktrace -finit-real=inf -finit-integer=9999." )
+  # endif()
+
+  # # OPENMP
+  # if (OPENMP)
+  #    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fopenmp")
+  #    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fopenmp" )
+  # endif()
+
+  check_f2008_features()
+endmacro(set_fast_flang)
 
 #
 # SET_FAST_INTEL_FORTRAN - Customizations for Intel Fortran Compiler

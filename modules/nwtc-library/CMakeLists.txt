@@ -56,7 +56,7 @@ set(NWTCLIBS_SOURCES
   src/NetLib/slatec/xgetua.f
   src/NetLib/slatec/xermsg.f  )
 
-get_filename_component(FCNAME ${CMAKE_Fortran_COMPILER} NAME)
+
 
 # Recursive use of routine in qk61/dqk61 will trigger errors in debug
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -115,6 +115,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "^Intel")
   elseif (WIN32)
     set(NWTC_SYS_FILE src/SysIVF.f90)
   endif (APPLE OR UNIX)
+elseif (${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang")
+  set(NWTC_SYS_FILE src/SysFlangLinux.f90)
 endif ()
 
 if (NWTC_SYS_FILE)
