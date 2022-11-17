@@ -1774,7 +1774,9 @@ SUBROUTINE CheckR16Var( RealVar, RealDesc, ErrStat, ErrMsg )
    INTEGER,     INTENT(OUT)           :: ErrStat                               !< Error status
    CHARACTER(*),INTENT(OUT)           :: ErrMsg                                !< Error message
 
-   IF (IEEE_IS_NAN(RealVar) .or. .not. IEEE_IS_FINITE( RealVar) ) THEN
+   real(QuKi) :: quad_prec_var
+
+   IF (ISNAN(RealVar) .or. RealVar > HUGE(quad_prec_var) ) THEN
       ErrStat = ErrID_Fatal
       ErrMsg = trim(RealDesc)//': value is not a finite real number.'
    ELSE
