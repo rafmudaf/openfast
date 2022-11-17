@@ -192,19 +192,21 @@ SUBROUTINE FlushOut ( Unit )
 END SUBROUTINE FlushOut ! ( Unit )
 !=======================================================================
 !bjj note: this subroutine is not tested for this compiler
-! SUBROUTINE Get_CWD ( DirName, Status )
+SUBROUTINE Get_CWD ( DirName, Status )
 
-!    ! This routine retrieves the path of the current working directory.
+   ! This routine retrieves the path of the current working directory.
 
-!    IMPLICIT NONE
+   IMPLICIT NONE
+   
+   CHARACTER(1024)              :: pwd
+   INTEGER                      :: length
+   CHARACTER(*), INTENT(OUT)    :: DirName                                         ! A CHARACTER string containing the path of the current working directory.
+   INTEGER,      INTENT(OUT)    :: Status                                          ! Status returned by the call to a portability routine.
+   
+   call get_environment_variable('PWD', DirName, length, Status)
 
-!    CHARACTER(*), INTENT(OUT)    :: DirName                                         ! A CHARACTER string containing the path of the current working directory.
-!    INTEGER,      INTENT(OUT)    :: Status                                          ! Status returned by the call to a portability routine.
-
-!    Status = GETCWD ( DirName )
-
-!    RETURN
-! END SUBROUTINE Get_CWD
+   RETURN
+END SUBROUTINE Get_CWD
 !=======================================================================
 SUBROUTINE MKDIR ( new_directory_path )
 
