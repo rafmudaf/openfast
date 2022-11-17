@@ -1556,8 +1556,8 @@ CONTAINS
          END IF
          
          ! Set the values
-         TmpFFTWaveElev  =  0.0_DbKi
-         WaveElevC0(:,:) =  0.0_DbKi
+         TmpFFTWaveElev  =  0.0
+         WaveElevC0(:,:) =  0.0
 
 
          ! Copy values over
@@ -1613,7 +1613,7 @@ CONTAINS
          
          ! get wave number array once
          DO I = 0, NStepWave2 
-            WaveNmbr(i)   = WaveNumber ( dble(I*WaveDOmega), p%g, p%WtrDpth )
+            WaveNmbr(i)   = WaveNumber ( real(I*WaveDOmega, DbKi), p%g, p%WtrDpth )
             tmpComplex(I)    =  CMPLX(WaveElevC0(1,I), WaveElevC0(2,I))
          END DO    
          
@@ -1633,10 +1633,10 @@ CONTAINS
                      ImagOmega = ImagNmbr*Omega
 
                      WaveElevC (i) = tmpComplex(i) * EXP( -ImagNmbr*WaveNmbr(i)*( p%pxWave(ix)*CosWaveDir + p%pyWave(iy)*SinWaveDir ))                                                                 
-                     WaveDynPC (i) = p%rhoW*p%g* WaveElevC(i) * COSHNumOvrCOSHDen( WaveNmbr(i), p%WtrDpth, DBLE(p%pzWave(iz)) )       
-                     WaveVelCHx(i) =       Omega*WaveElevC(i) * COSHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, DBLE(p%pzWave(iz)) ) *CosWaveDir
-                     WaveVelCHy(i) =       Omega*WaveElevC(i) * COSHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, DBLE(p%pzWave(iz)) ) *SinWaveDir             
-                     WaveVelCV (i) =   ImagOmega*WaveElevC(i) * SINHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, DBLE(p%pzWave(iz)) )
+                     WaveDynPC (i) = p%rhoW*p%g* WaveElevC(i) * COSHNumOvrCOSHDen( WaveNmbr(i), p%WtrDpth, real(p%pzWave(iz), DbKi) )       
+                     WaveVelCHx(i) =       Omega*WaveElevC(i) * COSHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, real(p%pzWave(iz), DbKi) ) *CosWaveDir
+                     WaveVelCHy(i) =       Omega*WaveElevC(i) * COSHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, real(p%pzWave(iz), DbKi) ) *SinWaveDir             
+                     WaveVelCV (i) =   ImagOmega*WaveElevC(i) * SINHNumOvrSINHDen( WaveNmbr(i), p%WtrDpth, real(p%pzWave(iz), DbKi) )
                      WaveAccCHx(i) =   ImagOmega*WaveVelCHx(i)
                      WaveAccCHy(i) =   ImagOmega*WaveVelCHy(i)
                      WaveAccCV (i) =   ImagOmega*WaveVelCV (i)

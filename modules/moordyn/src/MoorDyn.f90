@@ -1808,7 +1808,7 @@ CONTAINS
             CALL MeshConstructElement(u%CoupledKinematics(iTurb), ELEMENT_POINT, ErrStat2, ErrMsg2, J)
             
             ! lastly, do this to set the attached line endpoint positions:
-            CALL Rod_SetKinematics(m%RodList(m%CpldRodIs(l,iTurb)), DBLE(rRef), m%zeros6, m%zeros6, 0.0_DbKi, m)
+            CALL Rod_SetKinematics(m%RodList(m%CpldRodIs(l,iTurb)), real(rRef, DbKi), m%zeros6, m%zeros6, 0.0_DbKi, m)
          END DO 
 
          DO l = 1,p%nCpldCons(iTurb)   ! keeping this one simple for now, positioning at whatever is specified by glue code <<<
