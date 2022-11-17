@@ -2320,7 +2320,7 @@ END SUBROUTINE CheckR16Var
 
       ! Look for path separators
 
-   I = INDEX( GivenFil, '\', BACK=.TRUE. )
+   I = INDEX( GivenFil, '\\', BACK=.TRUE. )
    I = MAX( I, INDEX( GivenFil, '/', BACK=.TRUE. ) )
 
    IF ( I == 0 ) THEN
@@ -4438,9 +4438,9 @@ END SUBROUTINE CheckR16Var
 
    PathIsRelative = .FALSE.
 
-   IF ( ( INDEX( GivenFil, ":/") == 0 ) .AND. ( INDEX( GivenFil, ":\") == 0 ) ) THEN   ! No drive is specified (by ":\" or ":/")
+   IF ( ( INDEX( GivenFil, ":/") == 0 ) .AND. ( INDEX( GivenFil, ":\\") == 0 ) ) THEN   ! No drive is specified (by ":\" or ":/")
 
-      IF ( INDEX( "/\", GivenFil(1:1) ) == 0 ) THEN                                    ! The file name doesn't start with "\" or "/"
+      IF ( INDEX( "/\\", GivenFil(1:1) ) == 0 ) THEN                                    ! The file name doesn't start with "\" or "/"
 
          PathIsRelative = .TRUE.
 

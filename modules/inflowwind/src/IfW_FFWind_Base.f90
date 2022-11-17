@@ -905,7 +905,7 @@ SUBROUTINE WrBinHAWC(FileRootName, FFWind, delta, ErrStat, ErrMsg)
    WRITE( UnWind, '()'  )
    WRITE( UnWind, '(A)' )  'begin mann;'
    
-   ic = INDEX( FileRootName, '\', BACK=.TRUE. )
+   ic = INDEX( FileRootName, '\\', BACK=.TRUE. )
    ic = MAX( ic, INDEX( FileRootName, '/', BACK=.TRUE. ) )
    RootWithoutPathName = FileRootName((ic+1):)
 

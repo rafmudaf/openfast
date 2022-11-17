@@ -2501,7 +2501,7 @@ SUBROUTINE WrBinHAWC( p, V, USig, VSig, WSig, ErrStat, ErrMsg)
    !............................................
    ! write the summary file
    !............................................
-   ic = INDEX( p%RootName, '\', BACK=.TRUE. )
+   ic = INDEX( p%RootName, '\\', BACK=.TRUE. )
    ic = MAX( ic, INDEX( p%RootName, '/', BACK=.TRUE. ) )
    RootWithoutPathName = p%RootName((ic+1):)
 
