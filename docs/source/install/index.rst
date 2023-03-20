@@ -15,6 +15,19 @@ code,** refer to the table in the :ref:`download_binaries` section and read
 the corresponding documentation for specific instructions.
 For instructions on compiling, see :ref:`compile_from_source`.
 
+For all systems, the simplest method of "installation" is to simply maintain
+all of the libraries and executable in the same directory. The precompiled
+binaries are distributed this way and the build systems align the resulting
+binaries so that they are all able to find each other at run time. Otherwise,
+on Windows, all dynamically linked libraries (``.dll``) must exist on the
+Windows path. For Unix-based systems, the libraries (``.so`` or ``.dylib``)
+must be found in the environment's include path.
+
+.. warning::
+
+    The architecture (32 bit or 64 bit) of external libraries (.dll, .so, or
+    .dylib) must match the architecture of the OpenFAST executable.
+
 .. _download_binaries:
 
 Download binaries
