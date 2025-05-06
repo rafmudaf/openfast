@@ -72,16 +72,13 @@ class WaveTankLib(OpenFASTInterfaceType):
         self.WaveTank_Init.restype = c_int
 
         self.WaveTank_CalcOutput.argtypes = [
-            POINTER(c_double),      # real(c_double) :: time
+            POINTER(c_int),         # integer(c_int) :: frame_number
             POINTER(c_int),         # integer(c_int) :: n_camera_points
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_x(N_CAMERA_POINTS)
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_y(N_CAMERA_POINTS)
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_z(N_CAMERA_POINTS)
             POINTER(c_float),       # real(c_float),          intent(in   ) :: rotation_matrix(9)
             POINTER(c_float),       # real(c_float),          intent(  out) :: loads(N_CAMERA_POINTS)
-            POINTER(c_float),       # real(c_float),          intent(  out) :: ss_outputs(SS_NumChannels_C)
-            POINTER(c_float),       # real(c_float),          intent(  out) :: md_outputs(MD_NumChannels_C)
-            POINTER(c_float),       # real(c_float),          intent(  out) :: adi_outputs(ADI_NumChannels_C)
             POINTER(c_int),         # integer(c_int),         intent(  out) :: ErrStat_C
             POINTER(c_char),        # character(kind=c_char), intent(  out) :: ErrMsg_C(ErrMsgLen_C)
         ]
@@ -153,7 +150,7 @@ class WaveTankLib(OpenFASTInterfaceType):
 
     def calc_output(
         self,
-        time: float,
+        frame_number: int,
         n_camera_points: int,
         positions_x: np.ndarray,
         positions_y: np.ndarray,
@@ -165,16 +162,13 @@ class WaveTankLib(OpenFASTInterfaceType):
         _error_message = create_string_buffer(self.ERROR_MSG_C_LEN)
 
         self.WaveTank_CalcOutput(
-            byref(c_double(time)),
+            byref(c_int(frame_number)),
             byref(c_int(n_camera_points)),
             positions_x.ctypes.data_as(POINTER(c_float)),
             positions_y.ctypes.data_as(POINTER(c_float)),
             positions_z.ctypes.data_as(POINTER(c_float)),
             rotation_matrix.ctypes.data_as(POINTER(c_float)),
             loads.ctypes.data_as(POINTER(c_float)),
-            self.ss_output_values.ctypes.data_as(POINTER(c_float)),
-            self.md_output_values.ctypes.data_as(POINTER(c_float)),
-            self.adi_output_values.ctypes.data_as(POINTER(c_float)),
             byref(_error_status),
             _error_message,
         )
@@ -233,14 +227,13 @@ if __name__=="__main__":
     positions_y = 2 * np.ones(1, dtype=np.float32)
     positions_z = 3 * np.ones(1, dtype=np.float32)
     rotation_matrix = 4 * np.ones(9, dtype=np.float32)
-    loads = np.zeros((1,6), dtype=np.float32, order='C')
+    loads = 5 * np.ones(n_camera_points, dtype=np.float32)
 
+    for i in range(50):
     wavetanklib.allocate_outputs()
 
-    dt = 0.1
-    for i in range(2):
         wavetanklib.calc_output(
-            time=i*dt,
+            frame_number=i,
             n_camera_points=n_camera_points,
             positions_x=positions_x,
             positions_y=positions_y,
@@ -248,9 +241,7 @@ if __name__=="__main__":
             rotation_matrix=rotation_matrix,
             loads=loads,
         )
-        # print(loads)
+        print(loads)
 
-        # print(wavetanklib.md_output_values)
-    print(wavetanklib.md_output_values)
 
     wavetanklib.end()
