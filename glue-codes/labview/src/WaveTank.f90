@@ -237,6 +237,7 @@ SUBROUTINE WaveTank_Init(   &
     ErrStat_C,              &
     ErrMsg_C                &
 ) BIND (C, NAME='WaveTank_Init')
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_Init
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_Init
@@ -404,6 +405,7 @@ SUBROUTINE WaveTank_CalcOutput( &
     ErrStat_C,                  &
     ErrMsg_C                    &
 ) BIND (C, NAME='WaveTank_CalcOutput')
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_CalcOutput
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_CalcOutput
@@ -572,6 +574,7 @@ SUBROUTINE WaveTank_StepFunction( &
     ErrStat_C,                  &
     ErrMsg_C                    &
 ) BIND (C, NAME='WaveTank_StepFunction')
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_StepFunction
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_StepFunction
@@ -603,6 +606,7 @@ SUBROUTINE WaveTank_StepFunction( &
 END SUBROUTINE
 
 SUBROUTINE WaveTank_End(ErrStat_C, ErrMsg_C) bind (C, NAME="WaveTank_End")
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_End
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_End
@@ -630,6 +634,7 @@ SUBROUTINE WaveTank_End(ErrStat_C, ErrMsg_C) bind (C, NAME="WaveTank_End")
 END SUBROUTINE
 
 SUBROUTINE WaveTank_SetWaveFieldPointer(ErrStat_C, ErrMsg_C) bind (C, NAME="WaveTank_SetWaveFieldPointer")
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_SetWaveFieldPointer
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_SetWaveFieldPointer
@@ -666,6 +671,7 @@ SUBROUTINE WaveTank_SetWaveFieldPointer(ErrStat_C, ErrMsg_C) bind (C, NAME="Wave
 END SUBROUTINE
 
 SUBROUTINE WaveTank_NoOp(ErrStat_C, ErrMsg_C) bind (C, NAME="WaveTank_NoOp")
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_NoOp
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_NoOp
@@ -691,6 +697,7 @@ SUBROUTINE WaveTank_NoOp(ErrStat_C, ErrMsg_C) bind (C, NAME="WaveTank_NoOp")
 END SUBROUTINE
 
 SUBROUTINE WaveTank_Sizes(SS_NumOuts, MD_NumOuts, ADI_NumOuts) bind (C, NAME="WaveTank_Sizes")
+IMPLICIT NONE
 #ifndef IMPLICIT_DLLEXPORT
 !DEC$ ATTRIBUTES DLLEXPORT :: WaveTank_Sizes
 !GCC$ ATTRIBUTES DLLEXPORT :: WaveTank_Sizes
