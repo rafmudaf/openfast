@@ -4,10 +4,10 @@ MODULE WaveTankTesting
     USE ISO_C_BINDING
     USE NWTC_Library
     ! USE Precision
-    USE MoorDyn_C
-    USE SeaState_C_Binding
-    USE NWTC_C_Binding, ONLY: IntfStrLen, SetErrStat_C
+    USE SeaState_C_Binding, ONLY: SeaSt_C_Init, SeaSt_C_CalcOutput, SeaSt_C_End, MaxOutPts
     USE AeroDyn_Inflow_C_BINDING, ONLY: ADI_C_Init, MaxADIOutputs
+    USE MoorDyn_C, ONLY: MD_C_Init
+    USE NWTC_C_Binding, ONLY: IntfStrLen, SetErrStat_C, ErrMsgLen_C
 
     IMPLICIT NONE
     SAVE
@@ -50,8 +50,8 @@ IMPLICIT NONE
     TYPE(C_PTR),        INTENT(IN   ) :: AD_InputFile_C
     TYPE(C_PTR),        INTENT(IN   ) :: IfW_InputFile_C
     INTEGER(C_INT),     INTENT(IN   ) :: n_camera_points_c
-    INTEGER(C_INT),     INTENT(  OUT)         :: ErrStat_C
-    CHARACTER(*, KIND=C_CHAR), INTENT(  OUT)  :: ErrMsg_C
+    INTEGER(C_INT),     INTENT(  OUT) :: ErrStat_C
+    CHARACTER(KIND=C_CHAR), INTENT(  OUT) :: ErrMsg_C(ErrMsgLen_C)
 
     ! Local variables
     INTEGER(C_INT)                          :: ErrStat_C2
@@ -59,7 +59,7 @@ IMPLICIT NONE
     INTEGER(C_INT)                          :: input_file_passed = 0  ! We're passing paths to input files rather than input strings for all modules
 
     ! SeaState variables
-    CHARACTER(KIND=C_CHAR), TARGET :: SS_OutRootName(IntfStrLen)
+    CHARACTER(KIND=C_CHAR, LEN=IntfStrLen), TARGET :: SS_OutRootName
     TYPE(C_PTR)    :: SS_OutRootName_C           ! TYPE(C_PTR),    intent(in   )
     REAL(C_FLOAT)  :: SS_Gravity_C               ! REAL(C_FLOAT),  intent(in   )
     REAL(C_FLOAT)  :: SS_WtrDens_C               ! REAL(C_FLOAT),  intent(in   )
@@ -127,12 +127,12 @@ IMPLICIT NONE
     CHARACTER(KIND=C_CHAR) :: ADI_OutputChannelUnits_C(ChanLen*MaxADIOutputs+1) ! intent(  out)  :: OutputChannelUnits_C(ChanLen*MaxADIOutputs+1)
 
     ! Initialize error handling
-    ErrStat_C  =  ErrID_None
-    ErrMsg_C   =  ""
+    ErrStat_C = ErrID_None
+    ErrMsg_C  = " "//C_NULL_CHAR
 
     ! N_CAMERA_POINTS = n_camera_points_c
 
-    SS_OutRootName = "seastate"
+    SS_OutRootName = "seastate" // C_NULL_CHAR
     SS_OutRootName_C = c_loc(SS_OutRootName)
     SS_Gravity_C = 9.80665
     SS_WtrDens_C = 1025
@@ -160,7 +160,8 @@ IMPLICIT NONE
         ErrStat_C2,                 & ! INTEGER(C_INT),             intent(  out) :: ErrStat_c
         ErrMsg_C2                   & ! CHARACTER(KIND=C_CHAR),     intent(  out) :: ErrMsg_c(ErrMsgLen_c)
     )
-    ! CALL SetErrStat_C(ErrStat_C2, ErrMsg_C2, ErrStat_C, ErrMsg_C, 'SeaSt_C_Init')
+    CALL SetErrStat_C(ErrStat_C2, ErrMsg_C2, ErrStat_C, ErrMsg_C, 'SeaSt_C_Init')
+    IF (ErrStat_C >= AbortErrLev) RETURN
 
     ! SS_GetFlowFieldPtr(SSFFPTR)
     ! MD_SetFlowFieldPtr(SSFFPTR)
