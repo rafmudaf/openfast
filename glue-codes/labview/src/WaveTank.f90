@@ -29,9 +29,21 @@ MODULE WaveTankTesting
     INTEGER(C_INT) :: NumBlades_C
     INTEGER(C_INT) :: NumMeshPts_C
 
-    REAL(C_FLOAT), DIMENSION(3,6) :: Positions = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(2,6) :: Velocities = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(1,6) :: Accelerations = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(3,3) :: FloaterPositions = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(3,6) :: FloaterVelocities = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(3,6) :: FloaterAccelerations = 0.0_C_FLOAT
+
+    REAL(C_FLOAT), DIMENSION(3,3) :: NacellePositions = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(3,6) :: NacelleVelocities = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(3,6) :: NacelleAccelerations = 0.0_C_FLOAT
+
+    REAL(C_FLOAT), ALLOCATABLE :: BladeRootPositions(:,:)
+    REAL(C_FLOAT), ALLOCATABLE :: BladeRootVelocities(:,:)
+    REAL(C_FLOAT), ALLOCATABLE :: BladeRootAccelerations(:,:)
+    
+    REAL(C_FLOAT), ALLOCATABLE :: BladeMeshPositions(:,:)
+    REAL(C_FLOAT), ALLOCATABLE :: BladeMeshVelocities(:,:)
+    REAL(C_FLOAT), ALLOCATABLE :: BladeMeshAccelerations(:,:)
 
     TYPE WaveTank_InitInput
         ! SeaState variables
@@ -269,6 +281,35 @@ SUBROUTINE WaveTank_Init(   &
     NumBlades_C = WT_InitInp%NumBlades_C
     NumMeshPts_C = WT_InitInp%NumMeshPts_C
 
+    ! Allocate the blade root and blade mesh arrays since they're based on the number of blades and mesh points
+    IF (.NOT. ALLOCATED(BladeRootPositions)) THEN
+        ALLOCATE( BladeRootPositions(3,3*NumBlades_C) )
+    ENDIF
+    IF (.NOT. ALLOCATED(BladeRootVelocities)) THEN
+        ALLOCATE( BladeRootVelocities(2,6*NumBlades_C) )
+    ENDIF
+    IF (.NOT. ALLOCATED(BladeRootAccelerations)) THEN
+        ALLOCATE( BladeRootAccelerations(1,6*NumBlades_C) )
+    ENDIF
+    BladeRootPositions = 0.0_C_FLOAT
+    BladeRootVelocities = 0.0_C_FLOAT
+    BladeRootAccelerations = 0.0_C_FLOAT
+
+    IF (.NOT. ALLOCATED(BladeMeshPositions)) THEN
+        ALLOCATE( BladeMeshPositions(3,3*NumMeshPts_C) )
+    ENDIF
+
+    IF (.NOT. ALLOCATED(BladeMeshVelocities)) THEN
+        ALLOCATE( BladeMeshVelocities(2,6*NumMeshPts_C) )
+    ENDIF
+
+    IF (.NOT. ALLOCATED(BladeMeshAccelerations)) THEN
+        ALLOCATE( BladeMeshAccelerations(1,6*NumMeshPts_C) )
+    ENDIF
+    BladeMeshPositions = 0.0_C_FLOAT
+    BladeMeshVelocities = 0.0_C_FLOAT
+    BladeMeshAccelerations = 0.0_C_FLOAT
+
     CALL SeaSt_C_Init(                          &    
         SS_InputFile_C,                         &
         WT_InitInp%SS_OutRootName_C,            &
@@ -384,7 +425,8 @@ SUBROUTINE WaveTank_CalcOutput( &
     positions_x,                &
     positions_y,                &
     positions_z,                &
-    rotation_matrix,            &
+    floater_rotation_matrix,    &
+    blade_rotation_matrix,      &
     MD_Forces_C,                &
     ADI_MeshFrc_C,              &
     ADI_HHVel_C,                &
@@ -402,7 +444,9 @@ SUBROUTINE WaveTank_CalcOutput( &
     REAL(C_FLOAT),          INTENT(IN   ) :: positions_x
     REAL(C_FLOAT),          INTENT(IN   ) :: positions_y
     REAL(C_FLOAT),          INTENT(IN   ) :: positions_z
-    REAL(C_FLOAT),          INTENT(IN   ) :: rotation_matrix(9)
+    REAL(C_FLOAT),          INTENT(IN   ) :: floater_rotation_matrix(9)
+    REAL(C_FLOAT),          INTENT(IN   ) :: blade_rotation_matrix(NumBlades_C*9)   !< Rotation matrix for each blade, (/ 1x9 flat R for blade 1, 1x9 flat R for blade 2 /)
+
     ! Outputs
     REAL(C_FLOAT),          INTENT(  OUT) :: MD_Forces_C( 6 )
     REAL(C_FLOAT),          INTENT(  OUT) :: ADI_MeshFrc_C( 6*NumMeshPts_C )   !< A 6xNumMeshPts_C array [Fx,Fy,Fz,Mx,My,Mz]       -- forces and moments (global)
@@ -415,6 +459,8 @@ SUBROUTINE WaveTank_CalcOutput( &
     ! Local variables
     INTEGER(C_INT)                          :: ErrStat_C2
     CHARACTER(KIND=C_CHAR, LEN=ErrMsgLen_C) :: ErrMsg_C2
+    REAL(C_FLOAT)                           :: DeltaS(3)                        !< Change in position from previous time step
+    INTEGER                                 :: I, I0, I1
 
     ! ! ADI
     ! ! SetRotorMotion
@@ -441,25 +487,74 @@ SUBROUTINE WaveTank_CalcOutput( &
     ErrMsg_C  = " "//C_NULL_CHAR
 
     ! Shift the positions and velocities over one index
-    Positions(1,:) = Positions(2,:)
-    Positions(2,:) = Positions(3,:)
-    Velocities(1,:) = Velocities(2,:)
+    FloaterPositions(1,:) = FloaterPositions(2,:)
+    FloaterPositions(2,:) = FloaterPositions(3,:)
+    NacellePositions(1,:) = NacellePositions(2,:)
+    NacellePositions(2,:) = NacellePositions(3,:)
+    BladeRootPositions(1,:) = BladeRootPositions(2,:)
+    BladeRootPositions(2,:) = BladeRootPositions(3,:)
+    BladeMeshPositions(1,:) = BladeMeshPositions(2,:)
+    BladeMeshPositions(2,:) = BladeMeshPositions(3,:)
+    FloaterVelocities(1,:) = FloaterVelocities(2,:)
+    NacelleVelocities(1,:) = NacelleVelocities(2,:)
+    BladeRootVelocities(1,:) = BladeRootVelocities(2,:)
 
     ! Load the new positions
-    Positions(3,:) = (/ positions_x, positions_y, positions_z, 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterPositions(3,:) = (/ positions_x, positions_y, positions_z /)
+    DeltaS = FloaterPositions(3,:) - FloaterPositions(2,:)
+    NacellePositions(3,:) = NacellePositions(2,:) + DeltaS
+
+    ! Stride
+    ! Lower bound: (I-1)*3+1 is the first of the three position components for the current blade
+    !               +1 is because Fortran starts indexing at 1
+    ! Upper bound: (I-1)*3+1+2 is the last of the three position components for the current blade
+    !               +2 is because Fortran includes the last index in the range
+    DO I=1,NumBlades_C
+        I0 = (I-1)*3+1
+        I1 = (I-1)*3+1+2
+        BladeRootPositions(3,I0:I1) = BladeRootPositions(2,I0:I1) + DeltaS
+    END DO
+    DO I=1,NumMeshPts_C
+        I0 = (I-1)*3+1
+        I1 = (I-1)*3+1+2
+        BladeMeshPositions(3,I0:I1) = BladeMeshPositions(2,I0:I1) + DeltaS
+    END DO
 
     ! Calculate velocities and acceleration
-    Velocities(1,:) = (/ (Positions(2,1:3) - Positions(1,1:3)) / real(0.1, c_float), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    Velocities(2,:) = (/ (Positions(3,1:3) - Positions(2,1:3)) / real(0.1, c_float), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    Accelerations(1,:) = (/ (Velocities(2,1:3) - Velocities(1,1:3)) / real(0.1, c_float), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterVelocities(1,:) = (/ (FloaterPositions(2,:) - FloaterPositions(1,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterVelocities(2,:) = (/ (FloaterPositions(3,:) - FloaterPositions(2,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterAccelerations(1,:) = (/ (FloaterVelocities(2,:) - FloaterVelocities(1,:)) / REAL(0.1, C_FLOAT) /)
+
+    NacelleVelocities(1,:) = (/ (NacellePositions(2,:) - NacellePositions(1,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    NacelleVelocities(2,:) = (/ (NacellePositions(3,:) - NacellePositions(2,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    NacelleAccelerations(1,:) = (/ (NacelleVelocities(2,:) - NacelleVelocities(1,:)) / REAL(0.1, C_FLOAT) /)
+
+    DO I=1,NumBlades_C
+        I0 = (I-1)*6+1
+        I1 = (I-1)*6+1+5
+        BladeRootVelocities(1,I0:I1) = (/ (BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeRootVelocities(2,I0:I1) = (/ (BladeRootPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeRootAccelerations(1,I0:I1) = (BladeRootVelocities(2,:) - BladeRootVelocities(1,:)) / REAL(0.1, C_FLOAT)
+    END DO
+
+    DO I=1,NumMeshPts_C
+        I0 = (I-1)*6+1
+        I1 = (I-1)*6+1+5
+        BladeMeshVelocities(1,I0:I1) = (/ (BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeMeshVelocities(2,I0:I1) = (/ (BladeMeshPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeMeshAccelerations(1,I0:I1) = (BladeMeshVelocities(2,:) - BladeMeshVelocities(1,:)) / REAL(0.1, C_FLOAT)
+    END DO
 
     ! Get loads from MoorDyn
+    ! NOTE: MD_C_UpdateStates and MD_C_CalcOutput do not use the positions, velocities, and accelerations.
+    !       They're passed here just for consistency, but we should not let that interface drive
+    !       the design of this module.
     CALL MD_C_UpdateStates(                 &
         time,                               &
         REAL(time + 0.1, C_DOUBLE),         &
-        Positions(3,:),                     &
-        Velocities(2,:),                    &
-        Accelerations(1,:),                 &
+        (/ FloaterPositions(3,:), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /), &
+        (/ FloaterVelocities(2,:) /),       &
+        (/ FloaterAccelerations(2,:) /),    &
         ErrStat_C2, ErrMsg_C2               &
     )
     CALL SetErrStat_C(ErrStat_C2, ErrMsg_C2, ErrStat_C, ErrMsg_C, 'MD_C_UpdateStates')
@@ -467,10 +562,10 @@ SUBROUTINE WaveTank_CalcOutput( &
 
     CALL MD_C_CalcOutput(                   &
         time,                               &
-        Positions(3,:),                     &
-        Velocities(2,:),                    &
-        Accelerations(1,:),                 &
-        MD_Forces_C,                          &
+        (/ FloaterPositions(3,:), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /), &
+        (/ FloaterVelocities(2,:) /),       &
+        (/ FloaterAccelerations(2,:) /),    &
+        MD_Forces_C,                        &
         md_outputs,                         &
         ErrStat_C2, ErrMsg_C2               &
     )
@@ -478,22 +573,28 @@ SUBROUTINE WaveTank_CalcOutput( &
     IF (ErrStat_C >= AbortErrLev) RETURN
 
     ! Get loads from ADI
-    ADI_HubPos_C = Positions(3,1:3)
-    ADI_HubOri_C = (/ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 /)
-    ADI_HubVel_C = Velocities(2,:)
-    ADI_HubAcc_C = Accelerations(1,:)
-    ADI_NacPos_C = Positions(3,1:3)
-    ADI_NacOri_C = (/ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 /)
-    ADI_NacVel_C = Velocities(2,:)
-    ADI_NacAcc_C = Accelerations(1,:)
-    ADI_BldRootPos_C = (/ Positions(3,1:3), Positions(3,1:3) /)
-    ADI_BldRootOri_C = (/ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 /)
-    ADI_BldRootVel_C = (/ Velocities(2,1:6), Velocities(2,1:6) /)
-    ADI_BldRootAcc_C = (/ Accelerations(1,1:6), Accelerations(1,1:6) /)
-    ADI_MeshPos_C = (/ Positions(3,1:3), Positions(3,1:3) /)
-    ADI_MeshOri_C = (/ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 /)
-    ADI_MeshVel_C = (/ Velocities(2,1:6), Velocities(2,1:6) /)
-    ADI_MeshAcc_C = (/ Accelerations(1,1:6), Accelerations(1,1:6) /)
+
+    ! All components are rigidly connected so they share velocities, accelerations, and orientation
+    ! Positions are set by the input file geometry and the calling code
+    ADI_HubPos_C = FloaterPositions(3,:)
+    ADI_HubOri_C = floater_rotation_matrix
+    ADI_HubVel_C = FloaterVelocities(2,:)
+    ADI_HubAcc_C = FloaterAccelerations(1,:)
+
+    ADI_NacPos_C = NacellePositions(3,:)
+    ADI_NacOri_C = floater_rotation_matrix
+    ADI_NacVel_C = NacelleVelocities(2,:)
+    ADI_NacAcc_C = NacelleAccelerations(1,:)
+
+    ADI_BldRootPos_C = BladeRootPositions(3,:)
+    ADI_BldRootOri_C = blade_rotation_matrix
+    ADI_BldRootVel_C = BladeRootVelocities(2,:)
+    ADI_BldRootAcc_C = BladeRootAccelerations(1,:)
+
+    ADI_MeshPos_C = BladeMeshPositions(3,:)
+    ADI_MeshOri_C = blade_rotation_matrix
+    ADI_MeshVel_C = BladeMeshVelocities(2,:)
+    ADI_MeshAcc_C = BladeMeshAccelerations(1,:)
 
     CALL ADI_C_SetRotorMotion(              &
         iWT_c,                              & !< Wind turbine / rotor number
@@ -505,11 +606,11 @@ SUBROUTINE WaveTank_CalcOutput( &
         ADI_NacOri_C,                       & !< Nacelle orientation
         ADI_NacVel_C,                       & !< Nacelle velocity
         ADI_NacAcc_C,                       & !< Nacelle acceleration
-        ADI_BldRootPos_C,                   & !< Blade root positions
-        ADI_BldRootOri_C,                   & !< Blade root orientations
-        ADI_BldRootVel_C,                   & !< Blade root velocities
-        ADI_BldRootAcc_C,                   & !< Blade root accelerations
-        NumMeshPts_C,                       & !< Number of mesh points we are transfering motions to and output loads to
+        ADI_BldRootPos_C,                   & !< Blade root positions, 3xNumBlades_C
+        ADI_BldRootOri_C,                   & !< Blade root orientations, 9xNumBlades_C
+        ADI_BldRootVel_C,                   & !< Blade root velocities, 6xNumBlades_C
+        ADI_BldRootAcc_C,                   & !< Blade root accelerations, 6xNumBlades_C
+        NumMeshPts_C,                       & !< Number of mesh points we are transferring motions to and output loads to
         ADI_MeshPos_C,                      & !< A 3xNumMeshPts_C array [x,y,z]
         ADI_MeshOri_C,                      & !< A 9xNumMeshPts_C array [r11,r12,r13,r21,r22,r23,r31,r32,r33]
         ADI_MeshVel_C,                      & !< A 6xNumMeshPts_C array [x,y,z]

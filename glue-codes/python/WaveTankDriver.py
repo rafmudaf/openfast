@@ -14,6 +14,7 @@ from ctypes import (
 )
 import numpy as np
 from pathlib import Path
+from scipy.spatial.transform import Rotation
 
 from pyOpenFAST.interface_abc import OpenFASTInterfaceType
 
@@ -24,7 +25,6 @@ class WaveTankLib(OpenFASTInterfaceType):
 
     def __init__(self, library_path: str, input_file_names: dict):
         """
-        _summary_
 
         Args:
             library_path (str): Path to the compile wavetank interface shared library
@@ -77,7 +77,8 @@ class WaveTankLib(OpenFASTInterfaceType):
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_x
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_y
             POINTER(c_float),       # real(c_float),          intent(in   ) :: positions_z
-            POINTER(c_float),       # real(c_float),          intent(in   ) :: rotation_matrix(9)
+            POINTER(c_float),       # real(c_float),          intent(in   ) :: floater_rotation_matrix(9)
+            POINTER(c_float),       # real(c_float),          intent(in   ) :: blade_rotation_matrix(9)
             POINTER(c_float),       # real(c_float),          intent(  out) :: MD_Forces_C(1,6)
             POINTER(c_float),       # real(c_float),          intent(  out) :: ADI_MeshFrc_C(NumMeshPts,6)
             POINTER(c_float),       # real(c_float),          intent(  out) :: ADI_HHVel_C(3)
@@ -140,7 +141,8 @@ class WaveTankLib(OpenFASTInterfaceType):
         positions_x: float,
         positions_y: float,
         positions_z: float,
-        rotation_matrix: np.ndarray,
+        floater_rotation_matrix: np.ndarray,
+        blade_rotation_matrix: np.ndarray,
         md_loads: np.ndarray,
         ad_loads: np.ndarray,
         hub_height_velocities: np.ndarray,
@@ -153,7 +155,8 @@ class WaveTankLib(OpenFASTInterfaceType):
             byref(c_float(positions_x)),
             byref(c_float(positions_y)),
             byref(c_float(positions_z)),
-            rotation_matrix.ctypes.data_as(POINTER(c_float)),
+            floater_rotation_matrix.ctypes.data_as(POINTER(c_float)),
+            blade_rotation_matrix.ctypes.data_as(POINTER(c_float)),
             md_loads.ctypes.data_as(POINTER(c_float)),
             ad_loads.ctypes.data_as(POINTER(c_float)),
             hub_height_velocities.ctypes.data_as(POINTER(c_float)),
@@ -226,15 +229,34 @@ if __name__=="__main__":
     hub_height_velocities = np.zeros((3,1), dtype=np.float32, order='C')
 
     wavetanklib.allocate_outputs()
-
     dt = 0.1
+
+    blade_dcm = np.zeros((2*9), dtype=np.float32, order='C')
+
     for i in range(200):
+
+        R = Rotation.from_euler(
+            "xyz",
+            (
+                floater_motions["phi"][i],      # roll
+                floater_motions["theta"][i],    # pitch
+                floater_motions["psi"][i],      # yaw
+            )
+        )
+        floater_dcm = R.as_matrix().flatten()
+
+        # Create the rotation matrix for the blades using the loop index as a rotation angle
+        # The second blade is rotated 180 degrees from the first
+        blade_dcm[0:9] = Rotation.from_euler("xyz", (np.deg2rad(i), 0.0, 0.0)).as_matrix().flatten()
+        blade_dcm[9:18] = Rotation.from_euler("xyz", (np.deg2rad(i + 180), 0.0, 0.0)).as_matrix().flatten()
+
         wavetanklib.calc_output(
             time=i*dt,
             positions_x=i*dt, #positions_x,
             positions_y=positions_y,
             positions_z=positions_z,
-            rotation_matrix=rotation_matrix,
+            floater_rotation_matrix=floater_dcm,
+            blade_rotation_matrix=blade_dcm,
             md_loads=md_loads,
             ad_loads=ad_loads,
             hub_height_velocities=hub_height_velocities
