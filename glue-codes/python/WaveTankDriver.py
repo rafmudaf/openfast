@@ -17,6 +17,7 @@ from pathlib import Path
 from scipy.spatial.transform import Rotation
 
 from pyOpenFAST.interface_abc import OpenFASTInterfaceType
+from pyOpenFAST.tdmslib import parse_tdms
 
 project_root = '/Users/rmudafor/Development/openfast'
 library_path = project_root + '/build/glue-codes/labview/libwavetanktestinglib.dylib'
@@ -208,6 +209,10 @@ class WaveTankLib(OpenFASTInterfaceType):
         return error_status.value >= self.print_error_level
 
 if __name__=="__main__":
+
+    floater_motions = parse_tdms("Full_10N_Wrench_1.tdms")
+    n_timesteps = len(floater_motions["x"])
+
     wavetanklib = WaveTankLib(
         library_path,
         {
@@ -220,21 +225,16 @@ if __name__=="__main__":
     )
     wavetanklib.init()
 
-    positions_x = 0.0
-    positions_y = 0.0
-    positions_z = 0.0
     rotation_matrix = np.eye(3, 3, dtype=np.float32)
     md_loads = np.zeros((1,6), dtype=np.float32, order='C')
     ad_loads = np.zeros((2,6), dtype=np.float32, order='C')
     hub_height_velocities = np.zeros((3,1), dtype=np.float32, order='C')
 
     wavetanklib.allocate_outputs()
-    dt = 0.1
 
     blade_dcm = np.zeros((2*9), dtype=np.float32, order='C')
 
-    for i in range(200):
-
+    for i in range(n_timesteps):
         R = Rotation.from_euler(
             "xyz",
             (
@@ -251,17 +251,17 @@ if __name__=="__main__":
         blade_dcm[9:18] = Rotation.from_euler("xyz", (np.deg2rad(i + 180), 0.0, 0.0)).as_matrix().flatten()
 
         wavetanklib.calc_output(
-            time=i*dt,
-            positions_x=i*dt, #positions_x,
-            positions_y=positions_y,
-            positions_z=positions_z,
+            time=i,
+            positions_x=floater_motions["x"][i],
+            positions_y=floater_motions["y"][i],
+            positions_z=floater_motions["z"][i],
             floater_rotation_matrix=floater_dcm,
             blade_rotation_matrix=blade_dcm,
             md_loads=md_loads,
             ad_loads=ad_loads,
             hub_height_velocities=hub_height_velocities
         )
-        print(hub_height_velocities)
+        # print(hub_height_velocities)
 
         # print(wavetanklib.md_output_values)
     # print(wavetanklib.md_output_values)
