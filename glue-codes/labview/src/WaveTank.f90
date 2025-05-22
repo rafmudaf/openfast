@@ -29,6 +29,8 @@ MODULE WaveTankTesting
     INTEGER(C_INT) :: NumBlades_C
     INTEGER(C_INT) :: NumMeshPts_C
 
+    REAL(C_DOUBLE) :: DT
+
     REAL(C_FLOAT), DIMENSION(3,3) :: FloaterPositions = 0.0_C_FLOAT
     REAL(C_FLOAT), DIMENSION(3,6) :: FloaterVelocities = 0.0_C_FLOAT
     REAL(C_FLOAT), DIMENSION(3,6) :: FloaterAccelerations = 0.0_C_FLOAT
@@ -46,6 +48,8 @@ MODULE WaveTankTesting
     REAL(C_FLOAT), ALLOCATABLE :: BladeMeshAccelerations(:,:)
 
     TYPE WaveTank_InitInput
+        REAL(C_DOUBLE)  :: DT
+
         ! SeaState variables
         TYPE(C_PTR)     :: SS_OutRootName_C
         REAL(C_FLOAT)   :: SS_Gravity_C
@@ -58,7 +62,7 @@ MODULE WaveTankTesting
         INTEGER(C_INT)  :: SS_WrWvKinMod_C
 
         ! MD variables
-        REAL(C_DOUBLE)  :: MD_DT_C
+        ! REAL(C_DOUBLE)  :: MD_DT_C                                !< Using global DT
         REAL(C_FLOAT)   :: MD_G_C
         REAL(C_FLOAT)   :: MD_RHO_C
         REAL(C_FLOAT)   :: MD_DEPTH_C
@@ -102,7 +106,7 @@ MODULE WaveTankTesting
         ! Interpolation
         INTEGER(C_INT) :: ADI_InterpOrder_C                         !< Interpolation order to use (must be 1 or 2)
         ! Time
-        REAL(C_DOUBLE) :: ADI_DT_C                                  !< Timestep used with AD for stepping forward from t to t+dt.  Must be constant.
+        ! REAL(C_DOUBLE) :: ADI_DT_C                                  !< Timestep used with AD for stepping forward from t to t+dt.  Must be constant.; Using global DT
         REAL(C_DOUBLE) :: ADI_TMax_C                                !< Maximum time for simulation
         ! Flags
         INTEGER(C_INT) :: ADI_storeHHVel                            !< Store hub height time series from IfW
@@ -146,6 +150,7 @@ SUBROUTINE ReadInput(InputFilePath, InitInp, ErrStat, ErrMsg)
     IF (ErrStat >= AbortErrLev) RETURN
 
     CALL ReadCom( UnIn, FileName, 'Init comment', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
+    CALL ReadVar( UnIn, FileName, InitInp%DT, 'DT', 'DT', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadCom( UnIn, FileName, 'SeaState Init comment', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     IF (ErrStat >= AbortErrLev) RETURN
 
@@ -163,7 +168,6 @@ SUBROUTINE ReadInput(InputFilePath, InitInp, ErrStat, ErrMsg)
     IF (ErrStat >= AbortErrLev) RETURN
 
     CALL ReadCom( UnIn, FileName, 'MoorDyn Init comment', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
-    CALL ReadVar( UnIn, FileName, InitInp%MD_DT_C, 'MD_DT_C', 'MD_DT_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%MD_G_C, 'MD_G_C', 'MD_G_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%MD_RHO_C, 'MD_RHO_C', 'MD_RHO_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%MD_DEPTH_C, 'MD_DEPTH_C', 'MD_DEPTH_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
@@ -213,7 +217,6 @@ SUBROUTINE ReadInput(InputFilePath, InitInp, ErrStat, ErrMsg)
     CALL ReadVar( UnIn, FileName, TmpPath, 'ADI_OutVTKDir_C', 'ADI_OutVTKDir_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL StringConvert_F2C(TmpPath, InitInp%ADI_OutVTKDir_C)
     CALL ReadVar( UnIn, FileName, InitInp%ADI_InterpOrder_C, 'ADI_InterpOrder_C', 'ADI_InterpOrder_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
-    CALL ReadVar( UnIn, FileName, InitInp%ADI_DT_C, 'ADI_DT_C', 'ADI_DT_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%ADI_TMax_C, 'ADI_TMax_C', 'ADI_TMax_C', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%ADI_storeHHVel, 'ADI_storeHHVel', 'ADI_storeHHVel', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
     CALL ReadVar( UnIn, FileName, InitInp%ADI_WrVTK_in, 'ADI_WrVTK_in', 'ADI_WrVTK_in', ErrStat2, ErrMsg2); CALL SetErrStat(ErrStat2, ErrMsg2, ErrStat, ErrMsg, 'WaveTankTesting.ReadInput')
@@ -277,6 +280,7 @@ SUBROUTINE WaveTank_Init(   &
     IF (ErrStat_C >= AbortErrLev) RETURN
 
     ! Store to global variable for use in other routines
+    DT = WT_InitInp%DT
     iWT_C = WT_InitInp%iWT_C
     NumBlades_C = WT_InitInp%NumBlades_C
     NumMeshPts_C = WT_InitInp%NumMeshPts_C
@@ -336,7 +340,7 @@ SUBROUTINE WaveTank_Init(   &
         0,                                      &   !< InputFilePassed: 0 for file, 1 for string
         MD_InputFile_C,                         &
         IntfStrLen,                             &   !< InputFileStringLength_C
-        WT_InitInp%MD_DT_C,                     &
+        DT,                                     &
         WT_InitInp%MD_G_C,                      &
         WT_InitInp%MD_RHO_C,                    &
         WT_InitInp%MD_DEPTH_C,                  &
@@ -400,7 +404,7 @@ SUBROUTINE WaveTank_Init(   &
         WT_InitInp%ADI_OutRootName_C,           &   !< Root name to use for echo files and other
         WT_InitInp%ADI_OutVTKDir_C,             &   !< Directory to put all vtk output
         WT_InitInp%ADI_InterpOrder_C,           &   !< Interpolation order to use (must be 1 or 2)
-        WT_InitInp%ADI_DT_C,                    &   !< Timestep used with AD for stepping forward from t to t+dt.  Must be constant.
+        DT,                                     &   !< Timestep used with AD for stepping forward from t to t+dt.  Must be constant.
         WT_InitInp%ADI_TMax_C,                  &   !< Maximum time for simulation
         WT_InitInp%ADI_storeHHVel,              &   !< Store hub height time series from IfW
         WT_InitInp%ADI_WrVTK_in,                &   !< Write VTK outputs [0: none, 1: init only, 2: animation]
@@ -521,28 +525,28 @@ SUBROUTINE WaveTank_CalcOutput( &
     END DO
 
     ! Calculate velocities and acceleration
-    FloaterVelocities(1,:) = (/ (FloaterPositions(2,:) - FloaterPositions(1,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    FloaterVelocities(2,:) = (/ (FloaterPositions(3,:) - FloaterPositions(2,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    FloaterAccelerations(1,:) = (/ (FloaterVelocities(2,:) - FloaterVelocities(1,:)) / REAL(0.1, C_FLOAT) /)
+    FloaterVelocities(1,:) = (/ (FloaterPositions(2,:) - FloaterPositions(1,:)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterVelocities(2,:) = (/ (FloaterPositions(3,:) - FloaterPositions(2,:)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    FloaterAccelerations(1,:) = (/ (FloaterVelocities(2,:) - FloaterVelocities(1,:)) / REAL(DT, C_FLOAT) /)
 
-    NacelleVelocities(1,:) = (/ (NacellePositions(2,:) - NacellePositions(1,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    NacelleVelocities(2,:) = (/ (NacellePositions(3,:) - NacellePositions(2,:)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-    NacelleAccelerations(1,:) = (/ (NacelleVelocities(2,:) - NacelleVelocities(1,:)) / REAL(0.1, C_FLOAT) /)
+    NacelleVelocities(1,:) = (/ (NacellePositions(2,:) - NacellePositions(1,:)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    NacelleVelocities(2,:) = (/ (NacellePositions(3,:) - NacellePositions(2,:)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+    NacelleAccelerations(1,:) = (/ (NacelleVelocities(2,:) - NacelleVelocities(1,:)) / REAL(DT, C_FLOAT) /)
 
     DO I=1,NumBlades_C
         I0 = (I-1)*6+1
         I1 = (I-1)*6+1+5
-        BladeRootVelocities(1,I0:I1) = (/ (BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeRootVelocities(2,I0:I1) = (/ (BladeRootPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeRootAccelerations(1,I0:I1) = (BladeRootVelocities(2,:) - BladeRootVelocities(1,:)) / REAL(0.1, C_FLOAT)
+        BladeRootVelocities(1,I0:I1) = (/ (BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeRootVelocities(2,I0:I1) = (/ (BladeRootPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeRootAccelerations(1,I0:I1) = (BladeRootVelocities(2,:) - BladeRootVelocities(1,:)) / REAL(DT, C_FLOAT)
     END DO
 
     DO I=1,NumMeshPts_C
         I0 = (I-1)*6+1
         I1 = (I-1)*6+1+5
-        BladeMeshVelocities(1,I0:I1) = (/ (BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeMeshVelocities(2,I0:I1) = (/ (BladeMeshPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(0.1, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeMeshAccelerations(1,I0:I1) = (BladeMeshVelocities(2,:) - BladeMeshVelocities(1,:)) / REAL(0.1, C_FLOAT)
+        BladeMeshVelocities(1,I0:I1) = (/ (BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeMeshVelocities(2,I0:I1) = (/ (BladeMeshPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
+        BladeMeshAccelerations(1,I0:I1) = (BladeMeshVelocities(2,:) - BladeMeshVelocities(1,:)) / REAL(DT, C_FLOAT)
     END DO
 
     ! Get loads from MoorDyn
@@ -551,7 +555,7 @@ SUBROUTINE WaveTank_CalcOutput( &
     !       the design of this module.
     CALL MD_C_UpdateStates(                 &
         time,                               &
-        REAL(time + 0.1, C_DOUBLE),         &
+        REAL(time + DT, C_DOUBLE),          &
         (/ FloaterPositions(3,:), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /), &
         (/ FloaterVelocities(2,:) /),       &
         (/ FloaterAccelerations(2,:) /),    &
@@ -622,7 +626,7 @@ SUBROUTINE WaveTank_CalcOutput( &
 
     CALL ADI_C_UpdateStates(                &
         time,                               &
-        REAL(time + 0.1, C_DOUBLE),         &
+        REAL(time + DT, C_DOUBLE),          &
         ErrStat_C2, ErrMsg_C2               &
     )
     CALL SetErrStat_C(ErrStat_C2, ErrMsg_C2, ErrStat_C, ErrMsg_C, 'ADI_C_UpdateStates')
