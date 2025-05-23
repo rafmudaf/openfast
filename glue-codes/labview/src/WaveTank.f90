@@ -30,12 +30,12 @@ MODULE WaveTankTesting
     REAL(C_DOUBLE) :: DT
 
     REAL(C_FLOAT), DIMENSION(3,3) :: FloaterPositions = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(3,6) :: FloaterVelocities = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(3,6) :: FloaterAccelerations = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(2,6) :: FloaterVelocities = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(1,6) :: FloaterAccelerations = 0.0_C_FLOAT
 
     REAL(C_FLOAT), DIMENSION(3,3) :: NacellePositions = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(3,6) :: NacelleVelocities = 0.0_C_FLOAT
-    REAL(C_FLOAT), DIMENSION(3,6) :: NacelleAccelerations = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(2,6) :: NacelleVelocities = 0.0_C_FLOAT
+    REAL(C_FLOAT), DIMENSION(1,6) :: NacelleAccelerations = 0.0_C_FLOAT
 
     REAL(C_FLOAT), ALLOCATABLE :: BladeRootPositions(:,:)
     REAL(C_FLOAT), ALLOCATABLE :: BladeRootVelocities(:,:)
@@ -273,7 +273,7 @@ SUBROUTINE WaveTank_Init(   &
     ErrMsg_C  = " "//C_NULL_CHAR
 
     CALL C_F_POINTER(WT_InputFile_C, WT_InputFilePath)
-    call ReadInput(WT_InputFilePath, WT_InitInp, ErrStat_F2, ErrMsg_F2)
+    CALL ReadInput(WT_InputFilePath, WT_InitInp, ErrStat_F2, ErrMsg_F2)
     CALL SetErrStat_F2C(ErrStat_F2, ErrMsg_F2, ErrStat_C, ErrMsg_C) !, 'WaveTank_Init')
     IF (ErrStat_C >= AbortErrLev) RETURN
 
@@ -500,6 +500,7 @@ SUBROUTINE WaveTank_CalcOutput( &
     FloaterVelocities(1,:) = FloaterVelocities(2,:)
     NacelleVelocities(1,:) = NacelleVelocities(2,:)
     BladeRootVelocities(1,:) = BladeRootVelocities(2,:)
+    BladeMeshVelocities(1,:) = BladeMeshVelocities(2,:)
 
     ! Load the new positions
     FloaterPositions(3,:) = (/ positions_x, positions_y, positions_z /)
@@ -536,7 +537,7 @@ SUBROUTINE WaveTank_CalcOutput( &
         I1 = (I-1)*6+1+5
         BladeRootVelocities(1,I0:I1) = (/ (BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
         BladeRootVelocities(2,I0:I1) = (/ (BladeRootPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeRootPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeRootAccelerations(1,I0:I1) = (BladeRootVelocities(2,:) - BladeRootVelocities(1,:)) / REAL(DT, C_FLOAT)
+        BladeRootAccelerations(1,I0:I1) = (BladeRootVelocities(2,I0:I1) - BladeRootVelocities(1,I0:I1)) / REAL(DT, C_FLOAT)
     END DO
 
     DO I=1,NumMeshPts_C
@@ -544,7 +545,7 @@ SUBROUTINE WaveTank_CalcOutput( &
         I1 = (I-1)*6+1+5
         BladeMeshVelocities(1,I0:I1) = (/ (BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(1,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
         BladeMeshVelocities(2,I0:I1) = (/ (BladeMeshPositions(3,(I-1)*3+1:(I-1)*3+1+2) - BladeMeshPositions(2,(I-1)*3+1:(I-1)*3+1+2)) / REAL(DT, C_FLOAT), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /)
-        BladeMeshAccelerations(1,I0:I1) = (BladeMeshVelocities(2,:) - BladeMeshVelocities(1,:)) / REAL(DT, C_FLOAT)
+        BladeMeshAccelerations(1,I0:I1) = (BladeMeshVelocities(2,I0:I1) - BladeMeshVelocities(1,I0:I1)) / REAL(DT, C_FLOAT)
     END DO
 
     ! Get loads from MoorDyn
@@ -556,7 +557,7 @@ SUBROUTINE WaveTank_CalcOutput( &
         REAL(time + DT, C_DOUBLE),          &
         (/ FloaterPositions(3,:), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /), &
         (/ FloaterVelocities(2,:) /),       &
-        (/ FloaterAccelerations(2,:) /),    &
+        (/ FloaterAccelerations(1,:) /),    &
         ErrStat_C2, ErrMsg_C2               &
     )
     CALL SetErrStat_C(ErrStat_C2, ErrMsg_C2, ErrStat_C, ErrMsg_C, 'MD_C_UpdateStates')
@@ -566,7 +567,7 @@ SUBROUTINE WaveTank_CalcOutput( &
         time,                               &
         (/ FloaterPositions(3,:), 0.0_C_FLOAT, 0.0_C_FLOAT, 0.0_C_FLOAT /), &
         (/ FloaterVelocities(2,:) /),       &
-        (/ FloaterAccelerations(2,:) /),    &
+        (/ FloaterAccelerations(1,:) /),    &
         MD_Forces_C,                        &
         md_outputs,                         &
         ErrStat_C2, ErrMsg_C2               &
