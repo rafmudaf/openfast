@@ -283,6 +283,12 @@ SUBROUTINE WaveTank_Init(   &
     NumBlades_C = WT_InitInp%NumBlades_C
     NumMeshPts_C = WT_InitInp%NumMeshPts_C
 
+    ! Initialize hub and nacelle position to input HubPos_C and NacPos_C
+    DO I=1,3
+        FloaterPositions(I,:) = WT_InitInp%HubPos_C
+        NacellePositions(I,:) = WT_InitInp%NacPos_C
+    END DO
+
     ! Allocate the blade root and blade mesh arrays since they're based on the number of blades and mesh points
     IF (.NOT. ALLOCATED(BladeRootPositions)) THEN
         ALLOCATE( BladeRootPositions(3,3*NumBlades_C) )
@@ -293,7 +299,9 @@ SUBROUTINE WaveTank_Init(   &
     IF (.NOT. ALLOCATED(BladeRootAccelerations)) THEN
         ALLOCATE( BladeRootAccelerations(1,6*NumBlades_C) )
     ENDIF
-    BladeRootPositions = 0.0_C_FLOAT
+    DO I=1,3
+        BladeRootPositions(I,:) = WT_InitInp%BldRootPos_C
+    END DO
     BladeRootVelocities = 0.0_C_FLOAT
     BladeRootAccelerations = 0.0_C_FLOAT
 
@@ -308,7 +316,9 @@ SUBROUTINE WaveTank_Init(   &
     IF (.NOT. ALLOCATED(BladeMeshAccelerations)) THEN
         ALLOCATE( BladeMeshAccelerations(1,6*NumMeshPts_C) )
     ENDIF
-    BladeMeshPositions = 0.0_C_FLOAT
+    DO I=1,3
+        BladeMeshPositions(I,:) = WT_InitInp%InitMeshPos_C
+    END DO
     BladeMeshVelocities = 0.0_C_FLOAT
     BladeMeshAccelerations = 0.0_C_FLOAT
 
